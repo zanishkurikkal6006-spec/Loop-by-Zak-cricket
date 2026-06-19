@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -6,23 +7,26 @@ import { AppShell } from './layouts/AppShell';
 import LoginPage from './pages/LoginPage';
 import { LoopMark } from './components/brand/LoopMark';
 import { Toast } from './components/ui/Toast';
-import CoachHome from './features/coach/CoachHome';
-import CoachOneToOne from './features/coach/CoachOneToOne';
-import CoachAttendance from './features/attendance/CoachAttendance';
-import CoachReports from './features/reports/CoachReports';
-import AdminDashboard from './features/admin/AdminDashboard';
-import AdminPlayers from './features/admin/AdminPlayers';
-import AdminAttendance from './features/admin/AdminAttendance';
-import AdminFinance from './features/admin/AdminFinance';
-import AdminPayments from './features/admin/AdminPayments';
-import AdminPrograms from './features/admin/AdminPrograms';
-import MatchesList from './features/matches/MatchesList';
-import Rankings from './features/rankings/Rankings';
-import Badges from './features/badges/Badges';
-import HeadCoachDashboard from './features/head-coach/HeadCoachDashboard';
-import HeadCoachReports from './features/head-coach/HeadCoachReports';
-import HeadCoachFlags from './features/head-coach/HeadCoachFlags';
 import type { UserRole } from './lib/types';
+
+// Feature screens are code-split per route so the heavy admin bundles (charts +
+// xlsx) never load for a coach on their phone.
+const CoachHome = lazy(() => import('./features/coach/CoachHome'));
+const CoachOneToOne = lazy(() => import('./features/coach/CoachOneToOne'));
+const CoachAttendance = lazy(() => import('./features/attendance/CoachAttendance'));
+const CoachReports = lazy(() => import('./features/reports/CoachReports'));
+const AdminDashboard = lazy(() => import('./features/admin/AdminDashboard'));
+const AdminPlayers = lazy(() => import('./features/admin/AdminPlayers'));
+const AdminAttendance = lazy(() => import('./features/admin/AdminAttendance'));
+const AdminFinance = lazy(() => import('./features/admin/AdminFinance'));
+const AdminPayments = lazy(() => import('./features/admin/AdminPayments'));
+const AdminPrograms = lazy(() => import('./features/admin/AdminPrograms'));
+const MatchesList = lazy(() => import('./features/matches/MatchesList'));
+const Rankings = lazy(() => import('./features/rankings/Rankings'));
+const Badges = lazy(() => import('./features/badges/Badges'));
+const HeadCoachDashboard = lazy(() => import('./features/head-coach/HeadCoachDashboard'));
+const HeadCoachReports = lazy(() => import('./features/head-coach/HeadCoachReports'));
+const HeadCoachFlags = lazy(() => import('./features/head-coach/HeadCoachFlags'));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false } },
@@ -61,6 +65,7 @@ export default function App() {
       <AuthProvider>
         <BrowserRouter>
           <Toast />
+          <Suspense fallback={<FullScreenLoader />}>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/" element={<RootRedirect />} />
@@ -116,6 +121,7 @@ export default function App() {
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          </Suspense>
         </BrowserRouter>
       </AuthProvider>
     </QueryClientProvider>

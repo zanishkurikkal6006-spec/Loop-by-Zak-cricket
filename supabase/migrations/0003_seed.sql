@@ -36,7 +36,7 @@ insert into badge_types (academy_id, key, name, category, accent, emblem, criter
   (null, 'match_winner',   'Match Winner',     'moment',      '#9C1116', '🥇', 'Win the game for your team',            'auto'),
   (null, 'clutch',         'Clutch',           'moment',      '#C9A84C', '🎲', 'Decisive contribution under pressure',  'auto'),
   (null, 'duck_breaker',   'Duck Breaker',     'moment',      '#9C1116', '🦆', 'Bounce back after a duck',              'auto'),
-  (null, 'captains_knock', "Captain's Knock",  'moment',      '#C9A84C', '🧢', 'Lead the side with the bat',            'auto'),
+  (null, 'captains_knock', 'Captain''s Knock', 'moment',      '#C9A84C', '🧢', 'Lead the side with the bat',            'auto'),
   (null, 'partnership',    'Partnership',      'moment',      '#1F8A4C', '🤝', '50+ run partnership',                   'auto'),
   (null, 'allrounder',     'All-Rounder',      'moment',      '#C9A84C', '🌟', 'Runs and wickets in one match',         'auto');
 

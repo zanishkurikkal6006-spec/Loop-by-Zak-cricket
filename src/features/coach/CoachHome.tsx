@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyGroups, useMyOneToOneBlocks, useMyReports } from '@/lib/queries';
 import { greeting, firstName } from '@/lib/utils';
+import { downloadPortfolio } from '@/lib/portfolio';
+import { useToast } from '@/lib/toast';
 import { Card } from '@/components/ui';
 import { Icon } from '@/components/ui/Icon';
 
@@ -12,9 +14,29 @@ export default function CoachHome() {
   const { data: groups = [] } = useMyGroups();
   const { data: blocks = [] } = useMyOneToOneBlocks();
   const { data: reports = [] } = useMyReports();
+  const toast = useToast();
 
   const sessionsDelivered = blocks.reduce((sum, b) => sum + b.sessions_used, 0);
   const reportsSent = reports.filter((r) => r.status === 'sent').length;
+
+  function handleDownloadPortfolio() {
+    if (!profile) return;
+    downloadPortfolio({
+      coachName: profile.full_name,
+      academyName: 'Loop by Zak Cricket',
+      stats: [
+        { label: 'Sessions', value: sessionsDelivered },
+        { label: '1-on-1s', value: blocks.length },
+        { label: 'Reports Sent', value: reportsSent },
+        { label: 'Groups', value: groups.length },
+      ],
+      highlights: groups.slice(0, 5).map((g) => ({
+        label: g.name,
+        value: g.age_category ?? '—',
+      })),
+    });
+    toast.show('Career record downloaded');
+  }
 
   return (
     <div className="space-y-5">
@@ -33,7 +55,10 @@ export default function CoachHome() {
           <Metric label="1-on-1s" value={blocks.length} />
           <Metric label="Reports" value={reportsSent} />
         </div>
-        <button className="mt-4 flex w-full items-center justify-center gap-2 rounded-pill border border-white/15 py-2.5 text-[12px] font-semibold text-paper/80 hover:bg-white/5">
+        <button
+          onClick={handleDownloadPortfolio}
+          className="mt-4 flex w-full items-center justify-center gap-2 rounded-pill border border-white/15 py-2.5 text-[12px] font-semibold text-paper/80 hover:bg-white/5"
+        >
           <Icon name="download" size={14} /> Download Career Record
         </button>
       </div>

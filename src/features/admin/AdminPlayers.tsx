@@ -108,6 +108,9 @@ function AddPlayerModal({
   const [packageTypeId, setPackageTypeId] = useState('');
   const [sessionsUsed, setSessionsUsed] = useState('0');
 
+  const [mode, setMode] = useState<'single' | 'bulk'>('single');
+  const [bulkRows, setBulkRows] = useState<BulkRow[]>([emptyRow()]);
+
   const packageTypes = useQuery({
     queryKey: ['package-types', profile?.academy_id],
     enabled: !!profile && open,
@@ -169,9 +172,175 @@ function AddPlayerModal({
     onError: (e) => toast.show(e instanceof Error ? e.message : 'Could not add'),
   });
 
+  const typesById = new Map((packageTypes.data ?? []).map((t) => [t.id, t]));
+
+  const createBulk = useMutation({
+    mutationFn: async () => {
+      if (!profile) throw new Error('Not signed in');
+      const valid = bulkRows.filter((r) => r.name.trim());
+      if (!valid.length) throw new Error('Add at least one named player');
+
+      const { data: inserted, error } = await supabase
+        .from('players')
+        .insert(
+          valid.map((r) => ({
+            academy_id: profile.academy_id,
+            full_name: r.name.trim(),
+            age: r.age ? Number(r.age) : null,
+            group_id: r.groupId || null,
+            parent_phone: r.parentPhone || null,
+          })),
+        )
+        .select();
+      if (error) throw error;
+
+      // Mid-package import rows → one package each, remaining auto-calculates.
+      const packages = (inserted ?? [])
+        .map((player, i) => {
+          const row = valid[i];
+          const type = row.packageTypeId ? typesById.get(row.packageTypeId) : undefined;
+          if (!type) return null;
+          return {
+            academy_id: profile.academy_id,
+            player_id: player.id,
+            package_type_id: type.id,
+            sessions_total: type.sessions,
+            sessions_used: Number(row.sessionsUsed || 0),
+            source: 'admin_assigned' as const,
+            payment_status: 'paid' as const,
+            assigned_by: profile.id,
+          };
+        })
+        .filter(Boolean);
+      if (packages.length) {
+        const { error: pErr } = await supabase.from('packages').insert(packages as object[]);
+        if (pErr) throw pErr;
+      }
+      return valid.length;
+    },
+    onSuccess: (count) => {
+      toast.show(`${count} player${count === 1 ? '' : 's'} imported`);
+      queryClient.invalidateQueries({ queryKey: ['players'] });
+      onClose();
+      setBulkRows([emptyRow()]);
+    },
+    onError: (e) => toast.show(e instanceof Error ? e.message : 'Could not import'),
+  });
+
+  function patchRow(id: string, patch: Partial<BulkRow>) {
+    setBulkRows((rows) => rows.map((r) => (r.id === id ? { ...r, ...patch } : r)));
+  }
+
   return (
     <Modal open={open} onClose={onClose} title="Add Player">
       <div className="space-y-3">
+        {/* Single / Bulk toggle */}
+        <div className="flex gap-2">
+          {(['single', 'bulk'] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => setMode(m)}
+              className={
+                'flex-1 rounded-chip px-3 py-2 text-[12px] font-semibold capitalize transition ' +
+                (mode === m ? 'bg-brand-red text-paper' : 'border border-cardborder bg-white text-ink/60')
+              }
+            >
+              {m}
+            </button>
+          ))}
+        </div>
+
+        {mode === 'bulk' ? (
+          <div className="space-y-3">
+            <p className="text-[12px] text-ink/50">
+              Add multiple players. For mid-package imports, pick a package and enter sessions used —
+              remaining auto-calculates.
+            </p>
+            <div className="space-y-2">
+              {bulkRows.map((r) => {
+                const t = r.packageTypeId ? typesById.get(r.packageTypeId) : undefined;
+                const rem = t?.sessions != null ? Math.max(0, t.sessions - Number(r.sessionsUsed || 0)) : null;
+                return (
+                  <div key={r.id} className="rounded-card border border-cardborder bg-white p-2.5">
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        value={r.name}
+                        onChange={(e) => patchRow(r.id, { name: e.target.value })}
+                        placeholder="Full name"
+                        className={inputCls}
+                      />
+                      <input
+                        type="number"
+                        value={r.age}
+                        onChange={(e) => patchRow(r.id, { age: e.target.value })}
+                        placeholder="Age"
+                        className={inputCls}
+                      />
+                      <select
+                        value={r.groupId}
+                        onChange={(e) => patchRow(r.id, { groupId: e.target.value })}
+                        className={inputCls}
+                      >
+                        <option value="">Group…</option>
+                        {groups.map((g) => (
+                          <option key={g.id} value={g.id}>{g.name}</option>
+                        ))}
+                      </select>
+                      <input
+                        value={r.parentPhone}
+                        onChange={(e) => patchRow(r.id, { parentPhone: e.target.value })}
+                        placeholder="Parent WhatsApp"
+                        className={inputCls}
+                      />
+                      <select
+                        value={r.packageTypeId}
+                        onChange={(e) => patchRow(r.id, { packageTypeId: e.target.value })}
+                        className={inputCls}
+                      >
+                        <option value="">No package</option>
+                        {packageTypes.data?.map((pt) => (
+                          <option key={pt.id} value={pt.id}>{pt.name}</option>
+                        ))}
+                      </select>
+                      {r.packageTypeId && (
+                        <input
+                          type="number"
+                          value={r.sessionsUsed}
+                          onChange={(e) => patchRow(r.id, { sessionsUsed: e.target.value })}
+                          placeholder="Sessions used"
+                          className={inputCls}
+                        />
+                      )}
+                    </div>
+                    <div className="mt-1.5 flex items-center justify-between">
+                      {rem != null ? (
+                        <Chip tone="green">{rem} remaining</Chip>
+                      ) : <span />}
+                      {bulkRows.length > 1 && (
+                        <button
+                          onClick={() => setBulkRows((rows) => rows.filter((x) => x.id !== r.id))}
+                          className="text-[12px] font-semibold text-danger"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <button
+              onClick={() => setBulkRows((rows) => [...rows, emptyRow()])}
+              className="w-full rounded-pill border border-dashed border-cardborder py-2 text-[12px] font-semibold text-ink/55"
+            >
+              + Add another row
+            </button>
+            <Button className="w-full" disabled={createBulk.isPending} onClick={() => createBulk.mutate()}>
+              {createBulk.isPending ? 'Importing…' : `Import ${bulkRows.filter((r) => r.name.trim()).length} players`}
+            </Button>
+          </div>
+        ) : (
+        <>
         <Field label="Full name">
           <input value={name} onChange={(e) => setName(e.target.value)} className={inputCls} />
         </Field>
@@ -256,9 +425,33 @@ function AddPlayerModal({
         <Button className="w-full" disabled={create.isPending} onClick={() => create.mutate()}>
           {create.isPending ? 'Saving…' : 'Add Player'}
         </Button>
+        </>
+        )}
       </div>
     </Modal>
   );
+}
+
+interface BulkRow {
+  id: string;
+  name: string;
+  age: string;
+  groupId: string;
+  parentPhone: string;
+  packageTypeId: string;
+  sessionsUsed: string;
+}
+
+function emptyRow(): BulkRow {
+  return {
+    id: crypto.randomUUID(),
+    name: '',
+    age: '',
+    groupId: '',
+    parentPhone: '',
+    packageTypeId: '',
+    sessionsUsed: '0',
+  };
 }
 
 const inputCls =

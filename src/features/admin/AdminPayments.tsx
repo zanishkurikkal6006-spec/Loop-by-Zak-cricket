@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,13 +7,13 @@ import { ScreenTitle, Card, Chip, Button } from '@/components/ui';
 import { Modal } from '@/components/ui/Modal';
 import { LoopRing, RingAvatar } from '@/components/brand/LoopRing';
 import { counterState, stateColor, clsx, aed } from '@/lib/utils';
-import type { Package, PackageType, Player, MatchFee, Match, GroundFee, TrainingCenter } from '@/lib/types';
+import type { Package, PackageType, Player, MatchFee, Match, GroundFee, TrainingCenter, Batch } from '@/lib/types';
 
 // Payments — Packages & Sessions tab. Per-player counter with 5 ring states
 // (healthy / low / exhausted / unlimited / comp) plus the renewal chase list
 // (≤2 remaining). Source tag: Admin-assigned vs Coach-added · payment pending.
 
-type Tab = 'packages' | 'renewals' | 'types' | 'matchfees' | 'groundfees';
+type Tab = 'packages' | 'renewals' | 'types' | 'matchfees' | 'groundfees' | 'settings';
 
 type PackageRow = Package & { player: Player | null; package_type: PackageType | null };
 
@@ -67,6 +67,9 @@ export default function AdminPayments() {
         </TabBtn>
         <TabBtn active={tab === 'groundfees'} onClick={() => setTab('groundfees')}>
           Ground Fees
+        </TabBtn>
+        <TabBtn active={tab === 'settings'} onClick={() => setTab('settings')}>
+          Settings
         </TabBtn>
       </div>
 
@@ -123,6 +126,180 @@ export default function AdminPayments() {
 
       {tab === 'matchfees' && <MatchFeesTab />}
       {tab === 'groundfees' && <GroundFeesTab />}
+      {tab === 'settings' && <SettingsTab />}
+    </div>
+  );
+}
+
+function SettingsTab() {
+  const { profile } = useAuth();
+  const qc = useQueryClient();
+  const toast = useToast();
+
+  const { data: centers = [] } = useQuery({
+    queryKey: ['settings-centers', profile?.academy_id],
+    enabled: !!profile,
+    queryFn: async (): Promise<TrainingCenter[]> => {
+      const { data } = await supabase.from('training_centers').select('*').order('name');
+      return (data ?? []) as TrainingCenter[];
+    },
+  });
+
+  const { data: batches = [] } = useQuery({
+    queryKey: ['settings-batches', profile?.academy_id],
+    enabled: !!profile,
+    queryFn: async (): Promise<(Batch & { center: TrainingCenter | null })[]> => {
+      const { data } = await supabase
+        .from('batches')
+        .select('*, center:training_centers(*)')
+        .order('start_time');
+      return (data ?? []) as (Batch & { center: TrainingCenter | null })[];
+    },
+  });
+
+  const { data: academy } = useQuery({
+    queryKey: ['settings-academy', profile?.academy_id],
+    enabled: !!profile,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('academies')
+        .select('id, bank_details')
+        .eq('id', profile!.academy_id)
+        .single();
+      return data as { id: string; bank_details: Record<string, string> } | null;
+    },
+  });
+
+  // ── Training centers ───────────────────────────────────────────────────────
+  const [centerName, setCenterName] = useState('');
+  const [centerAddr, setCenterAddr] = useState('');
+  async function addCenter() {
+    if (!profile || !centerName.trim()) return;
+    const { error } = await supabase.from('training_centers').insert({
+      academy_id: profile.academy_id,
+      name: centerName.trim(),
+      address: centerAddr.trim() || null,
+    });
+    if (error) return toast.show('Could not add center');
+    toast.show('Center added');
+    setCenterName('');
+    setCenterAddr('');
+    qc.invalidateQueries({ queryKey: ['settings-centers'] });
+  }
+
+  // ── Batches ────────────────────────────────────────────────────────────────
+  const [batchName, setBatchName] = useState('');
+  const [batchStart, setBatchStart] = useState('');
+  const [batchEnd, setBatchEnd] = useState('');
+  const [batchCenter, setBatchCenter] = useState('');
+  async function addBatch() {
+    if (!profile || !batchName.trim()) return;
+    const { error } = await supabase.from('batches').insert({
+      academy_id: profile.academy_id,
+      name: batchName.trim(),
+      center_id: batchCenter || null,
+      start_time: batchStart || null,
+      end_time: batchEnd || null,
+    });
+    if (error) return toast.show('Could not add batch');
+    toast.show('Batch added');
+    setBatchName('');
+    setBatchStart('');
+    setBatchEnd('');
+    qc.invalidateQueries({ queryKey: ['settings-batches'] });
+  }
+
+  // ── Bank details ─────────────────────────────────────────────────────────--
+  const [bank, setBank] = useState<Record<string, string>>({});
+  // Seed the editable bank fields once the academy record loads.
+  useEffect(() => {
+    if (academy?.bank_details) setBank(academy.bank_details);
+  }, [academy]);
+  async function saveBank() {
+    if (!profile) return;
+    const { error } = await supabase
+      .from('academies')
+      .update({ bank_details: bank })
+      .eq('id', profile.academy_id);
+    if (error) return toast.show('Could not save bank details');
+    toast.show('Bank details saved');
+    qc.invalidateQueries({ queryKey: ['settings-academy'] });
+  }
+
+  const field = 'h-11 w-full rounded-pill border border-cardborder bg-white px-3 text-[14px] outline-none focus:border-gold';
+
+  return (
+    <div className="space-y-5">
+      {/* Training centers */}
+      <Card>
+        <div className="eyebrow mb-3 text-ink/40">Training Centers</div>
+        <div className="divide-y divide-hairline">
+          {centers.map((c) => (
+            <div key={c.id} className="flex items-center justify-between py-2 text-[13px]">
+              <span className="font-medium">{c.name}</span>
+              <span className="text-ink/45">{c.address}</span>
+            </div>
+          ))}
+          {!centers.length && <div className="py-2 text-[13px] text-ink/45">No centers yet.</div>}
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <input value={centerName} onChange={(e) => setCenterName(e.target.value)} placeholder="Center name" className={field} />
+          <input value={centerAddr} onChange={(e) => setCenterAddr(e.target.value)} placeholder="Address" className={field} />
+        </div>
+        <Button size="sm" className="mt-2" onClick={addCenter}>+ Add center</Button>
+      </Card>
+
+      {/* Batches & time slots */}
+      <Card>
+        <div className="eyebrow mb-3 text-ink/40">Batches &amp; Time Slots</div>
+        <div className="divide-y divide-hairline">
+          {batches.map((b) => (
+            <div key={b.id} className="flex items-center justify-between py-2 text-[13px]">
+              <span className="font-medium">{b.name}</span>
+              <span className="text-ink/45">
+                {b.start_time?.slice(0, 5) ?? '—'}–{b.end_time?.slice(0, 5) ?? '—'}
+                {b.center ? ` · ${b.center.name}` : ''}
+              </span>
+            </div>
+          ))}
+          {!batches.length && <div className="py-2 text-[13px] text-ink/45">No batches yet.</div>}
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <input value={batchName} onChange={(e) => setBatchName(e.target.value)} placeholder="Batch name (e.g. Elite Evening)" className={field} />
+          <select value={batchCenter} onChange={(e) => setBatchCenter(e.target.value)} className={field}>
+            <option value="">Center…</option>
+            {centers.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+          <input type="time" value={batchStart} onChange={(e) => setBatchStart(e.target.value)} className={field} />
+          <input type="time" value={batchEnd} onChange={(e) => setBatchEnd(e.target.value)} className={field} />
+        </div>
+        <Button size="sm" className="mt-2" onClick={addBatch}>+ Add batch</Button>
+      </Card>
+
+      {/* Academy bank details */}
+      <Card>
+        <div className="eyebrow mb-3 text-ink/40">Academy Bank Details</div>
+        <p className="mb-3 text-[12px] text-ink/50">Shared with parents for transfers.</p>
+        <div className="grid grid-cols-2 gap-2">
+          {(['bankName', 'accountName', 'iban', 'accountNumber'] as const).map((k) => (
+            <input
+              key={k}
+              value={bank[k] ?? ''}
+              onChange={(e) => setBank((b) => ({ ...b, [k]: e.target.value }))}
+              placeholder={{
+                bankName: 'Bank name',
+                accountName: 'Account name',
+                iban: 'IBAN',
+                accountNumber: 'Account number',
+              }[k]}
+              className={field}
+            />
+          ))}
+        </div>
+        <Button size="sm" className="mt-3" onClick={saveBank}>Save bank details</Button>
+      </Card>
     </div>
   );
 }

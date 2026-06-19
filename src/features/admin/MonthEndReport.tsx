@@ -20,6 +20,7 @@ interface Row {
   remaining: number | null;
   paymentStatus: string;
   notSeen: boolean;
+  noPackage: boolean;
   /** Higher = more urgent; drives the action-first sort. */
   priority: number;
 }
@@ -54,12 +55,14 @@ export default function MonthEndReport() {
 
       return ((players.data ?? []) as Player[]).map((player) => {
         const pkg = pkgByPlayer.get(player.id);
+        const noPackage = !pkg;
         const kind = pkg?.package_type?.kind ?? 'standard';
         const state = counterState(pkg?.sessions_remaining ?? null, kind);
         const notSeen = !player.last_seen_at || new Date(player.last_seen_at) < cutoff;
         const paymentStatus = pkg?.payment_status ?? 'none';
 
         let priority = 0;
+        if (noPackage) priority += 3; // surface alongside exhausted — needs a package
         if (state === 'exhausted') priority += 3;
         if (state === 'low') priority += 2;
         if (paymentStatus === 'pending') priority += 2;
@@ -73,6 +76,7 @@ export default function MonthEndReport() {
           remaining: pkg?.sessions_remaining ?? null,
           paymentStatus,
           notSeen,
+          noPackage,
           priority,
         };
       });
@@ -137,6 +141,7 @@ export default function MonthEndReport() {
                       {r.remaining <= 0 ? 'Exhausted' : `${r.remaining} left`}
                     </Chip>
                   )}
+                  {r.noPackage && <Chip tone="red">No package</Chip>}
                   {r.paymentStatus === 'pending' && <Chip tone="amber">Payment pending</Chip>}
                   {r.notSeen && <Chip tone="red">Not seen</Chip>}
                 </div>

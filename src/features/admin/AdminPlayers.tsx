@@ -180,41 +180,38 @@ function AddPlayerModal({
       const valid = bulkRows.filter((r) => r.name.trim());
       if (!valid.length) throw new Error('Add at least one named player');
 
-      const { data: inserted, error } = await supabase
-        .from('players')
-        .insert(
-          valid.map((r) => ({
+      // Insert each player with its package in lockstep so a package is always
+      // tied to the exact returned player id — never correlated by array
+      // position (insert-returning order is not guaranteed). Import volume is
+      // modest (onboarding), so per-row inserts are an acceptable trade-off.
+      for (const row of valid) {
+        const { data: player, error } = await supabase
+          .from('players')
+          .insert({
             academy_id: profile.academy_id,
-            full_name: r.name.trim(),
-            age: r.age ? Number(r.age) : null,
-            group_id: r.groupId || null,
-            parent_phone: r.parentPhone || null,
-          })),
-        )
-        .select();
-      if (error) throw error;
+            full_name: row.name.trim(),
+            age: row.age ? Number(row.age) : null,
+            group_id: row.groupId || null,
+            parent_phone: row.parentPhone || null,
+          })
+          .select()
+          .single();
+        if (error) throw error;
 
-      // Mid-package import rows → one package each, remaining auto-calculates.
-      const packages = (inserted ?? [])
-        .map((player, i) => {
-          const row = valid[i];
-          const type = row.packageTypeId ? typesById.get(row.packageTypeId) : undefined;
-          if (!type) return null;
-          return {
+        const type = row.packageTypeId ? typesById.get(row.packageTypeId) : undefined;
+        if (type) {
+          const { error: pErr } = await supabase.from('packages').insert({
             academy_id: profile.academy_id,
             player_id: player.id,
             package_type_id: type.id,
             sessions_total: type.sessions,
             sessions_used: Number(row.sessionsUsed || 0),
-            source: 'admin_assigned' as const,
-            payment_status: 'paid' as const,
+            source: 'admin_assigned',
+            payment_status: 'paid',
             assigned_by: profile.id,
-          };
-        })
-        .filter(Boolean);
-      if (packages.length) {
-        const { error: pErr } = await supabase.from('packages').insert(packages as object[]);
-        if (pErr) throw pErr;
+          });
+          if (pErr) throw pErr;
+        }
       }
       return valid.length;
     },

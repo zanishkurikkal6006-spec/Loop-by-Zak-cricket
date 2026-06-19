@@ -216,7 +216,10 @@ export function useRankings(stat: RankingStat, groupId?: string) {
         cur.runs += r.runs ?? 0;
         cur.balls += r.balls ?? 0;
         cur.wickets += r.wickets ?? 0;
-        cur.innings += 1;
+        // Count an innings only when the player actually batted — a
+        // bowling/fielding-only appearance shouldn't inflate batting innings.
+        const batted = (r.balls ?? 0) > 0 || (r.runs ?? 0) > 0 || !!r.how_out;
+        if (batted) cur.innings += 1;
         if (r.how_out && r.how_out.toLowerCase() !== 'not out') cur.dismissals += 1;
         byPlayer.set(r.player.id, cur);
       }

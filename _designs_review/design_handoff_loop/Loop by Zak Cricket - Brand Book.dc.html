@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  @keyframes loopDrift { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes loopDraw { to { stroke-dashoffset: 0; } }
+  @keyframes loopShimmer { 0% { transform: translateX(-140%) rotate(8deg); } 55% { transform: translateX(140%) rotate(8deg); } 100% { transform: translateX(140%) rotate(8deg); } }
+  @keyframes loopBreathe { 0%,100% { opacity: 0.5; } 50% { opacity: 0.85; } }
+</style>
+</helmet>
+
+<!-- ============ SHARED VECTOR DEFS ============ -->
+<svg width="0" height="0" style="position:absolute; overflow:hidden" aria-hidden="true">
+  <defs>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#EFDC97"></stop>
+      <stop offset="0.42" stop-color="#C9A84C"></stop>
+      <stop offset="1" stop-color="#937328"></stop>
+    </linearGradient>
+    <radialGradient id="discRed" cx="0.5" cy="0.40" r="0.72">
+      <stop offset="0" stop-color="#A9181E"></stop>
+      <stop offset="0.7" stop-color="#921318"></stop>
+      <stop offset="1" stop-color="#760F13"></stop>
+    </radialGradient>
+    <linearGradient id="iconRed" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a1141a"></stop>
+      <stop offset="0.55" stop-color="#820f14"></stop>
+      <stop offset="1" stop-color="#5e0a0e"></stop>
+    </linearGradient>
+    <radialGradient id="ballShade" cx="0.40" cy="0.33" r="0.82">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.22"></stop>
+      <stop offset="0.40" stop-color="#ffffff" stop-opacity="0"></stop>
+      <stop offset="1" stop-color="#3a0608" stop-opacity="0.44"></stop>
+    </radialGradient>
+    <radialGradient id="goldGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#C9A84C" stop-opacity="0.45"></stop>
+      <stop offset="1" stop-color="#C9A84C" stop-opacity="0"></stop>
+    </radialGradient>
+
+    <!-- arcs for emblem curved text -->
+    <path id="arcTop" d="M -138 0 A 138 138 0 0 1 138 0" fill="none"></path>
+    <path id="arcBot" d="M -126 0 A 126 126 0 0 0 126 0" fill="none"></path>
+
+    <!-- Clean badge -->
+    <symbol id="badge" viewBox="-100 -100 200 200">
+      <path d="M0.00 -83.19 C45.94 -83.19 83.19 -45.94 83.19 -0.00 C83.19 45.94 45.94 83.19 0.00 83.19 C-45.94 83.19 -83.19 45.94 -83.19 -0.00 C-83.19 -45.94 -45.94 -83.19 0.00 -83.19 Z" fill="url(#discRed)"></path>
+      <circle r="83.19" fill="url(#ballShade)"></circle>
+      <circle r="73" fill="none" stroke="url(#goldGrad)" stroke-width="2.6"></circle>
+      <path d="M23.60 -49.24 L11.04 -49.24 L11.04 -49.25 L-44.60 -49.25 L-28.43 -21.25 L-7.57 -21.25 L-3.90 -21.25 L-5.74 -18.07 L-44.60 49.24 L-23.60 49.24 L-23.60 49.25 L-11.04 49.25 L-11.04 49.24 L44.60 49.24 L28.44 21.25 L7.58 21.25 L3.90 21.25 L5.74 18.06 L44.60 -49.24 Z" fill="#FAF7F4"></path>
+    </symbol>
+
+    <!-- Seam badge — stitched cricket-ball loop -->
+    <symbol id="seamBadge" viewBox="-100 -100 200 200">
+      <path d="M0.00 -83.19 C45.94 -83.19 83.19 -45.94 83.19 -0.00 C83.19 45.94 45.94 83.19 0.00 83.19 C-45.94 83.19 -83.19 45.94 -83.19 -0.00 C-83.19 -45.94 -45.94 -83.19 0.00 -83.19 Z" fill="url(#discRed)"></path>
+      <circle r="83.19" fill="url(#ballShade)"></circle>
+      <circle r="78" fill="none" stroke="url(#goldGrad)" stroke-width="1.2" stroke-opacity="0.85"></circle>
+      <circle r="69" fill="none" stroke="url(#goldGrad)" stroke-width="1.2" stroke-opacity="0.85"></circle>
+      <circle r="73.5" fill="none" stroke="url(#goldGrad)" stroke-width="6.5" stroke-dasharray="2.2 9.4" stroke-linecap="round"></circle>
+      <path d="M23.60 -49.24 L11.04 -49.24 L11.04 -49.25 L-44.60 -49.25 L-28.43 -21.25 L-7.57 -21.25 L-3.90 -21.25 L-5.74 -18.07 L-44.60 49.24 L-23.60 49.24 L-23.60 49.25 L-11.04 49.25 L-11.04 49.24 L44.60 49.24 L28.44 21.25 L7.58 21.25 L3.90 21.25 L5.74 18.06 L44.60 -49.24 Z" fill="#FAF7F4"></path>
+    </symbol>
+
+    <!-- App icon -->
+    <symbol id="appIcon" viewBox="0 0 256 256">
+      <rect x="0" y="0" width="256" height="256" rx="58" fill="url(#iconRed)"></rect>
+      <g transform="translate(128,128)">
+        <circle r="99" fill="none" stroke="url(#goldGrad)" stroke-width="7"></circle>
+        <path transform="scale(1.12)" d="M23.60 -49.24 L11.04 -49.24 L11.04 -49.25 L-44.60 -49.25 L-28.43 -21.25 L-7.57 -21.25 L-3.90 -21.25 L-5.74 -18.07 L-44.60 49.24 L-23.60 49.24 L-23.60 49.25 L-11.04 49.25 L-11.04 49.24 L44.60 49.24 L28.44 21.25 L7.58 21.25 L3.90 21.25 L5.74 18.06 L44.60 -49.24 Z" fill="#FAF7F4"></path>
+      </g>
+      <rect x="1" y="1" width="254" height="254" rx="57" fill="none" stroke="#000000" stroke-opacity="0.18" stroke-width="2"></rect>
+    </symbol>
+
+    <!-- bare Z path symbol for mono uses -->
+    <symbol id="zOnly" viewBox="-50 -52 100 104">
+      <path d="M23.60 -49.24 L11.04 -49.24 L11.04 -49.25 L-44.60 -49.25 L-28.43 -21.25 L-7.57 -21.25 L-3.90 -21.25 L-5.74 -18.07 L-44.60 49.24 L-23.60 49.24 L-23.60 49.25 L-11.04 49.25 L-11.04 49.24 L44.60 49.24 L28.44 21.25 L7.58 21.25 L3.90 21.25 L5.74 18.06 L44.60 -49.24 Z" fill="currentColor"></path>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ============ PAGE ============ -->
+<div style="background:#E7E4DF; font-family:'Jost',sans-serif; color:#141414;">
+
+  <div style="position:fixed; inset:0; pointer-events:none; z-index:50; mix-blend-mode:overlay; opacity:0.045; background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22140%22 height=%22140%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.82%22 numOctaves=%222%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E');"></div>
+
+  <!-- ===== 1 · HERO ===== -->
+  <div style="position:relative; overflow:hidden; background:radial-gradient(120% 150% at 50% -16%, #34151a 0%, #190d0e 52%, #100a0b 100%); padding:96px 56px 104px; display:flex; flex-direction:column; align-items:center; text-align:center;">
+    <div style="position:absolute; top:50%; left:50%; width:560px; height:560px; transform:translate(-50%,-44%); border:1px solid rgba(201,168,76,0.14); border-radius:50%; pointer-events:none;"></div>
+    <div style="position:absolute; top:50%; left:50%; width:800px; height:800px; transform:translate(-50%,-44%); border:1px solid rgba(201,168,76,0.07); border-radius:50%; pointer-events:none;"></div>
+
+    <div style="position:relative; font-size:12px; font-weight:600; letter-spacing:0.46em; color:#C9A84C; text-transform:uppercase; margin-bottom:38px;">Brand Identity Manual</div>
+
+    <div style="position:relative; display:flex; align-items:center; justify-content:center; gap:2px; line-height:1;">
+      <span style="font-family:'Bebas Neue',sans-serif; font-size:176px; line-height:0.74; letter-spacing:0.01em; color:#FAF7F4;">LO</span>
+      <div style="position:relative; margin:0 8px; transform:translateY(-7px); filter:drop-shadow(0 22px 36px rgba(0,0,0,0.5));">
+        <div style="position:absolute; inset:-34px; background:radial-gradient(circle, rgba(201,168,76,0.32), transparent 68%); pointer-events:none;"></div>
+        <div style="position:relative; width:154px; height:154px; border-radius:50%; overflow:hidden;">
+          <svg width="154" height="154" style="display:block;"><use href="#seamBadge"></use></svg>
+          <div style="position:absolute; top:-22%; left:0; width:55%; height:144%; background:linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent); animation:loopShimmer 5.5s ease-in-out infinite; pointer-events:none;"></div>
+        </div>
+      </div>
+      <span style="font-family:'Bebas Neue',sans-serif; font-size:176px; line-height:0.74; letter-spacing:0.01em; color:#FAF7F4;">P</span>
+    </div>
+
+    <div style="position:relative; display:flex; align-items:center; gap:18px; margin-top:34px;">
+      <span style="width:44px; height:1px; background:rgba(201,168,76,0.55);"></span>
+      <span style="font-size:15px; font-weight:500; letter-spacing:0.46em; color:#C9A84C; text-transform:uppercase;">By Zak Cricket</span>
+      <span style="width:44px; height:1px; background:rgba(201,168,76,0.55);"></span>
+    </div>
+
+    <div style="position:relative; max-width:540px; margin-top:30px; font-size:16px; line-height:1.7; color:rgba(250,247,244,0.6);">A closed circle where coach, parent and player stay connected — the loop completes the word, and the Z holds two brothers at its centre.</div>
+  </div>
+
+  <!-- ===== BODY ===== -->
+  <div style="padding:64px 56px 80px; display:flex; justify-content:center;">
+   <div style="width:100%; max-width:1120px; display:flex; flex-direction:column; gap:30px;">
+
+    <!-- 2 · THE EMBLEM -->
+    <div>
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+        <span style="font-family:'Bebas Neue',sans-serif; font-size:18px; color:#9C1116; letter-spacing:0.06em;">01</span>
+        <span style="font-size:11px; font-weight:600; letter-spacing:0.3em; color:rgba(20,20,20,0.5); text-transform:uppercase;">The Emblem · Primary Crest</span>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0; border-radius:16px; overflow:hidden; box-shadow:0 22px 48px -30px rgba(20,20,20,0.5);">
+        <div style="background:#FAF7F4; display:flex; align-items:center; justify-content:center; padding:52px;">
+          <svg viewBox="-172 -172 344 344" width="320" height="320" style="display:block; filter:drop-shadow(0 16px 30px rgba(0,0,0,0.26));">
+            <circle r="158" fill="none" stroke="url(#goldGrad)" stroke-width="1.4"></circle>
+            <circle r="150" fill="none" stroke="url(#goldGrad)" stroke-width="3"></circle>
+            <circle r="106" fill="none" stroke="url(#goldGrad)" stroke-width="1.2" stroke-opacity="0.8"></circle>
+            <circle r="97" fill="none" stroke="url(#goldGrad)" stroke-width="1.2" stroke-opacity="0.8"></circle>
+            <circle r="101.5" fill="none" stroke="url(#goldGrad)" stroke-width="5.5" stroke-dasharray="2 8.4" stroke-linecap="round"></circle>
+            <text fill="url(#goldGrad)" font-family="Jost, sans-serif" font-size="16.5" font-weight="600" letter-spacing="2.3"><textPath href="#arcTop" startOffset="50%" text-anchor="middle">LOOP · ACADEMY MANAGEMENT</textPath></text>
+            <text fill="url(#goldGrad)" font-family="Jost, sans-serif" font-size="14.5" font-weight="500" letter-spacing="4.2"><textPath href="#arcBot" startOffset="50%" text-anchor="middle">BY ZAK CRICKET</textPath></text>
+            <g transform="translate(-131,0) rotate(45)"><rect x="-4.6" y="-4.6" width="9.2" height="9.2" fill="url(#goldGrad)"></rect></g>
+            <g transform="translate(131,0) rotate(45)"><rect x="-4.6" y="-4.6" width="9.2" height="9.2" fill="url(#goldGrad)"></rect></g>
+            <g transform="scale(0.84)">
+              <path d="M0.00 -83.19 C45.94 -83.19 83.19 -45.94 83.19 -0.00 C83.19 45.94 45.94 83.19 0.00 83.19 C-45.94 83.19 -83.19 45.94 -83.19 -0.00 C-83.19 -45.94 -45.94 -83.19 0.00 -83.19 Z" fill="url(#discRed)"></path>
+              <circle r="83.19" fill="url(#ballShade)"></circle>
+              <circle r="76" fill="none" stroke="url(#goldGrad)" stroke-width="1.6" stroke-opacity="0.55"></circle>
+              <path d="M23.60 -49.24 L11.04 -49.24 L11.04 -49.25 L-44.60 -49.25 L-28.43 -21.25 L-7.57 -21.25 L-3.90 -21.25 L-5.74 -18.07 L-44.60 49.24 L-23.60 49.24 L-23.60 49.25 L-11.04 49.25 L-11.04 49.24 L44.60 49.24 L28.44 21.25 L7.58 21.25 L3.90 21.25 L5.74 18.06 L44.60 -49.24 Z" fill="#FAF7F4"></path>
+            </g>
+          </svg>
+        </div>
+        <div style="background:radial-gradient(120% 130% at 50% 20%, #2a1012, #160c0d); display:flex; align-items:center; justify-content:center; padding:52px;">
+          <svg viewBox="-172 -172 344 344" width="320" height="320" style="display:block; filter:drop-shadow(0 16px 30px rgba(0,0,0,0.26));">
+            <circle r="158" fill="none" stroke="url(#goldGrad)" stroke-width="1.4"></circle>
+            <circle r="150" fill="none" stroke="url(#goldGrad)" stroke-width="3"></circle>
+            <circle r="106" fill="none" stroke="url(#goldGrad)" stroke-width="1.2" stroke-opacity="0.8"></circle>
+            <circle r="97" fill="none" stroke="url(#goldGrad)" stroke-width="1.2" stroke-opacity="0.8"></circle>
+            <circle r="101.5" fill="none" stroke="url(#goldGrad)" stroke-width="5.5" stroke-dasharray="2 8.4" stroke-linecap="round"></circle>
+            <text fill="url(#goldGrad)" font-family="Jost, sans-serif" font-size="16.5" font-weight="600" letter-spacing="2.3"><textPath href="#arcTop" startOffset="50%" text-anchor="middle">LOOP · ACADEMY MANAGEMENT</textPath></text>
+            <text fill="url(#goldGrad)" font-family="Jost, sans-serif" font-size="14.5" font-weight="500" letter-spacing="4.2"><textPath href="#arcBot" startOffset="50%" text-anchor="middle">BY ZAK CRICKET</textPath></text>
+            <g transform="translate(-131,0) rotate(45)"><rect x="-4.6" y="-4.6" width="9.2" height="9.2" fill="url(#goldGrad)"></rect></g>
+            <g transform="translate(131,0) rotate(45)"><rect x="-4.6" y="-4.6" width="9.2" height="9.2" fill="url(#goldGrad)"></rect></g>
+            <g transform="scale(0.84)">
+              <path d="M0.00 -83.19 C45.94 -83.19 83.19 -45.94 83.19 -0.00 C83.19 45.94 45.94 83.19 0.00 83.19 C-45.94 83.19 -83.19 45.94 -83.19 -0.00 C-83.19 -45.94 -45.94 -83.19 0.00 -83.19 Z" fill="url(#discRed)"></path>
+              <circle r="83.19" fill="url(#ballShade)"></circle>
+              <circle r="73" fill="none" stroke="url(#goldGrad)" stroke-width="2.4"></circle>
+              <path d="M23.60 -49.24 L11.04 -49.24 L11.04 -49.25 L-44.60 -49.25 L-28.43 -21.25 L-7.57 -21.25 L-3.90 -21.25 L-5.74 -18.07 L-44.60 49.24 L-23.60 49.24 L-23.60 49.25 L-11.04 49.25 L-11.04 49.24 L44.60 49.24 L28.44 21.25 L7.58 21.25 L3.90 21.25 L5.74 18.06 L44.60 -49.24 Z" fill="#FAF7F4"></path>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 · CONSTRUCTION + CONCEPT -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:30px;">
+      <!-- construction -->
+      <div>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+          <span style="font-family:'Bebas Neue',sans-serif; font-size:18px; color:#9C1116; letter-spacing:0.06em;">02</span>
+          <span style="font-size:11px; font-weight:600; letter-spacing:0.3em; color:rgba(20,20,20,0.5); text-transform:uppercase;">Construction</span>
+        </div>
+        <div style="background:#FAF7F4; border:1px solid rgba(20,20,20,0.07); border-radius:14px; box-shadow:0 18px 40px -28px rgba(20,20,20,0.4); padding:34px; display:flex; align-items:center; justify-content:center; height:340px;">
+          <svg viewBox="-130 -130 260 260" width="272" height="272" style="display:block;">
+            <line x1="-122" y1="0" x2="122" y2="0" stroke="#9C1116" stroke-width="0.6" stroke-opacity="0.35" stroke-dasharray="3 4"></line>
+            <line x1="0" y1="-122" x2="0" y2="122" stroke="#9C1116" stroke-width="0.6" stroke-opacity="0.35" stroke-dasharray="3 4"></line>
+            <circle r="103" fill="none" stroke="#9C1116" stroke-width="0.7" stroke-opacity="0.4" stroke-dasharray="3 4"></circle>
+            <circle r="83.19" fill="none" stroke="#9C1116" stroke-width="0.8" stroke-opacity="0.55"></circle>
+            <g opacity="0.92">
+              <path d="M0.00 -83.19 C45.94 -83.19 83.19 -45.94 83.19 -0.00 C83.19 45.94 45.94 83.19 0.00 83.19 C-45.94 83.19 -83.19 45.94 -83.19 -0.00 C-83.19 -45.94 -45.94 -83.19 0.00 -83.19 Z" fill="none" stroke="#9C1116" stroke-width="1.2"></path>
+              <path d="M23.60 -49.24 L11.04 -49.24 L11.04 -49.25 L-44.60 -49.25 L-28.43 -21.25 L-7.57 -21.25 L-3.90 -21.25 L-5.74 -18.07 L-44.60 49.24 L-23.60 49.24 L-23.60 49.25 L-11.04 49.25 L-11.04 49.24 L44.60 49.24 L28.44 21.25 L7.58 21.25 L3.90 21.25 L5.74 18.06 L44.60 -49.24 Z" fill="#9C1116" fill-opacity="0.10" stroke="#9C1116" stroke-width="1.1"></path>
+            </g>
+            <line x1="-44.6" y1="49.24" x2="44.6" y2="-49.24" stroke="#C9A84C" stroke-width="0.9" stroke-dasharray="2 3"></line>
+            <circle cx="0" cy="0" r="2" fill="#9C1116"></circle>
+            <circle cx="0" cy="-103" r="2.4" fill="#C9A84C"></circle>
+            <circle cx="89.2" cy="51.5" r="2.4" fill="#C9A84C"></circle>
+            <circle cx="-89.2" cy="51.5" r="2.4" fill="#C9A84C"></circle>
+            <text x="6" y="-58" font-family="Jost, sans-serif" font-size="8.5" font-weight="600" letter-spacing="1" fill="#9C1116" fill-opacity="0.7">r</text>
+            <text x="50" y="-44" font-family="Jost, sans-serif" font-size="8" font-weight="600" letter-spacing="1" fill="#937328">120°</text>
+          </svg>
+        </div>
+      </div>
+      <!-- concept -->
+      <div>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+          <span style="font-family:'Bebas Neue',sans-serif; font-size:18px; color:#9C1116; letter-spacing:0.06em;">03</span>
+          <span style="font-size:11px; font-weight:600; letter-spacing:0.3em; color:rgba(20,20,20,0.5); text-transform:uppercase;">The Idea · Connected Loop</span>
+        </div>
+        <div style="background:#FAF7F4; border:1px solid rgba(20,20,20,0.07); border-radius:14px; box-shadow:0 18px 40px -28px rgba(20,20,20,0.4); padding:34px; display:flex; flex-direction:column; align-items:center; justify-content:center; height:340px; text-align:center;">
+          <svg viewBox="-158 -150 316 300" width="258" height="245" style="display:block;">
+            <circle r="116" fill="none" stroke="#C9A84C" stroke-width="1.6" stroke-opacity="0.5"></circle>
+            <g style="transform-box:fill-box; transform-origin:center; animation:loopDrift 26s linear infinite;">
+              <circle cx="0" cy="-116" r="3.2" fill="#9C1116"></circle>
+            </g>
+            <g transform="scale(0.78)">
+              <path d="M0.00 -83.19 C45.94 -83.19 83.19 -45.94 83.19 -0.00 C83.19 45.94 45.94 83.19 0.00 83.19 C-45.94 83.19 -83.19 45.94 -83.19 -0.00 C-83.19 -45.94 -45.94 -83.19 0.00 -83.19 Z" fill="url(#discRed)"></path>
+              <circle r="73" fill="none" stroke="url(#goldGrad)" stroke-width="2.6"></circle>
+              <path d="M23.60 -49.24 L11.04 -49.24 L11.04 -49.25 L-44.60 -49.25 L-28.43 -21.25 L-7.57 -21.25 L-3.90 -21.25 L-5.74 -18.07 L-44.60 49.24 L-23.60 49.24 L-23.60 49.25 L-11.04 49.25 L-11.04 49.24 L44.60 49.24 L28.44 21.25 L7.58 21.25 L3.90 21.25 L5.74 18.06 L44.60 -49.24 Z" fill="#FAF7F4"></path>
+            </g>
+            <g><circle cx="0" cy="-116" r="8.5" fill="#C9A84C"><animate attributeName="r" values="8.5;10.5;8.5" dur="3.2s" begin="0s" repeatCount="indefinite"></animate></circle><circle cx="0" cy="-116" r="8.5" fill="none" stroke="#6E0C10" stroke-width="2"></circle></g>
+            <g><circle cx="100.5" cy="58" r="8.5" fill="#C9A84C"><animate attributeName="r" values="8.5;10.5;8.5" dur="3.2s" begin="1.07s" repeatCount="indefinite"></animate></circle><circle cx="100.5" cy="58" r="8.5" fill="none" stroke="#6E0C10" stroke-width="2"></circle></g>
+            <g><circle cx="-100.5" cy="58" r="8.5" fill="#C9A84C"><animate attributeName="r" values="8.5;10.5;8.5" dur="3.2s" begin="2.14s" repeatCount="indefinite"></animate></circle><circle cx="-100.5" cy="58" r="8.5" fill="none" stroke="#6E0C10" stroke-width="2"></circle></g>
+            <text x="0" y="-132" text-anchor="middle" font-family="Jost, sans-serif" font-size="12" font-weight="600" letter-spacing="2.2" fill="#141414">COACH</text>
+            <text x="100.5" y="88" text-anchor="middle" font-family="Jost, sans-serif" font-size="12" font-weight="600" letter-spacing="2.2" fill="#141414">PLAYER</text>
+            <text x="-100.5" y="88" text-anchor="middle" font-family="Jost, sans-serif" font-size="12" font-weight="600" letter-spacing="2.2" fill="#141414">PARENT</text>
+          </svg>
+          <div style="font-size:13.5px; line-height:1.6; color:rgba(20,20,20,0.62); max-width:360px; margin-top:6px;">The angular <strong style="color:#9C1116; font-weight:600;">Z</strong> is both brothers, Zohab &amp; Zanish — held inside one unbroken ring. Nobody falls out of the loop.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 · LOGO SUITE -->
+    <div>
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+        <span style="font-family:'Bebas Neue',sans-serif; font-size:18px; color:#9C1116; letter-spacing:0.06em;">04</span>
+        <span style="font-size:11px; font-weight:600; letter-spacing:0.3em; color:rgba(20,20,20,0.5); text-transform:uppercase;">Lockups</span>
+      </div>
+      <div style="display:grid; grid-template-columns:1.35fr 1fr; gap:30px;">
+        <div style="background:#FAF7F4; border:1px solid rgba(20,20,20,0.07); border-radius:14px; box-shadow:0 18px 40px -28px rgba(20,20,20,0.4); display:flex; align-items:center; justify-content:center; padding:54px 48px;">
+          <div style="display:flex; align-items:center; gap:26px;">
+            <svg width="116" height="116" style="display:block; flex:none;"><use href="#badge"></use></svg>
+            <div style="width:1px; align-self:stretch; background:linear-gradient(to bottom, transparent, rgba(201,168,76,0.7), transparent); margin:8px 0;"></div>
+            <div>
+              <div style="font-family:'Bebas Neue',sans-serif; font-size:80px; line-height:0.78; letter-spacing:0.04em; color:#141414;">LOOP</div>
+              <div style="font-size:14px; font-weight:500; letter-spacing:0.36em; color:#6E0C10; text-transform:uppercase; margin-top:12px; padding-left:3px;">By Zak Cricket</div>
+            </div>
+          </div>
+        </div>
+        <div style="background:#FAF7F4; border:1px solid rgba(20,20,20,0.07); border-radius:14px; box-shadow:0 18px 40px -28px rgba(20,20,20,0.4); display:flex; align-items:center; justify-content:center; padding:48px 32px;">
+          <div style="display:flex; flex-direction:column; align-items:center; text-align:center;">
+            <svg width="124" height="124" style="display:block;"><use href="#badge"></use></svg>
+            <div style="font-family:'Bebas Neue',sans-serif; font-size:72px; line-height:0.8; letter-spacing:0.04em; color:#141414; margin-top:20px;">LOOP</div>
+            <div style="font-size:12px; font-weight:500; letter-spacing:0.34em; color:#6E0C10; text-transform:uppercase; margin-top:10px;">By Zak Cricket</div>
+          </div>
+        </div>
+      </div>
+      <!-- responsive scaling -->
+      <div style="background:#FAF7F4; border:1px solid rgba(20,20,20,0.07); border-radius:14px; box-shadow:0 18px 40px -28px rgba(20,20,20,0.4); padding:30px 40px; margin-top:30px; display:flex; align-items:center; justify-content:space-around; gap:24px;">
+        <div style="display:flex; flex-direction:column; align-items:center; gap:14px;">
+          <div style="display:flex; align-items:center; gap:14px;">
+            <svg width="56" height="56" style="display:block;"><use href="#badge"></use></svg>
+            <div><div style="font-family:'Bebas Neue',sans-serif; font-size:38px; line-height:0.78; color:#141414;">LOOP</div><div style="font-size:7.5px; font-weight:500; letter-spacing:0.28em; color:#6E0C10;">BY ZAK CRICKET</div></div>
+          </div>
+          <span style="font-size:10px; letter-spacing:0.18em; color:rgba(20,20,20,0.4);">FULL</span>
+        </div>
+        <span style="width:1px; height:54px; background:rgba(20,20,20,0.1);"></span>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:14px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <svg width="42" height="42" style="display:block;"><use href="#badge"></use></svg>
+            <div style="font-family:'Bebas Neue',sans-serif; font-size:34px; line-height:0.78; color:#141414;">LOOP</div>
+          </div>
+          <span style="font-size:10px; letter-spacing:0.18em; color:rgba(20,20,20,0.4);">COMPACT</span>
+        </div>
+        <span style="width:1px; height:54px; background:rgba(20,20,20,0.1);"></span>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:14px;">
+          <svg width="42" height="42" style="display:block;"><use href="#badge"></use></svg>
+          <span style="font-size:10px; letter-spacing:0.18em; color:rgba(20,20,20,0.4);">ICON</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5 · APP ICON + APPLICATION -->
+    <div>
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+        <span style="font-family:'Bebas Neue',sans-serif; font-size:18px; color:#9C1116; letter-spacing:0.06em;">05</span>
+        <span style="font-size:11px; font-weight:600; letter-spacing:0.3em; color:rgba(20,20,20,0.5); text-transform:uppercase;">App Icon &amp; Application</span>
+      </div>
+      <div style="display:grid; grid-template-columns:1.35fr 1fr; gap:30px;">
+        <div style="background:#FAF7F4; border:1px solid rgba(20,20,20,0.07); border-radius:14px; box-shadow:0 18px 40px -28px rgba(20,20,20,0.4); display:flex; align-items:center; justify-content:center; gap:48px; padding:46px 40px;">
+          <svg width="156" height="156" style="display:block; filter:drop-shadow(0 14px 26px rgba(110,12,16,0.34));"><use href="#appIcon"></use></svg>
+          <div style="display:flex; align-items:flex-end; gap:22px;">
+            <div style="display:flex; flex-direction:column; align-items:center; gap:8px;"><svg width="60" height="60" style="display:block;"><use href="#appIcon"></use></svg><span style="font-size:10px; letter-spacing:0.14em; color:rgba(20,20,20,0.42);">60PX</span></div>
+            <div style="display:flex; flex-direction:column; align-items:center; gap:8px;"><svg width="44" height="44" style="display:block;"><use href="#appIcon"></use></svg><span style="font-size:10px; letter-spacing:0.14em; color:rgba(20,20,20,0.42);">44PX</span></div>
+            <div style="display:flex; flex-direction:column; align-items:center; gap:8px;"><svg width="30" height="30" style="display:block;"><use href="#appIcon"></use></svg><span style="font-size:10px; letter-spacing:0.14em; color:rgba(20,20,20,0.42);">30PX</span></div>
+          </div>
+        </div>
+        <!-- phone home screen -->
+        <div style="background:#FAF7F4; border:1px solid rgba(20,20,20,0.07); border-radius:14px; box-shadow:0 18px 40px -28px rgba(20,20,20,0.4); display:flex; align-items:center; justify-content:center; padding:34px;">
+          <div style="width:188px; height:300px; border-radius:30px; background:linear-gradient(165deg, #243042, #161b27); padding:18px 16px; box-shadow:0 16px 30px -16px rgba(0,0,0,0.5), inset 0 0 0 4px #0c0f15; position:relative;">
+            <div style="position:absolute; top:11px; left:50%; transform:translateX(-50%); width:54px; height:5px; border-radius:3px; background:rgba(255,255,255,0.18);"></div>
+            <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:14px 10px; margin-top:26px;">
+              <div style="aspect-ratio:1; border-radius:11px; background:rgba(255,255,255,0.13);"></div>
+              <div style="aspect-ratio:1; border-radius:11px; background:rgba(255,255,255,0.13);"></div>
+              <div style="aspect-ratio:1; border-radius:11px; background:rgba(255,255,255,0.13);"></div>
+              <div style="aspect-ratio:1; border-radius:11px; background:rgba(255,255,255,0.13);"></div>
+              <div style="aspect-ratio:1; border-radius:11px; background:rgba(255,255,255,0.13);"></div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:5px;">
+                <svg width="100%" viewBox="0 0 40 40" style="display:block; border-radius:11px; filter:drop-shadow(0 5px 8px rgba(0,0,0,0.4));"><use href="#appIcon" width="40" height="40"></use></svg>
+                <span style="font-size:7.5px; color:rgba(255,255,255,0.82); letter-spacing:0.02em;">Loop</span>
+              </div>
+              <div style="aspect-ratio:1; border-radius:11px; background:rgba(255,255,255,0.13);"></div>
+              <div style="aspect-ratio:1; border-radius:11px; background:rgba(255,255,255,0.13);"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6 · COLOUR -->
+    <div>
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+        <span style="font-family:'Bebas Neue',sans-serif; font-size:18px; color:#9C1116; letter-spacing:0.06em;">06</span>
+        <span style="font-size:11px; font-weight:600; letter-spacing:0.3em; color:rgba(20,20,20,0.5); text-transform:uppercase;">Colour System</span>
+      </div>
+      <div style="background:#FAF7F4; border:1px solid rgba(20,20,20,0.07); border-radius:14px; box-shadow:0 18px 40px -28px rgba(20,20,20,0.4); padding:34px 40px; display:flex; flex-direction:column; gap:22px;">
+        <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:14px;">
+          <div style="display:flex; flex-direction:column; gap:8px;"><div style="height:88px; border-radius:10px; background:#9C1116; box-shadow:inset 0 0 0 1px rgba(0,0,0,0.06);"></div><div style="font-size:12px; font-weight:600; color:#141414;">Brand Red</div><div style="font-size:11px; letter-spacing:0.06em; color:rgba(20,20,20,0.5);">#9C1116 · core mark</div></div>
+          <div style="display:flex; flex-direction:column; gap:8px;"><div style="height:88px; border-radius:10px; background:#6E0C10; box-shadow:inset 0 0 0 1px rgba(0,0,0,0.06);"></div><div style="font-size:12px; font-weight:600; color:#141414;">Deep Red</div><div style="font-size:11px; letter-spacing:0.06em; color:rgba(20,20,20,0.5);">#6E0C10 · depth</div></div>
+          <div style="display:flex; flex-direction:column; gap:8px;"><div style="height:88px; border-radius:10px; background:#C9A84C; box-shadow:inset 0 0 0 1px rgba(0,0,0,0.06);"></div><div style="font-size:12px; font-weight:600; color:#141414;">Gold</div><div style="font-size:11px; letter-spacing:0.06em; color:rgba(20,20,20,0.5);">#C9A84C · premium accent</div></div>
+          <div style="display:flex; flex-direction:column; gap:8px;"><div style="height:88px; border-radius:10px; background:#141414; box-shadow:inset 0 0 0 1px rgba(0,0,0,0.06);"></div><div style="font-size:12px; font-weight:600; color:#141414;">Ink</div><div style="font-size:11px; letter-spacing:0.06em; color:rgba(20,20,20,0.5);">#141414 · wordmark</div></div>
+          <div style="display:flex; flex-direction:column; gap:8px;"><div style="height:88px; border-radius:10px; background:#FAF7F4; box-shadow:inset 0 0 0 1px rgba(20,20,20,0.14);"></div><div style="font-size:12px; font-weight:600; color:#141414;">Paper</div><div style="font-size:11px; letter-spacing:0.06em; color:rgba(20,20,20,0.5);">#FAF7F4 · ground</div></div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:9px;">
+          <div style="display:flex; height:30px; border-radius:7px; overflow:hidden; box-shadow:inset 0 0 0 1px rgba(0,0,0,0.05);"><span style="flex:1; background:#5E0A0E;"></span><span style="flex:1; background:#6E0C10;"></span><span style="flex:1; background:#9C1116;"></span><span style="flex:1; background:#C25257;"></span><span style="flex:1; background:#E6BFC1;"></span></div>
+          <div style="display:flex; height:30px; border-radius:7px; overflow:hidden; box-shadow:inset 0 0 0 1px rgba(0,0,0,0.05);"><span style="flex:1; background:#7A5F22;"></span><span style="flex:1; background:#9C7C2E;"></span><span style="flex:1; background:#C9A84C;"></span><span style="flex:1; background:#DEC57E;"></span><span style="flex:1; background:#F0E4B8;"></span></div>
+          <div style="display:flex; height:30px; border-radius:7px; overflow:hidden; box-shadow:inset 0 0 0 1px rgba(0,0,0,0.05);"><span style="flex:1; background:#141414;"></span><span style="flex:1; background:#3A3A38;"></span><span style="flex:1; background:#6E6C66;"></span><span style="flex:1; background:#B9B4AC;"></span><span style="flex:1; background:#FAF7F4;"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7 · TYPOGRAPHY -->
+    <div>
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+        <span style="font-family:'Bebas Neue',sans-serif; font-size:18px; color:#9C1116; letter-spacing:0.06em;">07</span>
+        <span style="font-size:11px; font-weight:600; letter-spacing:0.3em; color:rgba(20,20,20,0.5); text-transform:uppercase;">Typography</span>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:30px;">
+        <div style="background:#FAF7F4; border:1px solid rgba(20,20,20,0.07); border-radius:14px; box-shadow:0 18px 40px -28px rgba(20,20,20,0.4); padding:32px 36px;">
+          <div style="display:flex; justify-content:space-between; align-items:baseline;"><span style="font-size:11px; font-weight:600; letter-spacing:0.2em; color:#9C1116; text-transform:uppercase;">Bebas Neue</span><span style="font-size:10px; letter-spacing:0.16em; color:rgba(20,20,20,0.4);">WORDMARK / DISPLAY</span></div>
+          <div style="font-family:'Bebas Neue',sans-serif; font-size:86px; line-height:0.86; letter-spacing:0.03em; color:#141414; margin-top:14px;">LOOP</div>
+          <div style="font-family:'Bebas Neue',sans-serif; font-size:21px; letter-spacing:0.06em; color:rgba(20,20,20,0.55); margin-top:8px;">ABCDEFGHIJKLMNOPQRSTUVWXYZ 1234567890</div>
+        </div>
+        <div style="background:#FAF7F4; border:1px solid rgba(20,20,20,0.07); border-radius:14px; box-shadow:0 18px 40px -28px rgba(20,20,20,0.4); padding:32px 36px;">
+          <div style="display:flex; justify-content:space-between; align-items:baseline;"><span style="font-size:11px; font-weight:600; letter-spacing:0.2em; color:#9C1116; text-transform:uppercase;">Jost</span><span style="font-size:10px; letter-spacing:0.16em; color:rgba(20,20,20,0.4);">TAGLINE / UI / BODY</span></div>
+          <div style="font-size:24px; font-weight:500; letter-spacing:0.3em; color:#141414; text-transform:uppercase; margin-top:18px;">By Zak Cricket</div>
+          <div style="display:flex; gap:22px; margin-top:20px;">
+            <span style="font-size:15px; font-weight:400; color:rgba(20,20,20,0.7);">Regular</span>
+            <span style="font-size:15px; font-weight:500; color:rgba(20,20,20,0.8);">Medium</span>
+            <span style="font-size:15px; font-weight:600; color:#141414;">Semibold</span>
+          </div>
+          <div style="font-size:13.5px; line-height:1.6; color:rgba(20,20,20,0.55); margin-top:14px;">Geometric, even, calm — set in caps with generous tracking for labels, sentence case for running text.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8 · PATTERN -->
+    <div>
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+        <span style="font-family:'Bebas Neue',sans-serif; font-size:18px; color:#9C1116; letter-spacing:0.06em;">08</span>
+        <span style="font-size:11px; font-weight:600; letter-spacing:0.3em; color:rgba(20,20,20,0.5); text-transform:uppercase;">Seam Pattern</span>
+      </div>
+      <div style="height:150px; border-radius:14px; box-shadow:0 18px 40px -28px rgba(20,20,20,0.4); overflow:hidden; background:#6E0C10; position:relative;">
+        <div style="position:absolute; inset:0; background-image:repeating-linear-gradient(45deg, transparent 0 17px, rgba(201,168,76,0.0) 17px 18px, rgba(201,168,76,0.55) 18px 21px, transparent 21px 22px); opacity:0.9;"></div>
+        <div style="position:absolute; inset:0; background-image:repeating-linear-gradient(45deg, transparent 0 7px, rgba(201,168,76,0.16) 7px 8px, transparent 8px 19px);"></div>
+        <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center;"><svg width="74" height="74" style="display:block; opacity:0.96; filter:drop-shadow(0 8px 16px rgba(0,0,0,0.4));"><use href="#seamBadge"></use></svg></div>
+      </div>
+    </div>
+
+    <!-- 9 · VERSIONS -->
+    <div>
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+        <span style="font-family:'Bebas Neue',sans-serif; font-size:18px; color:#9C1116; letter-spacing:0.06em;">09</span>
+        <span style="font-size:11px; font-weight:600; letter-spacing:0.3em; color:rgba(20,20,20,0.5); text-transform:uppercase;">Version System</span>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:18px;">
+        <div style="display:flex; flex-direction:column; gap:10px;"><div style="background:#FAF7F4; border:1px solid rgba(20,20,20,0.08); border-radius:12px; height:128px; display:flex; align-items:center; justify-content:center;"><svg width="78" height="78"><use href="#badge"></use></svg></div><span style="font-size:10.5px; letter-spacing:0.12em; color:rgba(20,20,20,0.5); text-align:center; text-transform:uppercase;">Full Colour</span></div>
+        <div style="display:flex; flex-direction:column; gap:10px;"><div style="background:#141414; border-radius:12px; height:128px; display:flex; align-items:center; justify-content:center;"><svg width="78" height="78"><use href="#badge"></use></svg></div><span style="font-size:10.5px; letter-spacing:0.12em; color:rgba(20,20,20,0.5); text-align:center; text-transform:uppercase;">Reversed</span></div>
+        <div style="display:flex; flex-direction:column; gap:10px;"><div style="background:#FAF7F4; border:1px solid rgba(20,20,20,0.08); border-radius:12px; height:128px; display:flex; align-items:center; justify-content:center;"><svg viewBox="-100 -100 200 200" width="78" height="78"><circle r="83.19" fill="#141414"></circle><use href="#zOnly" x="-50" y="-52" width="100" height="104" color="#FAF7F4"></use></svg></div><span style="font-size:10.5px; letter-spacing:0.12em; color:rgba(20,20,20,0.5); text-align:center; text-transform:uppercase;">Mono Ink</span></div>
+        <div style="display:flex; flex-direction:column; gap:10px;"><div style="background:#6E0C10; border-radius:12px; height:128px; display:flex; align-items:center; justify-content:center;"><svg viewBox="-100 -100 200 200" width="78" height="78"><circle r="83.19" fill="none" stroke="url(#goldGrad)" stroke-width="4"></circle><use href="#zOnly" x="-50" y="-52" width="100" height="104" color="#C9A84C"></use></svg></div><span style="font-size:10.5px; letter-spacing:0.12em; color:rgba(20,20,20,0.5); text-align:center; text-transform:uppercase;">Mono Gold</span></div>
+        <div style="display:flex; flex-direction:column; gap:10px;"><div style="background:#9C1116; border-radius:12px; height:128px; display:flex; align-items:center; justify-content:center;"><svg viewBox="-100 -100 200 200" width="78" height="78"><circle r="83.19" fill="none" stroke="#FAF7F4" stroke-width="3"></circle><use href="#zOnly" x="-50" y="-52" width="100" height="104" color="#FAF7F4"></use></svg></div><span style="font-size:10.5px; letter-spacing:0.12em; color:rgba(20,20,20,0.5); text-align:center; text-transform:uppercase;">Knockout</span></div>
+      </div>
+    </div>
+
+    <!-- 10 · CLEARSPACE & MIN SIZE -->
+    <div>
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+        <span style="font-family:'Bebas Neue',sans-serif; font-size:18px; color:#9C1116; letter-spacing:0.06em;">10</span>
+        <span style="font-size:11px; font-weight:600; letter-spacing:0.3em; color:rgba(20,20,20,0.5); text-transform:uppercase;">Clearspace &amp; Minimum Size</span>
+      </div>
+      <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:30px;">
+        <div style="background:#FAF7F4; border:1px solid rgba(20,20,20,0.07); border-radius:14px; box-shadow:0 18px 40px -28px rgba(20,20,20,0.4); padding:40px; display:flex; align-items:center; justify-content:center;">
+          <div style="position:relative; padding:46px;">
+            <div style="position:absolute; inset:0; border:1px dashed rgba(156,17,22,0.4); border-radius:8px;"></div>
+            <div style="position:absolute; top:8px; left:50%; transform:translateX(-50%); font-size:9px; letter-spacing:0.14em; color:rgba(156,17,22,0.6);">½ Z</div>
+            <svg width="116" height="116" style="display:block;"><use href="#badge"></use></svg>
+          </div>
+        </div>
+        <div style="background:#FAF7F4; border:1px solid rgba(20,20,20,0.07); border-radius:14px; box-shadow:0 18px 40px -28px rgba(20,20,20,0.4); padding:40px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px;">
+          <svg width="36" height="36" style="display:block;"><use href="#appIcon"></use></svg>
+          <div style="text-align:center;"><div style="font-size:13px; font-weight:600; color:#141414;">24px minimum</div><div style="font-size:11.5px; line-height:1.5; color:rgba(20,20,20,0.5); margin-top:4px; max-width:200px;">Below this, drop the keyline and use the solid mark for clarity.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:32px; margin-top:14px; padding-top:24px; border-top:1px solid rgba(20,20,20,0.14);">
+      <div style="font-size:11px; letter-spacing:0.16em; color:rgba(20,20,20,0.5); text-transform:uppercase;">Loop · Brand Identity Manual</div>
+      <div style="font-size:11px; letter-spacing:0.16em; color:rgba(20,20,20,0.5); text-transform:uppercase;">By Zak Cricket · Bebas Neue / Jost</div>
+    </div>
+
+   </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

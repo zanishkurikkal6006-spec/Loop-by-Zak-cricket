@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex; flex-direction:column; align-items:center; gap:12px; width:132px; font-family:'Jost',sans-serif;">
+  <div style="position:relative; width:118px; height:118px;">
+    <!-- medallion -->
+    <div style="width:118px; height:118px; border-radius:50%; padding:4px; background:{{ ringBg }}; box-shadow:{{ ringShadow }}; filter:{{ medFilter }};">
+      <div style="position:relative; width:100%; height:100%; border-radius:50%; background:{{ discBg }}; display:flex; align-items:center; justify-content:center; box-shadow:inset 0 2px 5px rgba(255,255,255,0.28), inset 0 -9px 18px rgba(0,0,0,0.32), inset 0 0 0 2px rgba(255,255,255,0.16); color:#FAF7F4;">
+        <!-- gold seam keyline -->
+        <div style="position:absolute; inset:9px; border-radius:50%; border:1.5px dashed rgba(255,255,255,0.32);"></div>
+        <div style="position:relative; z-index:2; display:flex; align-items:center; justify-content:center;">{{ emblem }}</div>
+      </div>
+    </div>
+    <!-- special burst ring -->
+    <div style="position:absolute; inset:-7px; border-radius:50%; border:1.5px solid #C9A84C; opacity:{{ specialOpacity }}; box-shadow:0 0 18px rgba(201,168,76,0.6);"></div>
+    <!-- locked chip -->
+    <div style="position:absolute; right:-2px; bottom:-2px; width:34px; height:34px; border-radius:50%; background:#E7E2DA; border:2px solid #FAF7F4; display:{{ lockDisplay }}; align-items:center; justify-content:center; box-shadow:0 4px 10px -4px rgba(20,20,20,0.4);">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8C857A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+    </div>
+    <!-- earned tick -->
+    <div style="position:absolute; right:-2px; bottom:-2px; width:34px; height:34px; border-radius:50%; background:#1F8A4C; border:2px solid #FAF7F4; display:{{ earnedDisplay }}; align-items:center; justify-content:center; box-shadow:0 4px 10px -4px rgba(20,20,20,0.4);">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+    </div>
+  </div>
+  <div style="text-align:center;">
+    <div style="font-size:11.5px; font-weight:600; letter-spacing:0.1em; line-height:1.2; text-transform:uppercase; color:{{ nameColor }}; min-height:28px; display:flex; align-items:center; justify-content:center;">{{ badgeName }}</div>
+    <div style="font-size:10.5px; letter-spacing:0.02em; color:{{ critColor }}; margin-top:4px; line-height:1.35;">{{ crit }}</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 160, &quot;height&quot;: 190}, &quot;kind&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;lightning&quot;}, &quot;accent&quot;: {&quot;editor&quot;: &quot;color&quot;, &quot;default&quot;: &quot;#D23B2F&quot;}, &quot;accentDk&quot;: {&quot;editor&quot;: &quot;color&quot;, &quot;default&quot;: &quot;#8E1F18&quot;}, &quot;badgeName&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;Thunderstrike&quot;}, &quot;crit&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;Strike rate 140+&quot;}, &quot;earned&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true}, &quot;special&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: false}}">
+class Component extends DCLogic {
+  emblem(kind) {
+    const svg = (children) => React.createElement('svg', { width: 46, height: 46, viewBox: '0 0 24 24', fill: 'none', stroke: '#FAF7F4', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' }, ...children);
+    const P = (d, x) => React.createElement('path', Object.assign({ d, key: Math.random() }, x || {}));
+    const C = (cx, cy, r, x) => React.createElement('circle', Object.assign({ cx, cy, r, key: Math.random() }, x || {}));
+    const R = (a) => React.createElement('rect', Object.assign({ key: Math.random() }, a));
+    const fill = { fill: '#FAF7F4', stroke: 'none' };
+    const map = {
+      lightning: svg([P('M13 2 4 13.5h6.2L9 22l9.5-12.2H12L13.2 2z', fill)]),
+      anchor: svg([C(12, 4.6, 2.2), P('M12 6.8V21'), P('M5 13.5a7 7 0 0 0 14 0'), P('M4.5 13.5H3'), P('M21 13.5h-1.5')]),
+      silk: svg([P('M3 9c3.4-4 5.6 4 9 0s5.6 4 9 0'), P('M3 15c3.4-4 5.6 4 9 0s5.6 4 9 0', { opacity: 0.55 })]),
+      target: svg([C(12, 12, 8.6), C(12, 12, 4.7), C(12, 12, 1.5, fill)]),
+      lock: svg([R({ x: 5, y: 11, width: 14, height: 9, rx: 2 }), P('M8 11V8a4 4 0 0 1 8 0v3'), C(12, 15.2, 1.1, fill)]),
+      summit: svg([P('M2.5 19.5h19L14.8 6.5l-3.1 5.4-2.3-3z', fill), P('M12.4 9.2 13.6 8')]),
+      double: svg([P('M16.5 4.3 9 11.8', { strokeWidth: 2.6 }), P('M14.6 6.2 17.8 9.4'), C(7, 16.8, 2.3, fill)]),
+      hands: svg([P('M8.5 11.5V6a1.4 1.4 0 0 1 2.8 0v5'), P('M11.3 11V4.7a1.4 1.4 0 0 1 2.8 0V11'), P('M14.1 11.4V6.4a1.4 1.4 0 0 1 2.8 0V14c0 3.6-2.5 6.4-6 6.4S6 18 6 14.4v-1.2L4.6 11.6a1.35 1.35 0 0 1 1.9-1.9l2 1.9')]),
+      star: svg([P('M12 3.2l2.5 5.3 5.6.7-4.1 3.9 1 5.6L12 21.4 7 19l1-5.6L3.9 9.5l5.6-.7z', fill)]),
+      shield: svg([P('M12 3 5 5.6v5.2c0 4.5 3 7.6 7 9.2 4-1.6 7-4.7 7-9.2V5.6z'), P('m8.6 12 2.2 2.2 4.6-4.6')]),
+      calcheck: svg([R({ x: 4, y: 5.5, width: 16, height: 14.5, rx: 2 }), P('M4 9.5h16'), P('M8.5 3.2v3.4'), P('M15.5 3.2v3.4'), P('m8.6 14 2.2 2.2 4.6-4.6')]),
+      sun: svg([C(12, 12, 4.2), P('M12 3v2.4'), P('M12 18.6V21'), P('M3 12h2.4'), P('M18.6 12H21'), P('M5.6 5.6l1.7 1.7'), P('M16.7 16.7l1.7 1.7'), P('M18.4 5.6l-1.7 1.7'), P('M7.3 16.7l-1.7 1.7')]),
+      flag: svg([P('M6 21V3.5'), P('M6 4.2h11.5l-2.2 3.4 2.2 3.4H6')]),
+      rocket: svg([P('M12 3c3 2.2 4.4 5.2 4.4 9.2L14.4 14.4H9.6L7.6 12.2C7.6 8.2 9 5.2 12 3z'), C(12, 9.2, 1.5, fill), P('M9.6 15l-2 3.2'), P('M14.4 15l2 3.2')]),
+      trendup: svg([P('M4 16.5l5-5 3 3 7.5-8'), P('M19.5 6.5h-3.5'), P('M19.5 6.5v3.5')]),
+      burst: svg([C(12, 12, 3, fill), P('M12 2.5V6'), P('M12 18v3.5'), P('M2.5 12H6'), P('M18 12h3.5'), P('M5 5l2.4 2.4'), P('M16.6 16.6 19 19'), P('M19 5l-2.4 2.4'), P('M7.4 16.6 5 19')]),
+      sunrise: svg([P('M3 18.5h18'), P('M7 18.5a5 5 0 0 1 10 0'), P('M12 8.5V5.5'), P('M5.2 11.2l1.6 1.4'), P('M18.8 11.2l-1.6 1.4'), P('M2.5 14.5h1.8'), P('M19.7 14.5h1.8')]),
+      six: svg([React.createElement('text', { key: 's6', x: 12, y: 17.4, textAnchor: 'middle', fontFamily: 'Bebas Neue, sans-serif', fontSize: 19, fontWeight: 700, fill: '#FAF7F4', stroke: 'none' }, '6')]),
+      four: svg([React.createElement('text', { key: 's4', x: 12, y: 17.4, textAnchor: 'middle', fontFamily: 'Bebas Neue, sans-serif', fontSize: 19, fontWeight: 700, fill: '#FAF7F4', stroke: 'none' }, '4')]),
+      dblbolt: svg([P('M9.5 2.5 5 11h2.6l-.8 6 4.4-7.6H8.6z', fill), P('M16.5 6.5 13 13h2l-.6 4.5L18 11.6h-2.4z', fill)]),
+      flame: svg([P('M12 2.6c2.4 3 4.4 4.8 4.4 8.4a4.4 4.4 0 0 1-8.8 0c0-1.6.6-2.8 1.7-3.9C10.4 8.2 11.2 6 12 2.6z'), P('M12 20.4c1.7 0 3-1.2 3-2.8 0-1.4-1-2.2-1.6-3-.5.9-1.4 1-1.4 2.2 0-1-.7-1.6-1.2-2.2-.5.7-1.1 1.4-1.1 3 0 1.6 1.6 2.8 3.3 2.8z', fill)]),
+      stumps: svg([P('M8 8.5V20'), P('M12 8.5V20'), P('M16 8.5V20'), P('M6 6.4l3.2 1.2'), P('M18.2 5l-3.4 2.2')]),
+      zero: svg([React.createElement('ellipse', { key: 'z', cx: 12, cy: 12, rx: 5, ry: 7 })]),
+    };
+    return map[kind] || map.star;
+  }
+
+  renderVals() {
+    const p = this.props;
+    const earned = p.earned ?? true;
+    const accent = p.accent ?? '#C9A84C';
+    const accentDk = p.accentDk ?? '#937328';
+    const special = !!p.special;
+    return {
+      emblem: this.emblem(p.kind ?? 'star'),
+      badgeName: p.badgeName ?? 'Badge',
+      crit: p.crit ?? '',
+      ringBg: earned
+        ? 'linear-gradient(145deg, #EFDC97 0%, #C9A84C 46%, #937328 100%)'
+        : 'linear-gradient(145deg, #D8D2C8, #B7B0A4)',
+      ringShadow: earned ? '0 14px 26px -14px rgba(20,20,20,0.5)' : '0 8px 18px -14px rgba(20,20,20,0.4)',
+      discBg: earned
+        ? `radial-gradient(135% 135% at 34% 26%, rgba(255,255,255,0.45), ${accent} 50%, ${accentDk})`
+        : 'radial-gradient(135% 135% at 34% 26%, rgba(255,255,255,0.3), #B3ADA2 55%, #8C857A)',
+      medFilter: earned ? 'none' : 'saturate(0.18)',
+      specialOpacity: special && earned ? '1' : '0',
+      lockDisplay: earned ? 'none' : 'flex',
+      earnedDisplay: earned && special ? 'flex' : 'none',
+      nameColor: earned ? '#141414' : '#9A938A',
+      critColor: earned ? 'rgba(20,20,20,0.5)' : 'rgba(20,20,20,0.35)',
+    };
+  }
+}
+</script>
+</body>
+</html>

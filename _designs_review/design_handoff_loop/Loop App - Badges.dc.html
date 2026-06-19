@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>* { box-sizing: border-box; } html, body { margin: 0; padding: 0; }</style>
+</helmet>
+
+<div style="min-height:100vh; background:#E7E4DF; font-family:'Jost',sans-serif; color:#141414; padding:46px 40px 64px; display:flex; justify-content:center;">
+  <div style="width:100%; max-width:1080px;">
+
+    <!-- masthead -->
+    <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:24px; padding-bottom:22px; border-bottom:1px solid rgba(20,20,20,0.14); margin-bottom:34px;">
+      <div style="display:flex; align-items:center; gap:15px;">
+        <svg width="40" height="40" viewBox="-100 -100 200 200" style="display:block;"><circle r="83.19" fill="#9C1116"></circle><circle r="73" fill="none" stroke="#C9A84C" stroke-width="4.4"></circle><path d="M23.6 -49.24 L11.04 -49.24 L11.04 -49.25 L-44.6 -49.25 L-28.43 -21.25 L-3.9 -21.25 L-5.74 -18.07 L-44.6 49.24 L-23.6 49.24 L-23.6 49.25 L44.6 49.24 L28.44 21.25 L3.9 21.25 L5.74 18.06 L44.6 -49.24 Z" fill="#FAF7F4"></path></svg>
+        <div>
+          <div style="font-size:11px; font-weight:600; letter-spacing:0.34em; color:#9C1116; text-transform:uppercase;">Achievement System</div>
+          <div style="font-family:'Bebas Neue',sans-serif; font-size:38px; line-height:0.9; letter-spacing:0.02em; margin-top:4px;">Player Badges</div>
+        </div>
+      </div>
+      <!-- legend -->
+      <div style="display:flex; gap:18px; align-items:center;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="width:18px; height:18px; border-radius:50%; background:linear-gradient(145deg,#EFDC97,#C9A84C 46%,#937328); box-shadow:inset 0 0 0 1.5px rgba(255,255,255,0.4);"></span>
+          <span style="font-size:11.5px; color:rgba(20,20,20,0.6);">Earned</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="width:18px; height:18px; border-radius:50%; background:linear-gradient(145deg,#D8D2C8,#B7B0A4);"></span>
+          <span style="font-size:11.5px; color:rgba(20,20,20,0.6);">Locked</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- intro -->
+    <div style="max-width:620px; margin-bottom:32px;">
+      <p style="font-size:14.5px; line-height:1.65; color:rgba(20,20,20,0.62); margin:0;">Every badge wears the <strong style="color:#9C1116; font-weight:600;">loop</strong> as its frame — a gold ring that ties each achievement back to the brand. Earn one and it fills with its own colour; until then it stays locked. Collectible, dignified, and built to make a young cricketer proud.</p>
+    </div>
+
+    <!-- PERFORMANCE GROUP -->
+    <div style="display:flex; align-items:center; gap:14px; margin-bottom:24px;">
+      <span style="font-family:'Bebas Neue',sans-serif; font-size:15px; letter-spacing:0.06em; color:#fff; background:#9C1116; padding:4px 12px; border-radius:7px;">01</span>
+      <span style="font-size:13px; font-weight:600; letter-spacing:0.28em; color:#141414; text-transform:uppercase;">Performance</span>
+      <span style="font-size:12px; color:rgba(20,20,20,0.45);">8 badges · batting, bowling &amp; fielding feats across a season</span>
+      <span style="flex:1; height:1px; background:rgba(20,20,20,0.12);"></span>
+    </div>
+
+    <div style="background:#FAF7F4; border:1px solid #ECE7E1; border-radius:20px; padding:38px 30px; box-shadow:0 20px 44px -30px rgba(20,20,20,0.5);">
+      <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:34px 8px; justify-items:center;">
+        <dc-import name="Badge" kind="lightning" accent="#D23B2F" accent-dk="#8E1F18" badge-name="Thunderstrike" crit="Strike rate 140+" earned="{{ true }}" hint-size="132px,182px"></dc-import>
+        <dc-import name="Badge" kind="anchor" accent="#2563EB" accent-dk="#173F9E" badge-name="The Anchor" crit="Average 35+" earned="{{ true }}" hint-size="132px,182px"></dc-import>
+        <dc-import name="Badge" kind="silk" accent="#7C3AED" accent-dk="#4C1D95" badge-name="Pure Silk" crit="Balanced avg & SR" earned="{{ true }}" hint-size="132px,182px"></dc-import>
+        <dc-import name="Badge" kind="target" accent="#D97706" accent-dk="#8A4B04" badge-name="Sharpshooter" crit="5+ wickets in a season" earned="{{ true }}" hint-size="132px,182px"></dc-import>
+        <dc-import name="Badge" kind="lock" accent="#059669" accent-dk="#04543B" badge-name="The Miser" crit="Economy under 7" earned="{{ true }}" hint-size="132px,182px"></dc-import>
+        <dc-import name="Badge" kind="summit" accent="#B45309" accent-dk="#6E3206" badge-name="Summit Club" crit="Scored a century" earned="{{ false }}" hint-size="132px,182px"></dc-import>
+        <dc-import name="Badge" kind="double" accent="#0891B2" accent-dk="#064F66" badge-name="Double Threat" crit="Runs + wickets" earned="{{ true }}" hint-size="132px,182px"></dc-import>
+        <dc-import name="Badge" kind="hands" accent="#475569" accent-dk="#273245" badge-name="Safe Hands" crit="5+ catches" earned="{{ false }}" hint-size="132px,182px"></dc-import>
+      </div>
+    </div>
+
+    <div style="margin-top:40px; display:flex; align-items:center; gap:14px; margin-bottom:24px;">
+      <span style="font-family:'Bebas Neue',sans-serif; font-size:15px; letter-spacing:0.06em; color:#fff; background:#9C1116; padding:4px 12px; border-radius:7px;">02</span>
+      <span style="font-size:13px; font-weight:600; letter-spacing:0.28em; color:#141414; text-transform:uppercase;">Attendance</span>
+      <span style="font-size:12px; color:rgba(20,20,20,0.45);">5 badges · rhythm &amp; reliability, fair to flexible attendance</span>
+      <span style="flex:1; height:1px; background:rgba(20,20,20,0.12);"></span>
+    </div>
+    <div style="background:#FAF7F4; border:1px solid #ECE7E1; border-radius:20px; padding:38px 30px; box-shadow:0 20px 44px -30px rgba(20,20,20,0.5);">
+      <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:34px 8px; justify-items:center;">
+        <dc-import name="Badge" kind="flag" accent="#4D7C0F" accent-dk="#2E4A09" badge-name="First Commitment" crit="8 sessions, no 10-day gap" earned="{{ true }}" hint-size="132px,182px"></dc-import>
+        <dc-import name="Badge" kind="calcheck" accent="#059669" accent-dk="#04543B" badge-name="Session Keeper" crit="No 10-day gap for 2 months" earned="{{ true }}" hint-size="132px,182px"></dc-import>
+        <dc-import name="Badge" kind="shield" accent="#15803D" accent-dk="#0B4D24" badge-name="Iron Presence" crit="2+/week, no 7-day gap, 1 month" earned="{{ true }}" hint-size="132px,182px"></dc-import>
+        <dc-import name="Badge" kind="sun" accent="#047857" accent-dk="#033F2E" badge-name="All-Season Pro" crit="No 14-day gap all season (6 mo)" earned="{{ false }}" hint-size="132px,182px"></dc-import>
+        <dc-import name="Badge" kind="flame" accent="#C9A84C" accent-dk="#937328" badge-name="Relentless" crit="20+ sessions in one month" earned="{{ false }}" special="{{ true }}" hint-size="132px,182px"></dc-import>
+      </div>
+    </div>
+
+    <div style="margin-top:40px; display:flex; align-items:center; gap:14px; margin-bottom:24px;">
+      <span style="font-family:'Bebas Neue',sans-serif; font-size:15px; letter-spacing:0.06em; color:#fff; background:#9C1116; padding:4px 12px; border-radius:7px;">03</span>
+      <span style="font-size:13px; font-weight:600; letter-spacing:0.28em; color:#141414; text-transform:uppercase;">Progress</span>
+      <span style="font-size:12px; color:rgba(20,20,20,0.45);">4 badges · improvement over time</span>
+      <span style="flex:1; height:1px; background:rgba(20,20,20,0.12);"></span>
+    </div>
+    <div style="background:#FAF7F4; border:1px solid #ECE7E1; border-radius:20px; padding:38px 30px; box-shadow:0 20px 44px -30px rgba(20,20,20,0.5);">
+      <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:34px 8px; justify-items:center;">
+        <dc-import name="Badge" kind="rocket" accent="#7C3AED" accent-dk="#4C1D95" badge-name="Breakthrough Month" crit="Most improved average" earned="{{ true }}" hint-size="132px,182px"></dc-import>
+        <dc-import name="Badge" kind="trendup" accent="#1D4ED8" accent-dk="#15307F" badge-name="On The Rise" crit="Up 3 months running" earned="{{ true }}" hint-size="132px,182px"></dc-import>
+        <dc-import name="Badge" kind="burst" accent="#B45309" accent-dk="#6E3206" badge-name="Personal Best Month" crit="New personal high" earned="{{ false }}" hint-size="132px,182px"></dc-import>
+        <dc-import name="Badge" kind="sunrise" accent="#15803D" accent-dk="#0B4D24" badge-name="New Chapter" crit="First match logged" earned="{{ true }}" hint-size="132px,182px"></dc-import>
+      </div>
+    </div>
+
+    <div style="margin-top:40px; display:flex; align-items:center; gap:14px; margin-bottom:24px;">
+      <span style="font-family:'Bebas Neue',sans-serif; font-size:15px; letter-spacing:0.06em; color:#fff; background:#9C1116; padding:4px 12px; border-radius:7px;">04</span>
+      <span style="font-size:13px; font-weight:600; letter-spacing:0.28em; color:#141414; text-transform:uppercase;">Moment</span>
+      <span style="font-size:12px; color:rgba(20,20,20,0.45);">10 badges · single-match feats, earned in an instant</span>
+      <span style="flex:1; height:1px; background:rgba(20,20,20,0.12);"></span>
+    </div>
+    <div style="background:#FAF7F4; border:1px solid #ECE7E1; border-radius:20px; padding:38px 30px; box-shadow:0 20px 44px -30px rgba(20,20,20,0.5);">
+      <!-- Hat-Trick Hero — the coveted one, given a celebratory feature row -->
+      <div style="display:flex; align-items:center; gap:26px; padding:8px 14px 26px; margin-bottom:28px; border-bottom:1px dashed rgba(201,168,76,0.5);">
+        <dc-import name="Badge" kind="flame" accent="#9C1116" accent-dk="#6E0C10" badge-name="Hat-Trick Hero" crit="Three wickets, three balls" earned="{{ true }}" special="{{ true }}" hint-size="132px,182px"></dc-import>
+        <div style="flex:1;">
+          <div style="display:inline-flex; align-items:center; gap:7px; background:#F5ECD3; border:1px solid #E3CE94; border-radius:999px; padding:5px 12px; margin-bottom:11px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="#C9A84C" stroke="none"><path d="M12 2l2.5 5.3 5.6.7-4.1 3.9 1 5.6L12 20.4 7 17.5l1-5.6L3.9 8l5.6-.7z"></path></svg>
+            <span style="font-size:10px; font-weight:600; letter-spacing:0.18em; color:#937328; text-transform:uppercase;">Most Coveted</span>
+          </div>
+          <div style="font-family:'Bebas Neue',sans-serif; font-size:30px; line-height:0.95; letter-spacing:0.02em; color:#141414;">Hat-Trick Hero</div>
+          <div style="font-size:13.5px; line-height:1.6; color:rgba(20,20,20,0.6); margin-top:6px; max-width:440px;">The rarest moment in the game — three wickets in three balls. Earning it triggers a gold burst, a celebratory animation, and an instant WhatsApp to the parent. The one every young bowler dreams of.</div>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:34px 8px; justify-items:center;">
+        <dc-import name="Badge" kind="six" accent="#7C3AED" accent-dk="#4C1D95" badge-name="Six Machine" crit="3+ sixes in an innings" earned="{{ true }}" hint-size="132px,182px"></dc-import>
+        <dc-import name="Badge" kind="four" accent="#2563EB" accent-dk="#173F9E" badge-name="Boundary Storm" crit="6+ fours in an innings" earned="{{ true }}" hint-size="132px,182px"></dc-import>
+        <dc-import name="Badge" kind="star" accent="#D97706" accent-dk="#8A4B04" badge-name="Six of the Best" crit="Six off the last ball" earned="{{ false }}" hint-size="132px,182px"></dc-import>
+        <dc-import name="Badge" kind="dblbolt" accent="#D23B2F" accent-dk="#8E1F18" badge-name="Double Strike" crit="Two wickets in an over" earned="{{ true }}" hint-size="132px,182px"></dc-import>
+        <dc-import name="Badge" kind="burst" accent="#EA580C" accent-dk="#9A3608" badge-name="Over Destroyer" crit="16+ runs off one over" earned="{{ true }}" hint-size="132px,182px"></dc-import>
+        <dc-import name="Badge" kind="zero" accent="#059669" accent-dk="#04543B" badge-name="Maiden Magic" crit="A maiden over bowled" earned="{{ false }}" hint-size="132px,182px"></dc-import>
+        <dc-import name="Badge" kind="target" accent="#0891B2" accent-dk="#064F66" badge-name="Direct Hit" crit="Run-out, direct throw" earned="{{ true }}" hint-size="132px,182px"></dc-import>
+        <dc-import name="Badge" kind="stumps" accent="#BE123C" accent-dk="#7C0B26" badge-name="Clean Sweep" crit="Bowled, stumps cartwheel" earned="{{ false }}" hint-size="132px,182px"></dc-import>
+      </div>
+    </div>
+
+    <div style="margin-top:28px; display:flex; align-items:center; gap:10px; font-size:12.5px; color:rgba(20,20,20,0.45);">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M9 12l2 2 4-4"></path></svg>
+      26 badges across four groups · one reusable component, earned &amp; locked states.
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  .lp-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+  .lp-scroll::-webkit-scrollbar-thumb { background: #D9D2C8; border-radius: 4px; }
+</style>
+</helmet>
+
+<div style="min-height:100vh; background:#E7E4DF; font-family:'Jost',sans-serif; color:#141414; padding:32px 24px 48px; display:flex; flex-direction:column; align-items:center; gap:16px;">
+
+  <div style="width:100%; max-width:1280px; display:flex; align-items:center; justify-content:space-between;">
+    <div style="font-size:11px; font-weight:600; letter-spacing:0.3em; color:#9C1116; text-transform:uppercase;">Coach App · Desktop</div>
+    <div style="font-size:11px; letter-spacing:0.06em; color:rgba(20,20,20,0.45);">1280 × 860 · sidebar layout · click the nav</div>
+  </div>
+
+  <!-- ===== APP WINDOW ===== -->
+  <div style="width:1280px; max-width:100%; height:860px; background:#FAF7F4; border-radius:18px; overflow:hidden; box-shadow:0 50px 100px -40px rgba(20,20,20,0.55); display:flex; border:1px solid rgba(20,20,20,0.08);">
+
+    <!-- ===== SIDEBAR ===== -->
+    <div style="width:240px; flex:none; background:#141414; display:flex; flex-direction:column; padding:22px 16px;">
+      <!-- logo -->
+      <div style="display:flex; align-items:center; gap:11px; padding:6px 8px 22px;">
+        <svg width="38" height="38" viewBox="-100 -100 200 200" style="display:block;"><circle r="83.19" fill="#9C1116"></circle><circle r="73" fill="none" stroke="#C9A84C" stroke-width="4.4"></circle><path d="M23.6 -49.24 L11.04 -49.24 L11.04 -49.25 L-44.6 -49.25 L-28.43 -21.25 L-3.9 -21.25 L-5.74 -18.07 L-44.6 49.24 L-23.6 49.24 L-23.6 49.25 L44.6 49.24 L28.44 21.25 L3.9 21.25 L5.74 18.06 L44.6 -49.24 Z" fill="#FAF7F4"></path></svg>
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif; font-size:22px; line-height:0.82; letter-spacing:0.04em; color:#FAF7F4;">LOOP</div>
+          <div style="font-size:7.5px; font-weight:500; letter-spacing:0.32em; color:#C9A84C; text-transform:uppercase; margin-top:2px;">By Zak Cricket</div>
+        </div>
+      </div>
+
+      <div style="font-size:9.5px; font-weight:600; letter-spacing:0.22em; color:rgba(250,247,244,0.34); text-transform:uppercase; padding:0 10px 10px;">Coaching</div>
+
+      <!-- nav -->
+      <div style="display:flex; flex-direction:column; gap:3px;">
+        <button onClick="{{ goHome }}" style="display:flex; align-items:center; gap:12px; height:44px; padding:0 12px; border:none; border-radius:11px; cursor:pointer; font-family:'Jost',sans-serif; font-size:13.5px; font-weight:600; letter-spacing:0.02em; text-align:left; background:{{ s.home.bg }}; color:{{ s.home.fg }};">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.6 12 3.5l9 7.1"></path><path d="M5.4 9.2V19a1 1 0 0 0 1 1h11.2a1 1 0 0 0 1-1V9.2"></path><path d="M9.6 20v-5.4a1 1 0 0 1 1-1h2.8a1 1 0 0 1 1 1V20"></path></svg>
+          Dashboard
+        </button>
+        <button onClick="{{ goSessions }}" style="display:flex; align-items:center; gap:12px; height:44px; padding:0 12px; border:none; border-radius:11px; cursor:pointer; font-family:'Jost',sans-serif; font-size:13.5px; font-weight:600; letter-spacing:0.02em; text-align:left; background:{{ s.sessions.bg }}; color:{{ s.sessions.fg }};">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.4"></circle><circle cx="12" cy="12" r="2.5" fill="currentColor" stroke="none"></circle></svg>
+          1-on-1 Sessions
+        </button>
+        <button onClick="{{ goAttendance }}" style="display:flex; align-items:center; gap:12px; height:44px; padding:0 12px; border:none; border-radius:11px; cursor:pointer; font-family:'Jost',sans-serif; font-size:13.5px; font-weight:600; letter-spacing:0.02em; text-align:left; background:{{ s.attend.bg }}; color:{{ s.attend.fg }};">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.6"></circle><path d="m8.2 12.2 2.5 2.5 5-5.4"></path></svg>
+          Attendance
+        </button>
+        <button onClick="{{ goMatches }}" style="display:flex; align-items:center; gap:12px; height:44px; padding:0 12px; border:none; border-radius:11px; cursor:pointer; font-family:'Jost',sans-serif; font-size:13.5px; font-weight:600; letter-spacing:0.02em; text-align:left; background:{{ s.matches.bg }}; color:{{ s.matches.fg }};">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8.5h13"></path><path d="M7.5 8.5V19.5"></path><path d="M12 8.5V19.5"></path><path d="M16.5 8.5V19.5"></path><path d="M9 8.5 9.8 5"></path><path d="m15 8.5-.8-3.5"></path></svg>
+          Matches
+        </button>
+        <button onClick="{{ goRankings }}" style="display:flex; align-items:center; gap:12px; height:44px; padding:0 12px; border:none; border-radius:11px; cursor:pointer; font-family:'Jost',sans-serif; font-size:13.5px; font-weight:600; letter-spacing:0.02em; text-align:left; background:{{ s.rank.bg }}; color:{{ s.rank.fg }};">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.6 9 6.2 3.2"></path><path d="m15.4 9 2.4-5.8"></path><circle cx="12" cy="15" r="5.7"></circle></svg>
+          Rankings
+        </button>
+        <button onClick="{{ goBadges }}" style="display:flex; align-items:center; gap:12px; height:44px; padding:0 12px; border:none; border-radius:11px; cursor:pointer; font-family:'Jost',sans-serif; font-size:13.5px; font-weight:600; letter-spacing:0.02em; text-align:left; background:{{ s.badges.bg }}; color:{{ s.badges.fg }};">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"></circle><path d="m8.5 14-1.5 7 5-3 5 3-1.5-7"></path></svg>
+          Achievements
+        </button>
+      </div>
+
+      <div style="margin-top:auto; display:flex; flex-direction:column; gap:3px;">
+        <button style="display:flex; align-items:center; gap:12px; height:42px; padding:0 12px; border:none; border-radius:11px; cursor:pointer; font-family:'Jost',sans-serif; font-size:13px; font-weight:500; text-align:left; background:none; color:rgba(250,247,244,0.55);">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          Settings
+        </button>
+        <div style="display:flex; align-items:center; gap:11px; margin-top:8px; padding:11px 10px; border-radius:13px; background:rgba(250,247,244,0.06);">
+          <div style="width:38px; height:38px; flex:none; border-radius:50%; padding:2px; background:linear-gradient(145deg,#EFDC97,#C9A84C);"><div style="width:100%; height:100%; border-radius:50%; background:#2a2a2a; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:15px; color:#FAF7F4;">ZK</div></div>
+          <div style="flex:1; min-width:0;">
+            <div style="font-size:12.5px; font-weight:600; color:#FAF7F4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Coach Zanish</div>
+            <div style="font-size:10.5px; color:rgba(250,247,244,0.5);">Batting Specialist</div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(250,247,244,0.5)" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MAIN ===== -->
+    <div style="flex:1; min-width:0; display:flex; flex-direction:column;">
+
+      <!-- topbar -->
+      <div style="flex:none; height:74px; border-bottom:1px solid #ECE7E1; display:flex; align-items:center; justify-content:space-between; padding:0 28px; background:#FAF7F4;">
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif; font-size:24px; line-height:0.9; letter-spacing:0.02em; color:#141414;">{{ viewTitle }}</div>
+          <div style="font-size:12px; color:rgba(20,20,20,0.5); margin-top:2px;">{{ viewSub }}</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div style="display:flex; align-items:center; gap:9px; height:40px; width:240px; padding:0 14px; background:#fff; border:1px solid #ECE7E1; border-radius:11px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A938A" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+            <span style="font-size:13px; color:#9A938A;">Search players, matches…</span>
+          </div>
+          <div style="position:relative; width:40px; height:40px; border-radius:11px; background:#fff; border:1px solid #ECE7E1; display:flex; align-items:center; justify-content:center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#141414" stroke-width="1.9"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+            <span style="position:absolute; top:8px; right:9px; width:7px; height:7px; border-radius:50%; background:#9C1116; border:1.5px solid #FAF7F4;"></span>
+          </div>
+          <div style="width:40px; height:40px; border-radius:11px; background:#9C1116; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:17px; color:#FAF7F4;">ZK</div>
+        </div>
+      </div>
+
+      <!-- scroll content -->
+      <div class="lp-scroll" style="flex:1; overflow-y:auto; padding:24px 28px 36px;">
+
+        <!-- ============ DASHBOARD ============ -->
+        <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+          <div>
+            <!-- welcome banner -->
+            <div style="position:relative; overflow:hidden; border-radius:18px; background:linear-gradient(120deg, #9C1116 0%, #7a0f13 52%, #6E0C10 100%); padding:22px 26px; margin-bottom:20px;">
+              <div style="position:absolute; inset:0; opacity:0.08; background-image:repeating-linear-gradient(48deg, transparent 0 12px, rgba(201,168,76,0.9) 12px 14px, transparent 14px 16px);"></div>
+              <div style="position:absolute; top:-50px; right:30px; width:160px; height:160px; border:1px solid rgba(201,168,76,0.2); border-radius:50%;"></div>
+              <div style="position:relative; display:flex; align-items:center; justify-content:space-between; gap:20px;">
+                <div style="flex:1; min-width:0;">
+                  <div style="font-size:10px; font-weight:600; letter-spacing:0.28em; color:rgba(255,233,210,0.7); text-transform:uppercase;">{{ dateLabel }}</div>
+                  <div style="font-family:'Bebas Neue',sans-serif; font-size:32px; line-height:1; letter-spacing:0.02em; color:#FAF7F4; margin-top:7px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ greeting }}</div>
+                  <div style="font-size:13px; color:rgba(255,238,224,0.72); margin-top:7px;">{{ welcomeLine }}</div>
+                </div>
+                <button style="flex:none; height:44px; padding:0 20px; border:1px solid rgba(201,168,76,0.5); border-radius:12px; background:rgba(201,168,76,0.14); color:#F2D27A; font-family:'Jost',sans-serif; font-size:12px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; display:flex; align-items:center; gap:9px;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3"></path><path d="m6 11 6 4 6-4"></path><path d="M21 21H3"></path></svg>
+                  Portfolio
+                </button>
+              </div>
+            </div>
+
+            <!-- stat row -->
+            <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:20px;">
+              <div style="background:#fff; border:1px solid #ECE7E1; border-radius:15px; padding:18px;">
+                <div style="display:flex; align-items:center; justify-content:space-between;"><span style="font-size:11px; font-weight:600; letter-spacing:0.14em; color:rgba(20,20,20,0.45); text-transform:uppercase;">Players</span><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9C1116" stroke-width="2"><circle cx="9" cy="8" r="3.1"></circle><path d="M3.6 19.5a5.6 5.6 0 0 1 10.8 0"></path><path d="M16 6.4a3 3 0 0 1 0 5.7"></path></svg></div>
+                <div style="font-family:'Bebas Neue',sans-serif; font-size:40px; line-height:0.8; color:#141414; margin-top:12px;">24</div>
+                <div style="font-size:11.5px; color:#1F8A4C; margin-top:7px;">+3 this month</div>
+              </div>
+              <div style="background:#fff; border:1px solid #ECE7E1; border-radius:15px; padding:18px;">
+                <div style="display:flex; align-items:center; justify-content:space-between;"><span style="font-size:11px; font-weight:600; letter-spacing:0.14em; color:rgba(20,20,20,0.45); text-transform:uppercase;">Sessions / mo</span><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9C1116" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></div>
+                <div style="font-family:'Bebas Neue',sans-serif; font-size:40px; line-height:0.8; color:#141414; margin-top:12px;">19</div>
+                <div style="font-size:11.5px; color:rgba(20,20,20,0.5); margin-top:7px;">142 this season</div>
+              </div>
+              <div style="background:linear-gradient(150deg,#fff,#FBF4E2); border:1px solid #EAD7AE; border-radius:15px; padding:18px;">
+                <div style="display:flex; align-items:center; justify-content:space-between;"><span style="font-size:11px; font-weight:600; letter-spacing:0.14em; color:#937328; text-transform:uppercase;">1-on-1s</span><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2"><circle cx="12" cy="12" r="8.4"></circle><circle cx="12" cy="12" r="2.5" fill="#C9A84C" stroke="none"></circle></svg></div>
+                <div style="font-family:'Bebas Neue',sans-serif; font-size:40px; line-height:0.8; color:#937328; margin-top:12px;">38</div>
+                <div style="font-size:11.5px; color:#937328; margin-top:7px;">Gold programme</div>
+              </div>
+              <div style="background:#fff; border:1px solid #ECE7E1; border-radius:15px; padding:18px;">
+                <div style="display:flex; align-items:center; justify-content:space-between;"><span style="font-size:11px; font-weight:600; letter-spacing:0.14em; color:rgba(20,20,20,0.45); text-transform:uppercase;">Att · Confirmed</span><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1F8A4C" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 3 3 5-6"></path></svg></div>
+                <div style="font-family:'Bebas Neue',sans-serif; font-size:40px; line-height:0.8; color:#141414; margin-top:12px;">91%</div>
+                <div style="font-size:11.5px; color:rgba(20,20,20,0.5); margin-top:7px;">Last 30 days</div>
+              </div>
+            </div>
+
+            <!-- 2-col -->
+            <div style="display:grid; grid-template-columns:1.7fr 1fr; gap:18px;">
+              <!-- left -->
+              <div style="display:flex; flex-direction:column; gap:18px;">
+                <!-- schedule -->
+                <div style="background:#fff; border:1px solid #ECE7E1; border-radius:16px; padding:20px;">
+                  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
+                    <span style="font-size:13px; font-weight:600; letter-spacing:0.04em; color:#141414;">Today's Schedule</span>
+                    <span style="font-size:11.5px; font-weight:600; color:#9C1116;">2 sessions</span>
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div style="display:flex; align-items:center; gap:15px; padding:13px; border:1px solid #ECE7E1; border-radius:13px;">
+                      <div style="width:54px; text-align:center;"><div style="font-family:'Bebas Neue',sans-serif; font-size:24px; line-height:0.8; color:#9C1116;">4:30</div><div style="font-size:9px; letter-spacing:0.1em; color:rgba(20,20,20,0.4);">PM</div></div>
+                      <div style="width:1px; align-self:stretch; background:#ECE7E1;"></div>
+                      <div style="flex:1;"><div style="font-size:14.5px; font-weight:600;">Under 16 · Squad Training</div><div style="font-size:12px; color:rgba(20,20,20,0.5); margin-top:1px;">Danube Sports · Central Wicket Practice</div></div>
+                      <button onClick="{{ goAttendance }}" style="height:34px; padding:0 14px; border:none; border-radius:9px; background:#9C1116; color:#fff; font-family:'Jost',sans-serif; font-size:11.5px; font-weight:600; letter-spacing:0.06em; cursor:pointer;">Take Attendance</button>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:15px; padding:13px; border:1px solid #EAD7AE; background:#FCF7EC; border-radius:13px;">
+                      <div style="width:54px; text-align:center;"><div style="font-family:'Bebas Neue',sans-serif; font-size:24px; line-height:0.8; color:#C9A84C;">6:00</div><div style="font-size:9px; letter-spacing:0.1em; color:rgba(20,20,20,0.4);">PM</div></div>
+                      <div style="width:1px; align-self:stretch; background:#EAD7AE;"></div>
+                      <div style="flex:1;"><div style="font-size:14.5px; font-weight:600;">Ahmed Al Rashidi · 1-on-1</div><div style="font-size:12px; color:rgba(20,20,20,0.5); margin-top:1px;">Cover drive technique · 60 min · Gold</div></div>
+                      <button onClick="{{ goSessions }}" style="height:34px; padding:0 14px; border:1px solid #C9A84C; border-radius:9px; background:#fff; color:#937328; font-family:'Jost',sans-serif; font-size:11.5px; font-weight:600; letter-spacing:0.06em; cursor:pointer;">Log Session</button>
+                    </div>
+                  </div>
+                </div>
+                <!-- packages -->
+                <div style="background:#fff; border:1px solid #ECE7E1; border-radius:16px; padding:20px;">
+                  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
+                    <span style="font-size:13px; font-weight:600; letter-spacing:0.04em; color:#141414;">1-on-1 Packages</span>
+                    <span onClick="{{ goSessions }}" style="font-size:11.5px; font-weight:600; color:#9C1116; cursor:pointer;">View all →</span>
+                  </div>
+                  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+                    <sc-for list="{{ packages }}" as="pk" hint-placeholder-count="3">
+                      <div style="border:1px solid #ECE7E1; border-radius:13px; padding:15px; display:flex; flex-direction:column; align-items:center; text-align:center;">
+                        <div style="position:relative; width:72px; height:72px;">
+                          <svg width="72" height="72" viewBox="0 0 72 72"><circle cx="36" cy="36" r="29" fill="none" stroke="#F1ECE4" stroke-width="6.5"></circle><circle cx="36" cy="36" r="29" fill="none" stroke="{{ pk.ringColor }}" stroke-width="6.5" stroke-linecap="round" stroke-dasharray="{{ pk.circ }}" stroke-dashoffset="{{ pk.off }}" transform="rotate(-90 36 36)"></circle></svg>
+                          <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;"><span style="font-family:'Bebas Neue',sans-serif; font-size:22px; line-height:0.74; color:#141414;">{{ pk.used }}</span><span style="font-size:8.5px; color:rgba(20,20,20,0.45);">of {{ pk.total }}</span></div>
+                        </div>
+                        <div style="font-size:12.5px; font-weight:600; margin-top:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;">{{ pk.first }}</div>
+                        <div style="font-size:10.5px; color:rgba(20,20,20,0.45); margin-top:2px;">{{ pk.remaining }} left</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+
+              <!-- right -->
+              <div style="display:flex; flex-direction:column; gap:18px;">
+                <!-- attendance ring -->
+                <div style="background:#141414; border-radius:16px; padding:20px; color:#FAF7F4;">
+                  <div style="font-size:12px; font-weight:600; letter-spacing:0.04em; margin-bottom:14px;">This Week · Attendance</div>
+                  <div style="display:flex; align-items:center; gap:18px;">
+                    <div style="position:relative; width:92px; height:92px; flex:none;">
+                      <svg width="92" height="92" viewBox="0 0 92 92"><circle cx="46" cy="46" r="38" fill="none" stroke="rgba(250,247,244,0.12)" stroke-width="8"></circle><circle cx="46" cy="46" r="38" fill="none" stroke="#1F8A4C" stroke-width="8" stroke-linecap="round" stroke-dasharray="238.8" stroke-dashoffset="33.4" transform="rotate(-90 46 46)"></circle></svg>
+                      <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;"><span style="font-family:'Bebas Neue',sans-serif; font-size:26px; line-height:0.78;">86%</span><span style="font-size:8px; letter-spacing:0.12em; color:rgba(250,247,244,0.5); text-transform:uppercase;">Present</span></div>
+                    </div>
+                    <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+                      <div style="display:flex; align-items:center; gap:8px;"><span style="width:9px; height:9px; border-radius:50%; background:#1F8A4C;"></span><span style="font-size:12px; color:rgba(250,247,244,0.8);">62 present</span></div>
+                      <div style="display:flex; align-items:center; gap:8px;"><span style="width:9px; height:9px; border-radius:50%; background:#C9A84C;"></span><span style="font-size:12px; color:rgba(250,247,244,0.8);">7 late</span></div>
+                      <div style="display:flex; align-items:center; gap:8px;"><span style="width:9px; height:9px; border-radius:50%; background:#B3261E;"></span><span style="font-size:12px; color:rgba(250,247,244,0.8);">4 absent</span></div>
+                    </div>
+                  </div>
+                </div>
+                <!-- recent achievements -->
+                <div style="background:#fff; border:1px solid #ECE7E1; border-radius:16px; padding:20px;">
+                  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+                    <span style="font-size:13px; font-weight:600; letter-spacing:0.04em; color:#141414;">Recent Achievements</span>
+                    <span onClick="{{ goBadges }}" style="font-size:11.5px; font-weight:600; color:#9C1116; cursor:pointer;">All →</span>
+                  </div>
+                  <div style="display:flex; justify-content:space-around; gap:6px; transform:scale(0.92); transform-origin:top center;">
+                    <dc-import name="Badge" kind="flame" accent="#9C1116" accent-dk="#6E0C10" badge-name="Hat-Trick" crit="K. Singh" earned="{{ true }}" special="{{ true }}" hint-size="118px,170px"></dc-import>
+                    <dc-import name="Badge" kind="lightning" accent="#D23B2F" accent-dk="#8E1F18" badge-name="Thunderstrike" crit="F. Al Zaabi" earned="{{ true }}" hint-size="118px,170px"></dc-import>
+                    <dc-import name="Badge" kind="shield" accent="#15803D" accent-dk="#0B4D24" badge-name="Iron" crit="A. Al Rashidi" earned="{{ true }}" hint-size="118px,170px"></dc-import>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ============ ATTENDANCE (USP) ============ -->
+        <sc-if value="{{ isAtt }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <!-- session bar -->
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; background:#fff; border:1px solid #ECE7E1; border-radius:15px; padding:16px 20px; margin-bottom:16px;">
+              <div style="display:flex; align-items:center; gap:14px;">
+                <!-- date stepper -->
+                <div style="display:flex; align-items:center; gap:7px;">
+                  <button onClick="{{ attPrevDay }}" style="width:34px; height:34px; border:1px solid #ECE7E1; border-radius:9px; background:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9C1116" stroke-width="2.2"><path d="m15 18-6-6 6-6"></path></svg></button>
+                  <div style="height:34px; padding:0 12px; border:1px solid #C9A84C; border-radius:9px; background:#FCF7EC; display:flex; align-items:center; gap:7px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#937328" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2.5"></rect><path d="M3 9h18M8 2v4M16 2v4"></path></svg><span style="font-size:12.5px; font-weight:600; color:#937328; white-space:nowrap;">{{ attDateLabel }}</span></div>
+                  <button onClick="{{ attNextDay }}" style="width:34px; height:34px; border:1px solid {{ attNextBorder }}; border-radius:9px; background:#fff; cursor:{{ attNextCursor }}; display:flex; align-items:center; justify-content:center;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="{{ attNextInk }}" stroke-width="2.2"><path d="m9 18 6-6-6-6"></path></svg></button>
+                </div>
+                <span style="width:1px; height:30px; background:#ECE7E1;"></span>
+                <!-- batch/group chips -->
+                <div style="display:flex; gap:7px;">
+                  <sc-for list="{{ attBatches }}" as="b" hint-placeholder-count="3"><button onClick="{{ b.pick }}" style="height:34px; padding:0 13px; border:1px solid {{ b.border }}; border-radius:9px; background:{{ b.bg }}; color:{{ b.fg }}; font-family:'Jost',sans-serif; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap;">{{ b.label }}</button></sc-for>
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <div style="display:flex; align-items:center; gap:9px; height:38px; padding:0 14px; background:#FAF7F4; border:1px solid #ECE7E1; border-radius:10px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A938A" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><span style="font-size:12.5px; color:#9A938A;">Search…</span></div>
+                <button onClick="{{ allPresent }}" style="height:38px; padding:0 15px; border:none; border-radius:10px; background:#1F8A4C; color:#fff; font-family:'Jost',sans-serif; font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:7px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"></path></svg>Mark all present</button>
+              </div>
+            </div>
+            <div style="font-size:12.5px; color:rgba(20,20,20,0.5); margin:-8px 0 16px 2px;">{{ attSessionTitle }} · {{ attDateFull }}</div>
+
+            <div style="display:grid; grid-template-columns:1.9fr 1fr; gap:18px;">
+              <!-- table -->
+              <div style="background:#fff; border:1px solid #ECE7E1; border-radius:16px; overflow:hidden;">
+                <div style="display:flex; align-items:center; padding:11px 18px; background:#FAF7F4; border-bottom:1px solid #ECE7E1; font-size:10.5px; font-weight:600; letter-spacing:0.14em; color:rgba(20,20,20,0.45); text-transform:uppercase;">
+                  <span style="flex:1;">Player</span><span style="width:160px; text-align:center;">Mark</span>
+                </div>
+                <sc-for list="{{ att.rows }}" as="row" hint-placeholder-count="7">
+                  <div style="display:flex; align-items:center; padding:11px 18px; border-bottom:1px solid #F3EEE8; border-left:3px solid {{ row.edge }};">
+                    <div style="flex:1; display:flex; align-items:center; gap:13px;">
+                      <div style="width:40px; height:40px; flex:none; border-radius:50%; padding:2px; background:{{ row.ring }};"><div style="width:100%; height:100%; border-radius:50%; background:#F3EEE8; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:15px; color:#6E0C10;">{{ row.av }}</div></div>
+                      <div><div style="font-size:14px; font-weight:600;">{{ row.name }}</div><div style="font-size:11.5px; color:rgba(20,20,20,0.45);">{{ row.meta }}</div></div>
+                    </div>
+                    <div style="width:160px; display:flex; justify-content:center; gap:7px;">
+                      <button onClick="{{ row.setP }}" style="{{ row.pStyle }}">P</button>
+                      <button onClick="{{ row.setL }}" style="{{ row.lStyle }}">L</button>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+              <!-- summary -->
+              <div style="display:flex; flex-direction:column; gap:16px;">
+                <div style="background:#fff; border:1px solid #ECE7E1; border-radius:16px; padding:20px;">
+                  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+                    <span style="font-size:13px; font-weight:600;">Live Count</span>
+                    <div style="position:relative; width:46px; height:46px;"><svg width="46" height="46" viewBox="0 0 46 46"><circle cx="23" cy="23" r="19" fill="none" stroke="#ECE7E1" stroke-width="5"></circle><circle cx="23" cy="23" r="19" fill="none" stroke="#1F8A4C" stroke-width="5" stroke-linecap="round" stroke-dasharray="{{ att.circ }}" stroke-dashoffset="{{ att.markedOff }}" transform="rotate(-90 23 23)"></circle></svg><div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:14px;">{{ att.marked }}/{{ att.total }}</div></div>
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:9px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; padding:11px 13px; background:#E7F4EC; border-radius:11px;"><span style="font-size:12.5px; font-weight:600; color:#1F8A4C;">Present</span><span style="font-family:'Bebas Neue',sans-serif; font-size:22px; color:#1F8A4C;">{{ att.present }}</span></div>
+                    <div style="display:flex; align-items:center; justify-content:space-between; padding:11px 13px; background:#FBF1DD; border-radius:11px;"><span style="font-size:12.5px; font-weight:600; color:#A9791B;">Late</span><span style="font-family:'Bebas Neue',sans-serif; font-size:22px; color:#A9791B;">{{ att.late }}</span></div>
+                  </div>
+                  <button onClick="{{ submitAtt }}" style="width:100%; height:48px; margin-top:16px; border:none; border-radius:12px; background:linear-gradient(180deg,#b1141a,#7c0f14); color:#FAF7F4; font-family:'Jost',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer;">Submit to Admin</button>
+                  <div style="text-align:center; font-size:11px; color:rgba(20,20,20,0.4); margin-top:9px;">Late counts as attended · parents notified on confirm</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ============ 1-ON-1 SESSIONS ============ -->
+        <sc-if value="{{ isSessions }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid; grid-template-columns:1.4fr 1fr; gap:18px;">
+            <!-- packages list -->
+            <div style="display:flex; flex-direction:column; gap:13px;">
+              <div style="display:flex; align-items:center; justify-content:space-between;">
+                <span style="font-size:12px; color:rgba(20,20,20,0.5); line-height:1.5;">Admin assigns most blocks — if a client arranges directly with you, add it &amp; track payment yourself.</span>
+                <button onClick="{{ openAddBlock }}" style="flex:none; height:36px; padding:0 14px; border:1px solid #9C1116; border-radius:10px; background:#fff; color:#9C1116; font-family:'Jost',sans-serif; font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:7px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M12 5v14"></path></svg>Add Block</button>
+              </div>
+              <sc-for list="{{ packages }}" as="pk" hint-placeholder-count="3">
+                <div style="background:#fff; border:1px solid #ECE7E1; border-radius:16px; padding:18px; display:flex; align-items:center; gap:18px;">
+                  <div style="position:relative; width:84px; height:84px; flex:none;">
+                    <svg width="84" height="84" viewBox="0 0 84 84"><circle cx="42" cy="42" r="34" fill="none" stroke="#F1ECE4" stroke-width="7.5"></circle><circle cx="42" cy="42" r="34" fill="none" stroke="{{ pk.ringColor }}" stroke-width="7.5" stroke-linecap="round" stroke-dasharray="{{ pk.circ2 }}" stroke-dashoffset="{{ pk.off2 }}" transform="rotate(-90 42 42)"></circle></svg>
+                    <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;"><span style="font-family:'Bebas Neue',sans-serif; font-size:27px; line-height:0.74; color:#141414;">{{ pk.used }}</span><span style="font-size:9px; color:rgba(20,20,20,0.45);">of {{ pk.total }}</span></div>
+                  </div>
+                  <div style="flex:1; min-width:0;">
+                    <div style="font-size:16px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ pk.first }}</div>
+                    <div style="font-size:12.5px; color:rgba(20,20,20,0.5); margin-top:2px;">{{ pk.focus }}</div>
+                    <div style="display:inline-flex; align-items:center; gap:6px; margin-top:9px; padding:4px 10px; border-radius:8px; background:{{ pk.tagBg }};"><span style="width:6px; height:6px; border-radius:50%; background:{{ pk.ringColor }};"></span><span style="font-size:11px; font-weight:600; color:{{ pk.tagInk }};">{{ pk.remaining }} sessions left</span></div>
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:8px;">
+                    <button onClick="{{ pk.logSession }}" style="height:38px; padding:0 16px; border:none; border-radius:10px; background:#9C1116; color:#fff; font-family:'Jost',sans-serif; font-size:11.5px; font-weight:600; letter-spacing:0.06em; cursor:pointer;">Log Session</button>
+                    <button style="height:38px; padding:0 16px; border:1px solid #25D366; border-radius:10px; background:#fff; color:#1c9b4b; font-family:'Jost',sans-serif; font-size:11.5px; font-weight:600; cursor:pointer;">WhatsApp</button>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <!-- report panel -->
+            <div style="background:#141414; border-radius:16px; padding:22px; color:#FAF7F4; align-self:start;">
+              <div style="font-size:10px; font-weight:600; letter-spacing:0.24em; color:#C9A84C; text-transform:uppercase;">Post-Session Report</div>
+              <div style="font-family:'Bebas Neue',sans-serif; font-size:24px; line-height:0.95; margin-top:7px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ reportName }}</div>
+              <div style="font-size:12px; color:rgba(250,247,244,0.55); margin-top:3px;">Cover drive technique · 60 min · today</div>
+              <div style="margin-top:16px; background:rgba(250,247,244,0.06); border:1px solid rgba(250,247,244,0.12); border-radius:12px; padding:14px;">
+                <div style="font-size:9.5px; font-weight:600; letter-spacing:0.18em; color:rgba(250,247,244,0.5); text-transform:uppercase; margin-bottom:8px;">AI-drafted summary</div>
+                <div style="font-size:13px; line-height:1.6; color:rgba(250,247,244,0.82); border-left:2px solid #C9A84C; padding-left:12px;">Strong session on the cover drive — footwork is noticeably sharper and head position stayed balanced through the shot. Ready to face spin next week.</div>
+              </div>
+              <!-- whatsapp preview -->
+              <div style="margin-top:16px; background:#0b141a; border-radius:14px; padding:14px;">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="#25D366"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2"></path></svg><span style="font-size:11px; color:rgba(250,247,244,0.5);">To Mohammed (parent) · +971 50 123 4567</span></div>
+                <div style="background:#075E54; border-radius:10px 10px 10px 3px; padding:11px 13px; font-size:12.5px; line-height:1.5; color:#eafff4;">Assalamu Alaikum 👋 Ahmed had a great 1-on-1 today focused on his cover drive. Footwork sharper, balance improved. 5 of 8 sessions used. — Coach Zanish, Loop</div>
+              </div>
+              <button style="width:100%; height:46px; margin-top:16px; border:none; border-radius:12px; background:#25D366; color:#04331c; font-family:'Jost',sans-serif; font-size:12.5px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer;">Send to Parent</button>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ============ MATCHES ============ -->
+        <sc-if value="{{ isMatches }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <!-- Log / Payments toggle -->
+            <div style="display:flex; gap:6px; background:#F1ECE6; border-radius:11px; padding:4px; margin-bottom:16px; width:max-content;">
+              <button onClick="{{ mLogTab }}" style="height:36px; padding:0 22px; border:none; border-radius:8px; cursor:pointer; font-family:'Jost',sans-serif; font-size:12.5px; font-weight:600; background:{{ mLogBg }}; color:{{ mLogFg }};">Match Log</button>
+              <button onClick="{{ mPayTab }}" style="height:36px; padding:0 22px; border:none; border-radius:8px; cursor:pointer; font-family:'Jost',sans-serif; font-size:12.5px; font-weight:600; background:{{ mPayBg }}; color:{{ mPayFg }};">Match Payments</button>
+            </div>
+
+            <!-- MATCH PAYMENTS -->
+            <sc-if value="{{ mIsPay }}" hint-placeholder-val="{{ false }}">
+              <div style="display:grid; grid-template-columns:1.6fr 1fr; gap:18px; align-items:start;">
+                <div style="display:flex; flex-direction:column; gap:16px;">
+                  <div style="display:flex; align-items:center; gap:8px; background:#EAF1FB; border:1px solid #C3D7F2; border-radius:12px; padding:11px 15px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5"></path><path d="M12 16h.01"></path></svg><span style="font-size:12px; color:#3D5A8A;">You coordinate matches — collect &amp; confirm fees here. Admin sees every update live.</span></div>
+                  <sc-for list="{{ matchPays }}" as="mp" hint-placeholder-count="2">
+                    <div style="background:#fff; border:1px solid #ECE7E1; border-radius:16px; padding:18px;">
+                      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+                        <div><div style="font-size:15px; font-weight:600;">{{ mp.title }}</div><div style="font-size:12px; color:rgba(20,20,20,0.5); margin-top:2px;">{{ mp.meta }} · {{ mp.fee }} AED / player</div></div>
+                        <div style="text-align:right;"><div style="font-family:'Bebas Neue',sans-serif; font-size:22px; color:#1F8A4C;">{{ mp.collected }}</div><div style="font-size:11px; color:rgba(20,20,20,0.45);">of {{ mp.total }} AED</div></div>
+                      </div>
+                      <div style="height:7px; border-radius:4px; background:#F1ECE4; overflow:hidden; margin-bottom:14px;"><div style="height:100%; width:{{ mp.barW }}; background:#1F8A4C; border-radius:4px;"></div></div>
+                      <div style="display:flex; flex-direction:column; gap:8px;">
+                        <sc-for list="{{ mp.rows }}" as="r" hint-placeholder-count="3">
+                          <div style="display:flex; align-items:center; gap:11px; padding:10px 12px; border:1px solid #F3EEE8; border-radius:11px;">
+                            <div style="width:34px; height:34px; flex:none; border-radius:50%; background:#F3EEE8; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:13px; color:#6E0C10;">{{ r.av }}</div>
+                            <div style="flex:1; min-width:0;"><div style="font-size:13.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ r.name }}</div><div style="font-size:11px; color:{{ r.ink }}; margin-top:1px;">{{ r.statusLabel }}</div></div>
+                            <button onClick="{{ r.act }}" style="{{ r.btnStyle }}">{{ r.btnLabel }}</button>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+                <!-- summary + bank -->
+                <div style="display:flex; flex-direction:column; gap:16px;">
+                  <div style="background:#141414; border-radius:16px; padding:20px; color:#FAF7F4;">
+                    <div style="font-size:12px; font-weight:600; margin-bottom:16px;">Match Fees · this season</div>
+                    <div style="display:flex; flex-direction:column; gap:13px;">
+                      <div style="display:flex; align-items:center; justify-content:space-between;"><span style="display:flex; align-items:center; gap:8px; font-size:12.5px; color:rgba(250,247,244,0.7);"><span style="width:9px; height:9px; border-radius:50%; background:#1F8A4C;"></span>Collected</span><span style="font-family:'Bebas Neue',sans-serif; font-size:22px; color:#7BD49B;">{{ payCollected }}</span></div>
+                      <div style="display:flex; align-items:center; justify-content:space-between;"><span style="display:flex; align-items:center; gap:8px; font-size:12.5px; color:rgba(250,247,244,0.7);"><span style="width:9px; height:9px; border-radius:50%; background:#C9A84C;"></span>Awaiting confirm</span><span style="font-family:'Bebas Neue',sans-serif; font-size:22px; color:#E7B96A;">{{ payScreenshot }}</span></div>
+                      <div style="display:flex; align-items:center; justify-content:space-between;"><span style="display:flex; align-items:center; gap:8px; font-size:12.5px; color:rgba(250,247,244,0.7);"><span style="width:9px; height:9px; border-radius:50%; background:#9A938A;"></span>Pending</span><span style="font-family:'Bebas Neue',sans-serif; font-size:22px; color:rgba(250,247,244,0.7);">{{ payPending }}</span></div>
+                    </div>
+                  </div>
+                  <div style="background:#fff; border:1px solid #ECE7E1; border-radius:16px; padding:20px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:11px;"><span style="font-size:12.5px; font-weight:600;">Academy bank details</span><button style="height:30px; padding:0 12px; border:none; border-radius:8px; background:#25D366; color:#04331c; font-family:'Jost',sans-serif; font-size:10.5px; font-weight:700; cursor:pointer;">Share</button></div>
+                    <div style="font-size:13px; font-family:'Bebas Neue',sans-serif; letter-spacing:0.06em; color:#141414;">Emirates NBD</div>
+                    <div style="font-size:13px; font-family:'Bebas Neue',sans-serif; letter-spacing:0.06em; color:#141414; margin-top:3px;">AE07 0260 0010 1500 7732 498</div>
+                    <div style="font-size:11px; color:rgba(20,20,20,0.5); margin-top:7px; line-height:1.5;">Parents add player name as reference, then send you the screenshot to confirm.</div>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <!-- LIST (hidden when a match is open) -->
+            <sc-if value="{{ matchListShow }}" hint-placeholder-val="{{ true }}">
+              <div>
+                <!-- filter bar -->
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px; flex-wrap:wrap;">
+                  <div style="display:flex; align-items:center; gap:8px; height:38px; padding:0 12px; background:#fff; border:1px solid #ECE7E1; border-radius:10px; flex:1; min-width:180px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A938A" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input value="{{ matchSearch }}" onInput="{{ onMatchSearch }}" placeholder="Search opponent or venue…" style="border:none; outline:none; background:none; font-family:'Jost',sans-serif; font-size:13px; color:#141414; flex:1; min-width:0;"></input><span onClick="{{ clearMatchSearch }}" style="display:{{ matchClearShow }}; cursor:pointer; color:#9A938A; font-size:15px;">×</span></div>
+                  <sc-for list="{{ matchResultFilters }}" as="f" hint-placeholder-count="3"><button onClick="{{ f.pick }}" style="height:38px; padding:0 14px; border:1px solid {{ f.border }}; border-radius:9px; background:{{ f.bg }}; color:{{ f.fg }}; font-family:'Jost',sans-serif; font-size:12px; font-weight:600; cursor:pointer;">{{ f.label }}</button></sc-for>
+                  <button onClick="{{ exportMatches }}" style="height:38px; padding:0 15px; border:1px solid #1F8A4C; border-radius:9px; background:#E7F4EC; color:#1F6E40; font-family:'Jost',sans-serif; font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:7px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3"></path><path d="m6 11 6 4 6-4"></path><path d="M21 21H3"></path></svg>Export</button>
+                  <button onClick="{{ openAddMatch }}" style="height:38px; padding:0 15px; border:none; border-radius:9px; background:#9C1116; color:#fff; font-family:'Jost',sans-serif; font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:7px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5v14"></path></svg>Log Match</button>
+                  <button style="height:38px; padding:0 15px; border:1px solid #9C1116; border-radius:9px; background:#fff; color:#9C1116; font-family:'Jost',sans-serif; font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:7px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M21 21H3"></path></svg>CricHeros</button>
+                </div>
+                <div style="background:#fff; border:1px solid #ECE7E1; border-radius:16px; overflow:hidden;">
+                  <div style="display:flex; padding:12px 20px; background:#FAF7F4; border-bottom:1px solid #ECE7E1; font-size:10.5px; font-weight:600; letter-spacing:0.14em; color:rgba(20,20,20,0.45); text-transform:uppercase;">
+                    <span style="flex:1.6;">Match</span><span style="flex:1;">Group · Venue</span><span style="width:90px;">Date</span><span style="width:100px;">Score</span><span style="width:80px; text-align:right;">Result</span>
+                  </div>
+                  <sc-for list="{{ matches }}" as="mt" hint-placeholder-count="3">
+                    <div onClick="{{ mt.open }}" style="display:flex; align-items:center; padding:15px 20px; border-bottom:1px solid #F3EEE8; cursor:pointer;" style-hover="background:#FAF7F4;">
+                      <div style="flex:1.6; font-size:14px; font-weight:600;">{{ mt.title }}</div>
+                      <div style="flex:1; font-size:12.5px; color:rgba(20,20,20,0.55);">{{ mt.meta }}</div>
+                      <div style="width:90px; font-size:12.5px; color:rgba(20,20,20,0.55);">{{ mt.date }}</div>
+                      <div style="width:100px; font-family:'Bebas Neue',sans-serif; font-size:20px; color:#141414;">{{ mt.score }}</div>
+                      <div style="width:80px; text-align:right;"><span style="font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:{{ mt.resultInk }}; background:{{ mt.resultBg }}; padding:5px 10px; border-radius:8px;">{{ mt.result }}</span></div>
+                    </div>
+                  </sc-for>
+                  <sc-if value="{{ matchEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:32px; text-align:center; font-size:13px; color:rgba(20,20,20,0.45);">No matches match these filters.</div></sc-if>
+                </div>
+              </div>
+            </sc-if>
+
+            <!-- PER-MATCH DETAIL REPORT -->
+            <sc-if value="{{ matchDetailShow }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <button onClick="{{ closeMatch }}" style="display:flex; align-items:center; gap:7px; height:36px; padding:0 13px; border:1px solid #ECE7E1; border-radius:10px; background:#fff; color:rgba(20,20,20,0.6); font-family:'Jost',sans-serif; font-size:12px; font-weight:600; cursor:pointer; margin-bottom:16px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"></path></svg>All matches</button>
+                <!-- result hero -->
+                <div style="position:relative; overflow:hidden; border-radius:16px; padding:24px; margin-bottom:18px; background:{{ md.heroBg }}; color:#FAF7F4;">
+                  <div style="position:absolute; top:-40px; right:-30px; width:150px; height:150px; border:1px solid rgba(255,255,255,0.14); border-radius:50%;"></div>
+                  <div style="position:relative; display:flex; align-items:center; justify-content:space-between; gap:20px;">
+                    <div>
+                      <div style="font-size:11px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; opacity:0.7;">{{ md.date }} · {{ md.meta }}</div>
+                      <div style="font-family:'Bebas Neue',sans-serif; font-size:38px; line-height:0.95; letter-spacing:0.02em; margin-top:6px;">{{ md.title }}</div>
+                      <div style="font-size:14px; margin-top:6px; opacity:0.85;">{{ md.resultLine }}</div>
+                    </div>
+                    <div style="text-align:right;"><div style="font-family:'Bebas Neue',sans-serif; font-size:46px; line-height:0.8;">{{ md.score }}</div><div style="font-size:12px; opacity:0.7; margin-top:4px;">vs {{ md.oppScore }}</div></div>
+                  </div>
+                </div>
+                <!-- 2-col: scorecard + summary -->
+                <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:18px;">
+                  <div style="background:#fff; border:1px solid #ECE7E1; border-radius:16px; overflow:hidden;">
+                    <div style="padding:14px 18px; border-bottom:1px solid #ECE7E1; display:flex; align-items:center; justify-content:space-between;"><span style="font-size:13px; font-weight:600;">Scorecard · every player</span><span style="font-size:11px; color:rgba(20,20,20,0.45);">Tap a player for their match history</span></div>
+                    <div style="display:flex; padding:10px 18px; background:#FAF7F4; border-bottom:1px solid #ECE7E1; font-size:9.5px; font-weight:600; letter-spacing:0.1em; color:rgba(20,20,20,0.45); text-transform:uppercase;"><span style="width:26px;">#</span><span style="flex:1;">Player</span><span style="width:46px; text-align:center;">Runs</span><span style="width:42px; text-align:center;">Balls</span><span style="flex:0.9;">How out</span><span style="width:42px; text-align:center;">Wkts</span></div>
+                    <sc-for list="{{ md.performers }}" as="pf" hint-placeholder-count="5">
+                      <div onClick="{{ pf.open }}" style="padding:11px 18px; border-bottom:1px solid #F3EEE8; cursor:pointer;" style-hover="background:#FAF7F4;">
+                        <div style="display:flex; align-items:center;">
+                          <span style="width:26px; font-family:'Bebas Neue',sans-serif; font-size:15px; color:rgba(20,20,20,0.4);">{{ pf.pos }}</span>
+                          <div style="flex:1; display:flex; align-items:center; gap:10px;"><div style="width:30px; height:30px; border-radius:50%; background:#F3EEE8; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:12px; color:#6E0C10;">{{ pf.av }}</div><span style="font-size:13.5px; font-weight:600;">{{ pf.name }}</span><span style="font-size:13px;">{{ pf.badge }}</span></div>
+                          <span style="width:46px; text-align:center; font-family:'Bebas Neue',sans-serif; font-size:17px; color:#9C1116;">{{ pf.runs }}</span>
+                          <span style="width:42px; text-align:center; font-size:12px; color:rgba(20,20,20,0.5);">{{ pf.balls }}</span>
+                          <span style="flex:0.9; font-size:11.5px; color:rgba(20,20,20,0.55);">{{ pf.out }}</span>
+                          <span style="width:42px; text-align:center; font-family:'Bebas Neue',sans-serif; font-size:17px; color:#141414;">{{ pf.wkts }}</span>
+                        </div>
+                        <sc-if value="{{ pf.note }}" hint-placeholder-val="{{ false }}">
+                          <div style="display:flex; align-items:flex-start; gap:7px; margin-top:7px; margin-left:26px; padding:7px 11px; background:#FCF7EC; border-left:2px solid #C9A84C; border-radius:0 7px 7px 0;"><span style="font-size:10px; font-weight:700; letter-spacing:0.06em; color:#937328; text-transform:uppercase; flex:none; margin-top:1px;">Why</span><span style="font-size:11.5px; line-height:1.45; color:#7A5F22;">{{ pf.note }}</span></div>
+                        </sc-if>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:16px;">
+                    <div style="background:linear-gradient(150deg,#fff,#FBF4E2); border:1px solid #EAD7AE; border-radius:16px; padding:18px;">
+                      <div style="font-size:10.5px; font-weight:600; letter-spacing:0.12em; color:#937328; text-transform:uppercase;">Player of the Match</div>
+                      <div style="display:flex; align-items:center; gap:12px; margin-top:12px;"><div style="width:44px; height:44px; border-radius:50%; padding:2.5px; background:linear-gradient(145deg,#EFDC97,#C9A84C);"><div style="width:100%; height:100%; border-radius:50%; background:#F3EEE8; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:16px; color:#6E0C10;">{{ md.motmAv }}</div></div><div><div style="font-size:15px; font-weight:600;">{{ md.motm }}</div><div style="font-size:12px; color:#937328;">{{ md.motmLine }}</div></div></div>
+                    </div>
+                    <div style="background:#fff; border:1px solid #ECE7E1; border-radius:16px; padding:18px;">
+                      <div style="font-size:13px; font-weight:600; margin-bottom:10px;">Match Summary</div>
+                      <div style="font-size:13px; line-height:1.6; color:rgba(20,20,20,0.65);">{{ md.summary }}</div>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                      <div style="background:#fff; border:1px solid #ECE7E1; border-radius:13px; padding:14px;"><div style="font-size:10px; font-weight:600; letter-spacing:0.1em; color:rgba(20,20,20,0.45); text-transform:uppercase;">Run Rate</div><div style="font-family:'Bebas Neue',sans-serif; font-size:26px; line-height:0.8; margin-top:8px; color:#9C1116;">{{ md.runRate }}</div></div>
+                      <div style="background:#fff; border:1px solid #ECE7E1; border-radius:13px; padding:14px;"><div style="font-size:10px; font-weight:600; letter-spacing:0.1em; color:rgba(20,20,20,0.45); text-transform:uppercase;">Badges Won</div><div style="font-family:'Bebas Neue',sans-serif; font-size:26px; line-height:0.8; margin-top:8px; color:#C9A84C;">{{ md.badgeCount }}</div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <!-- PLAYER MATCH HISTORY · evidence record -->
+            <sc-if value="{{ playerHistShow }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute; inset:0; z-index:60; background:rgba(20,20,20,0.5); display:flex; align-items:center; justify-content:center; padding:40px;">
+                <div class="lp-scroll" style="width:680px; max-width:100%; max-height:100%; overflow-y:auto; background:#FAF7F4; border-radius:18px; box-shadow:0 40px 80px -30px rgba(0,0,0,0.6);">
+                  <div style="position:sticky; top:0; z-index:2; background:linear-gradient(135deg,#1c1110,#141414); padding:22px; display:flex; align-items:center; gap:15px;">
+                    <div style="width:50px; height:50px; flex:none; border-radius:50%; padding:2.5px; background:linear-gradient(145deg,#EFDC97,#C9A84C);"><div style="width:100%; height:100%; border-radius:50%; background:#2a2a2a; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:18px; color:#FAF7F4;">{{ ph.av }}</div></div>
+                    <div style="flex:1; min-width:0;"><div style="font-size:9.5px; font-weight:600; letter-spacing:0.26em; color:#C9A84C; text-transform:uppercase;">Match History · Evidence Record</div><div style="font-family:'Bebas Neue',sans-serif; font-size:26px; line-height:0.95; color:#FAF7F4; margin-top:3px;">{{ ph.name }}</div></div>
+                    <button onClick="{{ closePlayerHist }}" style="width:32px; height:32px; flex:none; border:none; border-radius:50%; background:rgba(250,247,244,0.14); cursor:pointer; display:flex; align-items:center; justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FAF7F4" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+                  </div>
+                  <div style="padding:22px;">
+                    <div style="display:flex; align-items:flex-start; gap:9px; background:#EAF1FB; border:1px solid #C3D7F2; border-radius:12px; padding:12px 14px; margin-bottom:18px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" style="flex:none; margin-top:1px;"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5"></path><path d="M12 16h.01"></path></svg><span style="font-size:12px; line-height:1.5; color:#3D5A8A;">Pull this up when a parent questions a decision — every innings, role and the reasoning behind the call, on record.</span></div>
+                    <!-- season aggregate -->
+                    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:11px; margin-bottom:18px;">
+                      <div style="background:#fff; border:1px solid #ECE7E1; border-radius:13px; padding:14px; text-align:center;"><div style="font-family:'Bebas Neue',sans-serif; font-size:26px; line-height:0.8; color:#9C1116;">{{ ph.totRuns }}</div><div style="font-size:9px; letter-spacing:0.1em; color:rgba(20,20,20,0.45); text-transform:uppercase; margin-top:4px;">Runs</div></div>
+                      <div style="background:#fff; border:1px solid #ECE7E1; border-radius:13px; padding:14px; text-align:center;"><div style="font-family:'Bebas Neue',sans-serif; font-size:26px; line-height:0.8; color:#141414;">{{ ph.matches }}</div><div style="font-size:9px; letter-spacing:0.1em; color:rgba(20,20,20,0.45); text-transform:uppercase; margin-top:4px;">Matches</div></div>
+                      <div style="background:#fff; border:1px solid #ECE7E1; border-radius:13px; padding:14px; text-align:center;"><div style="font-family:'Bebas Neue',sans-serif; font-size:26px; line-height:0.8; color:#141414;">{{ ph.avg }}</div><div style="font-size:9px; letter-spacing:0.1em; color:rgba(20,20,20,0.45); text-transform:uppercase; margin-top:4px;">Avg</div></div>
+                      <div style="background:#fff; border:1px solid #ECE7E1; border-radius:13px; padding:14px; text-align:center;"><div style="font-family:'Bebas Neue',sans-serif; font-size:26px; line-height:0.8; color:#C9A84C;">{{ ph.totWkts }}</div><div style="font-size:9px; letter-spacing:0.1em; color:rgba(20,20,20,0.45); text-transform:uppercase; margin-top:4px;">Wkts</div></div>
+                    </div>
+                    <div style="font-size:12px; font-weight:600; letter-spacing:0.12em; color:rgba(20,20,20,0.5); text-transform:uppercase; margin-bottom:12px;">Innings by innings · with the decisions</div>
+                    <div style="display:flex; flex-direction:column; gap:11px;">
+                      <sc-for list="{{ ph.history }}" as="h" hint-placeholder-count="4">
+                        <div style="background:#fff; border:1px solid #ECE7E1; border-radius:14px; padding:15px;">
+                          <div style="display:flex; align-items:center; gap:12px;">
+                            <div style="flex:1; min-width:0;"><div style="font-size:13.5px; font-weight:600;">{{ h.match }}</div><div style="font-size:11.5px; color:rgba(20,20,20,0.5); margin-top:1px;">{{ h.date }} · batted {{ h.pos }} · {{ h.role }}</div></div>
+                            <div style="text-align:right;"><div style="font-family:'Bebas Neue',sans-serif; font-size:22px; line-height:0.8; color:#9C1116;">{{ h.runs }}<span style="font-size:12px; color:rgba(20,20,20,0.4);"> ({{ h.balls }})</span></div><div style="font-size:11px; color:rgba(20,20,20,0.5); margin-top:2px;">{{ h.out }}</div></div>
+                          </div>
+                          <sc-if value="{{ h.note }}" hint-placeholder-val="{{ true }}">
+                            <div style="display:flex; align-items:flex-start; gap:8px; margin-top:11px; padding:9px 12px; background:#FCF7EC; border-left:2px solid #C9A84C; border-radius:0 8px 8px 0;"><span style="font-size:10px; font-weight:700; letter-spacing:0.06em; color:#937328; text-transform:uppercase; flex:none; margin-top:1px;">Coach call</span><span style="font-size:12px; line-height:1.5; color:#7A5F22;">{{ h.note }}</span></div>
+                          </sc-if>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <!-- AI parent explanation + send -->
+                    <div style="margin-top:18px; border-top:1px solid #ECE7E1; padding-top:16px;">
+                      <div style="display:flex; align-items:center; gap:6px; margin-bottom:9px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#937328" stroke-width="2"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"></path><circle cx="12" cy="12" r="3.2" fill="#937328" stroke="none"></circle></svg><span style="font-size:9.5px; font-weight:700; letter-spacing:0.14em; color:#937328; text-transform:uppercase;">Explain to parent · AI rephrases professionally</span></div>
+                      <div style="font-size:12px; line-height:1.5; color:rgba(20,20,20,0.55); margin-bottom:10px;">Just say it plainly — “batted him at 4 to face spin, he’s earning his way up.” Loop turns it into a warm, professional note backed by his real numbers above.</div>
+                      <textarea value="{{ evDraft }}" onInput="{{ onEvDraft }}" placeholder="Your reason in a few words…" style="width:100%; height:80px; border:1px solid #ECE7E1; border-radius:12px; background:#fff; padding:12px; font-family:'Jost',sans-serif; font-size:13px; line-height:1.5; color:#141414; resize:none; outline:none;"></textarea>
+                      <div style="display:flex; gap:10px; margin-top:11px;">
+                        <button onClick="{{ evGenerate }}" style="flex:1; height:46px; border:1px solid #C9A84C; border-radius:11px; background:rgba(201,168,76,0.1); color:#937328; font-family:'Jost',sans-serif; font-size:12px; font-weight:600; cursor:pointer;">✨ {{ evGenLabel }}</button>
+                        <button onClick="{{ evSend }}" style="flex:1.4; height:46px; border:none; border-radius:11px; background:#25D366; color:#04331c; font-family:'Jost',sans-serif; font-size:12px; font-weight:700; letter-spacing:0.06em; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="#04331c"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2"></path></svg>Send Evidence Report</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <!-- ============ RANKINGS ============ -->
+        <sc-if value="{{ isRankings }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <!-- filters -->
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
+              <span style="font-size:11px; font-weight:600; color:rgba(20,20,20,0.45); text-transform:uppercase; letter-spacing:0.1em;">Group</span>
+              <sc-for list="{{ lbGroups }}" as="g" hint-placeholder-count="4"><button onClick="{{ g.pick }}" style="height:32px; padding:0 12px; border:1px solid {{ g.border }}; border-radius:9px; background:{{ g.bg }}; color:{{ g.fg }}; font-family:'Jost',sans-serif; font-size:11.5px; font-weight:600; cursor:pointer;">{{ g.label }}</button></sc-for>
+              <span style="width:1px; height:22px; background:#E0D8CE; margin:0 3px;"></span>
+              <span style="font-size:11px; font-weight:600; color:rgba(20,20,20,0.45); text-transform:uppercase; letter-spacing:0.1em;">Age</span>
+              <sc-for list="{{ lbAges }}" as="a" hint-placeholder-count="3"><button onClick="{{ a.pick }}" style="height:32px; padding:0 12px; border:1px solid {{ a.border }}; border-radius:9px; background:{{ a.bg }}; color:{{ a.fg }}; font-family:'Jost',sans-serif; font-size:11.5px; font-weight:600; cursor:pointer;">{{ a.label }}</button></sc-for>
+            </div>
+            <!-- stat tabs -->
+            <div style="display:flex; gap:7px; margin-bottom:16px; flex-wrap:wrap;">
+              <sc-for list="{{ lbStats }}" as="s2" hint-placeholder-count="4"><button onClick="{{ s2.pick }}" style="height:36px; padding:0 15px; border:1px solid {{ s2.border }}; border-radius:10px; background:{{ s2.bg }}; color:{{ s2.fg }}; font-family:'Jost',sans-serif; font-size:12px; font-weight:600; cursor:pointer;">{{ s2.label }}</button></sc-for>
+            </div>
+            <!-- podium -->
+            <div style="display:flex; align-items:flex-end; justify-content:center; gap:14px; margin-bottom:18px;">
+              <sc-for list="{{ podium }}" as="p" hint-placeholder-count="3">
+                <div style="display:flex; flex-direction:column; align-items:center; width:150px;">
+                  <div style="position:relative; width:{{ p.av_size }}; height:{{ p.av_size }};">
+                    <div style="width:100%; height:100%; border-radius:50%; padding:3px; background:{{ p.ring }};"><div style="width:100%; height:100%; border-radius:50%; background:#F3EEE8; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:20px; color:#6E0C10;">{{ p.av }}</div></div>
+                    <div style="position:absolute; -bottom:6px; bottom:-6px; left:50%; transform:translateX(-50%); width:24px; height:24px; border-radius:50%; background:{{ p.medal }}; border:2px solid #FAF7F4; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:13px; color:#fff;">{{ p.place }}</div>
+                  </div>
+                  <div style="font-size:13px; font-weight:600; margin-top:13px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;">{{ p.name }}</div>
+                  <div style="font-family:'Bebas Neue',sans-serif; font-size:26px; line-height:0.8; color:#9C1116; margin-top:4px;">{{ p.value }}</div>
+                  <div style="font-size:10px; letter-spacing:0.1em; color:rgba(20,20,20,0.45); text-transform:uppercase; margin-top:3px;">{{ lbStatLabel }}</div>
+                  <div style="width:100%; height:{{ p.barH }}; background:{{ p.barBg }}; border-radius:8px 8px 0 0; margin-top:11px;"></div>
+                </div>
+              </sc-for>
+            </div>
+            <!-- full list -->
+            <div style="background:#fff; border:1px solid #ECE7E1; border-radius:16px; overflow:hidden;">
+              <div style="display:flex; padding:12px 20px; background:#FAF7F4; border-bottom:1px solid #ECE7E1; font-size:10.5px; font-weight:600; letter-spacing:0.14em; color:rgba(20,20,20,0.45); text-transform:uppercase;">
+                <span style="width:50px;">#</span><span style="flex:1;">Player</span><span style="width:120px;">Group · Age</span><span style="flex:1;">Form</span><span style="width:90px; text-align:right;">{{ lbStatLabel }}</span>
+              </div>
+              <sc-for list="{{ leaderboard }}" as="rk" hint-placeholder-count="5">
+                <div style="display:flex; align-items:center; padding:14px 20px; border-bottom:1px solid #F3EEE8;">
+                  <div style="width:50px; font-family:'Bebas Neue',sans-serif; font-size:24px; color:{{ rk.rankColor }};">{{ rk.rank }}</div>
+                  <div style="flex:1; display:flex; align-items:center; gap:12px;"><div style="width:36px; height:36px; border-radius:50%; background:#F3EEE8; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:13px; color:#6E0C10;">{{ rk.av }}</div><span style="font-size:14px; font-weight:600;">{{ rk.name }}</span></div>
+                  <div style="width:120px; font-size:11.5px; color:rgba(20,20,20,0.5);">{{ rk.group }} · {{ rk.ageCat }}</div>
+                  <div style="flex:1; font-size:12.5px; color:rgba(20,20,20,0.55);">{{ rk.line }}</div>
+                  <div style="width:90px; text-align:right; font-family:'Bebas Neue',sans-serif; font-size:22px; color:#9C1116;">{{ rk.value }}</div>
+                </div>
+              </sc-for>
+              <sc-if value="{{ lbEmpty }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:32px; text-align:center; font-size:13px; color:rgba(20,20,20,0.45);">No players match these filters.</div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ============ ACHIEVEMENTS ============ -->
+        <sc-if value="{{ isBadges }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#fff; border:1px solid #ECE7E1; border-radius:16px; padding:26px;">
+            <div style="font-size:13px; font-weight:600; letter-spacing:0.04em; margin-bottom:6px;">Squad Achievements</div>
+            <div style="font-size:12.5px; color:rgba(20,20,20,0.5); margin-bottom:22px;">Badges earned across your players this season.</div>
+            <div style="display:grid; grid-template-columns:repeat(6,1fr); gap:24px 8px; justify-items:center;">
+              <dc-import name="Badge" kind="flame" accent="#9C1116" accent-dk="#6E0C10" badge-name="Hat-Trick Hero" crit="Kabir Singh" earned="{{ true }}" special="{{ true }}" hint-size="120px,176px"></dc-import>
+              <dc-import name="Badge" kind="lightning" accent="#D23B2F" accent-dk="#8E1F18" badge-name="Thunderstrike" crit="Faris Al Zaabi" earned="{{ true }}" hint-size="120px,176px"></dc-import>
+              <dc-import name="Badge" kind="anchor" accent="#2563EB" accent-dk="#173F9E" badge-name="The Anchor" crit="Ahmed Al Rashidi" earned="{{ true }}" hint-size="120px,176px"></dc-import>
+              <dc-import name="Badge" kind="shield" accent="#15803D" accent-dk="#0B4D24" badge-name="Iron Presence" crit="Ahmed Al Rashidi" earned="{{ true }}" hint-size="120px,176px"></dc-import>
+              <dc-import name="Badge" kind="target" accent="#D97706" accent-dk="#8A4B04" badge-name="Sharpshooter" crit="Kabir Singh" earned="{{ true }}" hint-size="120px,176px"></dc-import>
+              <dc-import name="Badge" kind="summit" accent="#B45309" accent-dk="#6E3206" badge-name="Summit Club" crit="Locked" earned="{{ false }}" hint-size="120px,176px"></dc-import>
+            </div>
+          </div>
+        </sc-if>
+
+      </div>
+    </div>
+  </div>
+
+  <div style="font-size:11px; letter-spacing:0.16em; color:rgba(20,20,20,0.45); text-transform:uppercase;">Coach desktop · mirrors the mobile flow with more visible at once</div>
+
+  <!-- ADD MATCH MODAL -->
+  <sc-if value="{{ addMatchOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute; inset:0; z-index:80; background:rgba(20,20,20,0.5); display:flex; align-items:center; justify-content:center; padding:40px;">
+      <div class="lp-scroll" style="width:640px; max-width:100%; max-height:100%; overflow-y:auto; background:#FAF7F4; border-radius:18px; box-shadow:0 40px 80px -30px rgba(0,0,0,0.6);">
+        <div style="position:sticky; top:0; background:#FAF7F4; display:flex; align-items:center; justify-content:space-between; padding:20px 22px; border-bottom:1px solid #ECE7E1; z-index:2;">
+          <div><div style="font-family:'Bebas Neue',sans-serif; font-size:24px; letter-spacing:0.02em;">Log a Match</div><div style="font-size:12px; color:rgba(20,20,20,0.5); margin-top:2px;">{{ amModeSub }}</div></div>
+          <button onClick="{{ closeAddMatch }}" style="width:32px; height:32px; border:none; border-radius:50%; background:#F1ECE6; cursor:pointer; display:flex; align-items:center; justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6E6A64" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+        </div>
+        <div style="padding:22px;">
+          <!-- new vs previous toggle -->
+          <div style="display:flex; gap:6px; background:#F1ECE6; border-radius:11px; padding:4px; margin-bottom:18px;">
+            <button onClick="{{ amNewTab }}" style="flex:1; height:38px; border:none; border-radius:8px; cursor:pointer; font-family:'Jost',sans-serif; font-size:12.5px; font-weight:600; background:{{ amNewBg }}; color:{{ amNewFg }};">New match</button>
+            <button onClick="{{ amPrevTab }}" style="flex:1; height:38px; border:none; border-radius:8px; cursor:pointer; font-family:'Jost',sans-serif; font-size:12.5px; font-weight:600; background:{{ amPrevBg }}; color:{{ amPrevFg }};">Previous match</button>
+          </div>
+          <sc-if value="{{ amIsPrev }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; align-items:flex-start; gap:9px; margin-bottom:16px; padding:12px 14px; background:#FBF1DD; border:1px solid #EAD7AE; border-radius:11px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A9791B" stroke-width="2" style="flex:none; margin-top:1px;"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg><span style="font-size:12px; line-height:1.5; color:#6E4E12;">Backfilling an <strong>older match</strong> — pick its real date below. It joins the season record like any other.</span></div>
+          </sc-if>
+          <!-- match details -->
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:13px;">
+            <div><div style="font-size:11px; font-weight:600; color:rgba(20,20,20,0.5); margin-bottom:6px;">Opponent</div><div style="height:46px; border:1px solid #ECE7E1; border-radius:11px; background:#fff; display:flex; align-items:center; padding:0 13px; font-size:13.5px;">vs Falcons CC</div></div>
+            <div><div style="font-size:11px; font-weight:600; color:rgba(20,20,20,0.5); margin-bottom:6px;">Date</div><div style="height:46px; border:1px solid #ECE7E1; border-radius:11px; background:#fff; display:flex; align-items:center; padding:0 13px; font-size:13.5px;">{{ amDate }}</div></div>
+            <div><div style="font-size:11px; font-weight:600; color:rgba(20,20,20,0.5); margin-bottom:6px;">Group</div><div style="height:46px; border:1px solid #ECE7E1; border-radius:11px; background:#fff; display:flex; align-items:center; justify-content:space-between; padding:0 13px; font-size:13.5px;">Under 16<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A938A" stroke-width="2"><path d="m6 9 6 6 6-6"></path></svg></div></div>
+            <div><div style="font-size:11px; font-weight:600; color:rgba(20,20,20,0.5); margin-bottom:6px;">Venue</div><div style="height:46px; border:1px solid #ECE7E1; border-radius:11px; background:#fff; display:flex; align-items:center; padding:0 13px; font-size:13.5px;">Danube Sports City</div></div>
+            <div><div style="font-size:11px; font-weight:600; color:rgba(20,20,20,0.5); margin-bottom:6px;">Result</div><div style="height:46px; border:2px solid #1F8A4C; border-radius:11px; background:#E7F4EC; display:flex; align-items:center; justify-content:space-between; padding:0 13px; font-size:13.5px; font-weight:600; color:#1F6E40;">Won<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1F8A4C" stroke-width="2"><path d="m6 9 6 6 6-6"></path></svg></div></div>
+            <div><div style="font-size:11px; font-weight:600; color:rgba(20,20,20,0.5); margin-bottom:6px;">Team score</div><div style="height:46px; border:1px solid #ECE7E1; border-radius:11px; background:#fff; display:flex; align-items:center; padding:0 13px; font-size:13.5px;">176/7</div></div>
+          </div>
+          <!-- per-player stats -->
+          <div style="font-size:11px; font-weight:600; letter-spacing:0.1em; color:rgba(20,20,20,0.5); text-transform:uppercase; margin:18px 0 10px;">Player Stats &amp; Decisions</div>
+          <div style="border:1px solid #ECE7E1; border-radius:12px; overflow:hidden;">
+            <div style="display:flex; padding:9px 13px; background:#FAF7F4; border-bottom:1px solid #ECE7E1; font-size:9.5px; font-weight:600; letter-spacing:0.06em; color:rgba(20,20,20,0.45); text-transform:uppercase;"><span style="flex:1.4;">Player</span><span style="width:42px; text-align:center;">Pos</span><span style="width:54px; text-align:center;">Runs</span><span style="width:48px; text-align:center;">Wkts</span><span style="flex:1;">Note / why</span></div>
+            <sc-for list="{{ amRows }}" as="r" hint-placeholder-count="4">
+              <div style="display:flex; align-items:center; padding:9px 13px; border-bottom:1px solid #F3EEE8; font-size:12.5px;">
+                <span style="flex:1.4; display:flex; align-items:center; gap:9px; min-width:0;"><span style="width:28px; height:28px; flex:none; border-radius:50%; background:#F3EEE8; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:11px; color:#6E0C10;">{{ r.av }}</span><span style="font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ r.name }}</span></span>
+                <span style="width:42px; text-align:center;">{{ r.pos }}</span>
+                <span style="width:54px; text-align:center; font-family:'Bebas Neue',sans-serif; font-size:16px;">{{ r.runs }}</span>
+                <span style="width:48px; text-align:center; font-family:'Bebas Neue',sans-serif; font-size:16px;">{{ r.wkts }}</span>
+                <span style="flex:1; color:rgba(20,20,20,0.55); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ r.note }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="font-size:11px; color:rgba(20,20,20,0.45); margin-top:9px;">A short note per player records the decision &amp; why — your evidence record if a parent asks later.</div>
+          <div style="display:flex; gap:11px; margin-top:20px;">
+            <button onClick="{{ closeAddMatch }}" style="flex:1; height:48px; border:1px solid #ECE7E1; border-radius:12px; background:#fff; color:rgba(20,20,20,0.6); font-family:'Jost',sans-serif; font-size:12.5px; font-weight:600; cursor:pointer;">Cancel</button>
+            <button onClick="{{ saveMatch }}" style="flex:1.8; height:48px; border:none; border-radius:12px; background:linear-gradient(180deg,#b1141a,#7c0f14); color:#FAF7F4; font-family:'Jost',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer;">{{ amSaveLabel }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ADD 1-ON-1 BLOCK MODAL (self-coordinated) -->
+  <sc-if value="{{ addBlockOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute; inset:0; z-index:80; background:rgba(20,20,20,0.5); display:flex; align-items:center; justify-content:center; padding:40px;">
+      <div class="lp-scroll" style="width:520px; max-width:100%; max-height:100%; overflow-y:auto; background:#FAF7F4; border-radius:18px; box-shadow:0 40px 80px -30px rgba(0,0,0,0.6);">
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:20px 22px; border-bottom:1px solid #ECE7E1;">
+          <div><div style="font-family:'Bebas Neue',sans-serif; font-size:24px; letter-spacing:0.02em;">Add 1-on-1 Block</div><div style="font-size:12px; color:rgba(20,20,20,0.5); margin-top:2px;">Self-coordinated · you track payment</div></div>
+          <button onClick="{{ closeAddBlock }}" style="width:32px; height:32px; border:none; border-radius:50%; background:#F1ECE6; cursor:pointer; display:flex; align-items:center; justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6E6A64" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+        </div>
+        <div style="padding:22px;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:13px;">
+            <div><div style="font-size:11px; font-weight:600; color:rgba(20,20,20,0.5); margin-bottom:6px;">Player</div><div style="height:46px; border:1px solid #ECE7E1; border-radius:11px; background:#fff; display:flex; align-items:center; padding:0 13px; font-size:13.5px;">Ahmed Al Rashidi</div></div>
+            <div><div style="font-size:11px; font-weight:600; color:rgba(20,20,20,0.5); margin-bottom:6px;">Total sessions</div><div style="height:46px; border:1px solid #ECE7E1; border-radius:11px; background:#fff; display:flex; align-items:center; justify-content:space-between; padding:0 13px; font-size:13.5px;">8<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A938A" stroke-width="2"><path d="m6 9 6 6 6-6"></path></svg></div></div>
+          </div>
+          <div style="margin-top:13px;"><div style="font-size:11px; font-weight:600; color:rgba(20,20,20,0.5); margin-bottom:6px;">Focus</div><div style="height:46px; border:1px solid #ECE7E1; border-radius:11px; background:#fff; display:flex; align-items:center; padding:0 13px; font-size:13.5px;">Batting — cover drive</div></div>
+          <div style="font-size:11px; font-weight:600; color:rgba(20,20,20,0.5); margin:16px 0 8px;">Payment</div>
+          <div style="display:flex; gap:9px; margin-bottom:9px;">
+            <button onClick="{{ blkPaid }}" style="flex:1; height:46px; border:{{ blkPaidBorder }}; border-radius:11px; background:{{ blkPaidBg }}; color:{{ blkPaidInk }}; font-family:'Jost',sans-serif; font-size:12.5px; font-weight:600; cursor:pointer;">Paid</button>
+            <button onClick="{{ blkUnpaid }}" style="flex:1.4; height:46px; border:{{ blkUnpaidBorder }}; border-radius:11px; background:{{ blkUnpaidBg }}; color:{{ blkUnpaidInk }}; font-family:'Jost',sans-serif; font-size:12.5px; font-weight:600; cursor:pointer;">Not paid yet — still attending</button>
+          </div>
+          <div style="display:flex; align-items:flex-start; gap:9px; padding:12px 14px; background:#EAF1FB; border:1px solid #C3D7F2; border-radius:11px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" style="flex:none; margin-top:1px;"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5"></path><path d="M12 16h.01"></path></svg><span style="font-size:12px; line-height:1.5; color:#3D5A8A;">Sessions count and run even if unpaid — the block shows a "payment pending" flag so you &amp; admin can chase it later. No child is turned away.</span></div>
+          <div style="display:flex; gap:11px; margin-top:20px;">
+            <button onClick="{{ closeAddBlock }}" style="flex:1; height:48px; border:1px solid #ECE7E1; border-radius:12px; background:#fff; color:rgba(20,20,20,0.6); font-family:'Jost',sans-serif; font-size:12.5px; font-weight:600; cursor:pointer;">Cancel</button>
+            <button onClick="{{ saveBlock }}" style="flex:1.8; height:48px; border:none; border-radius:12px; background:linear-gradient(180deg,#b1141a,#7c0f14); color:#FAF7F4; font-family:'Jost',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer;">Create Block</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- GROUP SESSION FEEDBACK MODAL -->
+  <sc-if value="{{ gfOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute; inset:0; z-index:80; background:rgba(20,20,20,0.5); display:flex; align-items:center; justify-content:center; padding:40px;">
+      <div style="width:520px; max-width:100%; background:#FAF7F4; border-radius:18px; box-shadow:0 40px 80px -30px rgba(0,0,0,0.6);">
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:20px 22px; border-bottom:1px solid #ECE7E1;">
+          <div><div style="font-family:'Bebas Neue',sans-serif; font-size:24px; letter-spacing:0.02em;">Session Feedback</div><div style="font-size:12px; color:rgba(20,20,20,0.5); margin-top:2px;">Under 16 · a quick note for the squad's parents</div></div>
+          <button onClick="{{ closeGf }}" style="width:32px; height:32px; border:none; border-radius:50%; background:#F1ECE6; cursor:pointer; display:flex; align-items:center; justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6E6A64" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+        </div>
+        <div style="padding:22px;">
+          <div style="display:flex; align-items:center; gap:8px; padding:10px 13px; background:#E7F4EC; border-radius:11px; margin-bottom:16px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1F8A4C" stroke-width="3"><path d="M20 6 9 17l-5-5"></path></svg><span style="font-size:12px; font-weight:600; color:#1F6E40;">Attendance submitted to admin</span></div>
+          <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"></path><circle cx="12" cy="12" r="3.2" fill="#C9A84C" stroke="none"></circle></svg><span style="font-size:9.5px; font-weight:700; letter-spacing:0.14em; color:#937328; text-transform:uppercase;">Group session feedback · optional</span></div>
+          <div style="font-size:12.5px; line-height:1.5; color:rgba(20,20,20,0.6); margin-bottom:11px;">A general note on what the squad worked on today — Loop polishes it and sends to all attending parents.</div>
+          <textarea value="{{ gfDraft }}" onInput="{{ onGfDraft }}" placeholder="e.g. back-foot defence + running between wickets, good intensity" style="width:100%; height:104px; border:1px solid #ECE7E1; border-radius:12px; background:#fff; padding:12px; font-family:'Jost',sans-serif; font-size:13.5px; line-height:1.5; color:#141414; resize:none; outline:none;"></textarea>
+          <button onClick="{{ gfGenerate }}" style="width:100%; height:44px; margin-top:11px; border:1px solid #C9A84C; border-radius:11px; background:rgba(201,168,76,0.1); color:#937328; font-family:'Jost',sans-serif; font-size:12px; font-weight:600; cursor:pointer;">✨ {{ gfGenLabel }}</button>
+          <div style="display:flex; gap:11px; margin-top:18px;">
+            <button onClick="{{ gfSkip }}" style="flex:1; height:48px; border:1px solid #ECE7E1; border-radius:12px; background:#fff; color:rgba(20,20,20,0.6); font-family:'Jost',sans-serif; font-size:12.5px; font-weight:600; cursor:pointer;">Skip</button>
+            <button onClick="{{ gfSend }}" style="flex:1.8; height:48px; border:none; border-radius:12px; background:#25D366; color:#04331c; font-family:'Jost',sans-serif; font-size:12.5px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer;">Send to Parents</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed; bottom:28px; left:50%; transform:translateX(-50%); z-index:90; display:flex; align-items:center; gap:11px; background:#141414; color:#FAF7F4; padding:14px 20px; border-radius:13px; box-shadow:0 18px 40px -16px rgba(0,0,0,0.6);">
+      <span style="width:26px; height:26px; border-radius:50%; background:#C9A84C; display:flex; align-items:center; justify-content:center;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3A2A06" stroke-width="3"><path d="M20 6 9 17l-5-5"></path></svg></span>
+      <span style="font-size:13px; font-weight:500;">{{ toast }}</span>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    view: 'home',
+    lbGroup: 'All', lbAge: 'All', lbStat: 'runs',
+    matchSearch: '', matchResult: 'All', openMatchId: null, toast: '', histPlayerId: null, matchSub: 'log', payState: {}, addMatchOpen: false, amMode: 'new',
+    marks: { p1: 'present', p3: 'present', p5: 'late', p2: null, p4: null, p6: null, p7: null },
+    reportName: 'Ahmed Al Rashidi', attDayOffset: 0, attBatch: 'b1', addBlockOpen: false, blkPay: 'unpaid', gfOpen: false, gfDraft: '', evDraft: '',
+  };
+
+  BATCHES = [
+    { id: 'b1', label: 'Elite Evening', title: 'Elite · Central Wicket', time: '4:45–7:15 PM' },
+    { id: 'b2', label: 'Launch Pad / Level Up', title: 'Launch Pad · Nets', time: '4:30–6:00 PM' },
+    { id: 'b3', label: 'Elite Batch 2', title: 'Advanced · Match Sim', time: '6:30–9:00 PM' },
+    { id: 'b4', label: 'Custom / one-off', title: 'Custom session', time: 'Custom time' },
+  ];
+  attDateBatchVals() {
+    const off = this.state.attDayOffset || 0;
+    const d = new Date(2026, 5, 18); d.setDate(d.getDate() + off);
+    const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'], mons = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const label = off === 0 ? 'Today · ' + days[d.getDay()] + ' ' + d.getDate() + ' ' + mons[d.getMonth()] : days[d.getDay()] + ' ' + d.getDate() + ' ' + mons[d.getMonth()];
+    const atToday = off >= 0;
+    const b = this.BATCHES.find(x => x.id === this.state.attBatch) || this.BATCHES[0];
+    return { attDateLabel: label, attDateFull: days[d.getDay()] + ' ' + d.getDate() + ' ' + mons[d.getMonth()] + ' 2026',
+      attNextBorder: atToday ? '#F1ECE6' : '#ECE7E1', attNextInk: atToday ? '#D9CFC4' : '#9C1116', attNextCursor: atToday ? 'default' : 'pointer',
+      attSessionTitle: b.title + ' · ' + b.time,
+      attBatches: this.BATCHES.map(x => ({ label: x.label, pick: () => this.setState({ attBatch: x.id }),
+        bg: x.id === this.state.attBatch ? '#9C1116' : '#fff', fg: x.id === this.state.attBatch ? '#fff' : 'rgba(20,20,20,0.6)', border: x.id === this.state.attBatch ? '#9C1116' : '#ECE7E1' })) };
+  }
+
+  PLAYERS = [
+    { id: 'p1', name: 'Ahmed Al Rashidi', av: 'AA', meta: 'Under 16 · Top order' },
+    { id: 'p2', name: 'Rayan Fernandez', av: 'RF', meta: 'Under 16 · All-rounder' },
+    { id: 'p3', name: 'Kabir Singh', av: 'KS', meta: 'Under 16 · Pace' },
+    { id: 'p4', name: 'Mohammed Irfan', av: 'MI', meta: 'Under 16 · Keeper' },
+    { id: 'p5', name: 'Faris Al Zaabi', av: 'FZ', meta: 'Under 16 · Opener' },
+    { id: 'p6', name: 'Zayd Khan', av: 'ZK', meta: 'Under 16 · Spin' },
+    { id: 'p7', name: 'Hassan Mahmood', av: 'HM', meta: 'Under 16 · Middle order' },
+  ];
+  PKGS = [
+    { id: 'pp1', first: 'Ahmed Al Rashidi', focus: 'Cover drive · Playing spin', used: 3, total: 8 },
+    { id: 'pp2', first: 'Faris Al Zaabi', focus: 'Opening tempo · Pull control', used: 2, total: 6 },
+    { id: 'pp3', first: 'Kabir Singh', focus: 'Yorkers at death · Pace', used: 5, total: 10 },
+  ];
+  RANK = [
+    { av: 'FZ', name: 'Faris Al Zaabi', group: 'Advanced', ageCat: 'U16', avg: 42.0, runs: 294, wkts: 2, sr: 138 },
+    { av: 'AA', name: 'Ahmed Al Rashidi', group: 'Under 16', ageCat: 'U16', avg: 35.5, runs: 213, wkts: 4, sr: 121 },
+    { av: 'KS', name: 'Kabir Singh', group: 'Under 16', ageCat: 'U16', avg: 24.3, runs: 146, wkts: 11, sr: 108 },
+    { av: 'RF', name: 'Rayan Fernandez', group: 'Juniors', ageCat: 'U14', avg: 24.0, runs: 120, wkts: 6, sr: 96 },
+    { av: 'MI', name: 'Mohammed Irfan', group: 'Juniors', ageCat: 'U12', avg: 18.5, runs: 74, wkts: 0, sr: 88 },
+    { av: 'ZK', name: 'Zayd Khan', group: 'Under 16', ageCat: 'U14', avg: 16.0, runs: 88, wkts: 7, sr: 112 },
+  ];
+  PLAYER_HISTORY = {
+    p1: { av: 'AA', name: 'Ahmed Al Rashidi', totRuns: '213', matches: '6', avg: '35.5', totWkts: '4', history: [
+      { match: 'vs Green Tigers', date: '1 Jun', pos: '3', role: 'Anchor the chase', runs: '103', balls: '61', out: 'not out', note: 'Promoted to 3 to anchor the chase — rewarded with a century.' },
+      { match: 'vs Blue Hawks', date: '9 Jun', pos: '3', role: 'Top order', runs: '41', balls: '33', out: 'b Sharma', note: '' },
+      { match: 'vs Falcons', date: '18 May', pos: '4', role: 'Rebuild after early wickets', runs: '29', balls: '31', out: 'c mid-off', note: 'Dropped to 4 that day to steady a wobble — did the job.' } ] },
+    p5: { av: 'FZ', name: 'Faris Al Zaabi', totRuns: '294', matches: '6', avg: '42.0', totWkts: '2', history: [
+      { match: 'vs Blue Hawks', date: '9 Jun', pos: '1', role: 'Set the tempo', runs: '88', balls: '52', out: 'c & b Khan', note: 'Opened — his tempo sets our innings, backed to bat through.' },
+      { match: 'vs Sharjah Stars', date: '24 May', pos: '1', role: 'Open', runs: '34', balls: '30', out: 'lbw Raza', note: '' } ] },
+    p3: { av: 'KS', name: 'Kabir Singh', totRuns: '146', matches: '6', avg: '24.3', totWkts: '11', history: [
+      { match: 'vs Sharjah Stars', date: '24 May', pos: '8', role: 'Strike bowler', runs: '23', balls: '19', out: 'c keeper', note: 'Floated up the order chasing quick runs late.' },
+      { match: 'vs Blue Hawks', date: '9 Jun', pos: '7', role: 'Death bowling', runs: '6', balls: '4', out: 'not out', note: 'Held back to bowl at death — value is with the ball here.' } ] },
+    p6: { av: 'ZK', name: 'Zayd Khan', totRuns: '88', matches: '5', avg: '16.0', totWkts: '7', history: [
+      { match: 'vs Blue Hawks', date: '9 Jun', pos: '6', role: 'Spin all-rounder', runs: '12', balls: '9', out: 'not out', note: '' } ] },
+    p2: { av: 'RF', name: 'Rayan Fernandez', totRuns: '120', matches: '5', avg: '24.0', totWkts: '6', history: [
+      { match: 'vs Green Tigers', date: '1 Jun', pos: '4', role: 'All-rounder', runs: '28', balls: '24', out: 'run out', note: '' } ] },
+    p4: { av: 'MI', name: 'Mohammed Irfan', totRuns: '74', matches: '5', avg: '18.5', totWkts: '0', history: [
+      { match: 'vs Sharjah Stars', date: '24 May', pos: '5', role: 'Keeper-bat', runs: '18', balls: '22', out: 'b Khan', note: 'Moved to 5 to face spin — handled it better than at 7.' } ] },
+  };
+
+  LB_OLD_RANK = [
+    { rank: '1', av: 'FZ', name: 'Faris Al Zaabi', line: 'Avg 42.0 · SR 138', runs: '294' },
+    { rank: '2', av: 'AA', name: 'Ahmed Al Rashidi', line: 'Avg 35.5 · SR 121', runs: '213' },
+    { rank: '3', av: 'KS', name: 'Kabir Singh', line: '11 wkts · Econ 6.2', runs: '146' },
+    { rank: '4', av: 'RF', name: 'Rayan Fernandez', line: 'Avg 24.0 · 6 wkts', runs: '120' },
+  ];
+  MATCHES = [
+    { id: 'm1', title: 'vs Blue Hawks', meta: 'Under 16 · Danube', date: '9 Jun', result: 'Won', score: '184/6', oppScore: '171/9', motm: 'Faris Al Zaabi', motmAv: 'FZ', motmLine: '88 off 52 · 2 catches', runRate: '9.2',
+      resultLine: 'Won by 13 runs · batted first', summary: 'A commanding total set up by Faris\u2019 88, then disciplined death bowling from Kabir held the chase. Two moment badges earned.',
+      performers: [ { id: 'p5', av: 'FZ', name: 'Faris Al Zaabi', pos: 1, runs: '88', balls: '52', out: 'c & b Khan', wkts: '0', note: 'Opened — his tempo sets our innings, backed to bat through.', badge: '\u26a1' }, { id: 'p1', av: 'AA', name: 'Ahmed Al Rashidi', pos: 3, runs: '41', balls: '33', out: 'b Sharma', wkts: '1', note: '', badge: '' }, { id: 'p3', av: 'KS', name: 'Kabir Singh', pos: 7, runs: '6', balls: '4', out: 'not out', wkts: '3', note: 'Held back to bowl at death — value is with the ball here.', badge: '\ud83c\udfaf' }, { id: 'p6', av: 'ZK', name: 'Zayd Khan', pos: 6, runs: '12', balls: '9', out: 'not out', wkts: '2', note: '', badge: '' } ] },
+    { id: 'm2', title: 'vs Green Tigers', meta: 'Under 16 · DSC', date: '1 Jun', result: 'Won', score: '152/4', oppScore: '149/8', motm: 'Ahmed Al Rashidi', motmAv: 'AA', motmLine: '103* off 61', runRate: '7.6',
+      resultLine: 'Won by 3 runs · chased down', summary: 'Ahmed\u2019s unbeaten century carried the chase to the last over. His first Summit Club badge of the season.',
+      performers: [ { id: 'p1', av: 'AA', name: 'Ahmed Al Rashidi', pos: 3, runs: '103', balls: '61', out: 'not out', wkts: '0', note: 'Promoted to 3 to anchor the chase — rewarded with a century.', badge: '\ud83c\udfcf' }, { id: 'p2', av: 'RF', name: 'Rayan Fernandez', pos: 4, runs: '28', balls: '24', out: 'run out', wkts: '2', note: '', badge: '' }, { id: 'p3', av: 'KS', name: 'Kabir Singh', pos: 8, runs: '9', balls: '7', out: 'not out', wkts: '1', note: '', badge: '' } ] },
+    { id: 'm3', title: 'vs Sharjah Stars', meta: 'Advanced · Sharjah', date: '24 May', result: 'Lost', score: '141 a/o', oppScore: '142/4', motm: 'Kabir Singh', motmAv: 'KS', motmLine: '4 wickets · 23 runs', runRate: '7.1',
+      resultLine: 'Lost by 6 wickets · batted first', summary: 'Kabir\u2019s four-for kept it competitive but the batting fell short against a strong Sharjah attack. A learning day for the top order.',
+      performers: [ { id: 'p3', av: 'KS', name: 'Kabir Singh', pos: 8, runs: '23', balls: '19', out: 'c keeper', wkts: '4', note: 'Floated up the order chasing quick runs late.', badge: '\ud83c\udfaf' }, { id: 'p5', av: 'FZ', name: 'Faris Al Zaabi', pos: 1, runs: '34', balls: '30', out: 'lbw Raza', wkts: '0', note: '', badge: '' }, { id: 'p4', av: 'MI', name: 'Mohammed Irfan', pos: 5, runs: '18', balls: '22', out: 'b Khan', wkts: '0', note: 'Moved to 5 to face spin — handled it better than at 7.', badge: '' } ] },
+  ];
+
+  setMark(id, status) { this.setState(s => ({ marks: { ...s.marks, [id]: s.marks[id] === status ? null : status } })); }
+  allPresent() { const m = {}; this.PLAYERS.forEach(p => m[p.id] = 'present'); this.setState({ marks: m }); }
+
+  MATCH_PAYS = [
+    { id: 'mp1', title: 'vs Blue Hawks', meta: 'Under 16 · 9 Jun', fee: 50,
+      rows: [ { id: 'r1', av: 'AA', name: 'Ahmed Al Rashidi', k: 'bank' }, { id: 'r2', av: 'FZ', name: 'Faris Al Zaabi', k: 'cash' }, { id: 'r3', av: 'KS', name: 'Kabir Singh', k: 'screenshot' }, { id: 'r4', av: 'RF', name: 'Rayan Fernandez', k: 'pending' } ] },
+    { id: 'mp2', title: 'vs Sharjah Stars', meta: 'Advanced · 24 May', fee: 60,
+      rows: [ { id: 'r5', av: 'FZ', name: 'Faris Al Zaabi', k: 'bank' }, { id: 'r6', av: 'HM', name: 'Hassan Mahmood', k: 'cash' }, { id: 'r7', av: 'ZK', name: 'Zayd Khan', k: 'pending' } ] },
+  ];
+  setPay(id, k) { this.setState(s => ({ payState: { ...s.payState, [id]: k } })); }
+  payRow(r) {
+    const k = this.state.payState[r.id] || r.k;
+    const map = { bank: { label: '✓ Bank transfer confirmed', ink: '#1F8A4C' }, cash: { label: '✓ Cash collected', ink: '#1F8A4C' }, screenshot: { label: '📸 Screenshot received — confirm', ink: '#A9791B' }, pending: { label: 'Awaiting payment', ink: '#9A938A' } };
+    const paid = k === 'bank' || k === 'cash'; const m = map[k];
+    let btnLabel, css, act;
+    if (paid) { btnLabel = 'Paid'; css = 'background:#E7F4EC;color:#1F8A4C;border:1px solid #C2E2CE;cursor:default;'; act = () => {}; }
+    else if (k === 'screenshot') { btnLabel = 'Confirm Bank'; css = 'background:#9C1116;color:#fff;border:none;cursor:pointer;'; act = () => this.setPay(r.id, 'bank'); }
+    else { btnLabel = 'Collect Cash'; css = 'background:#1F8A4C;color:#fff;border:none;cursor:pointer;'; act = () => this.setPay(r.id, 'cash'); }
+    return { ...r, k, statusLabel: m.label, ink: m.ink, btnLabel, act, btnStyle: 'flex:none;height:32px;padding:0 13px;border-radius:9px;font-family:Jost,sans-serif;font-size:11px;font-weight:600;' + css };
+  }
+
+  btnStyle(active, kind) {
+    const base = 'width:36px;height:36px;border-radius:9px;font-family:Jost,sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;';
+    const map = {
+      p: { on: 'background:#1F8A4C;color:#fff;border:1px solid #1F8A4C;', off: 'background:#fff;color:#1F8A4C;border:1px solid #D6E7DC;' },
+      l: { on: 'background:#C9A84C;color:#fff;border:1px solid #C9A84C;', off: 'background:#fff;color:#A9791B;border:1px solid #EAD7AE;' },
+      a: { on: 'background:#B3261E;color:#fff;border:1px solid #B3261E;', off: 'background:#fff;color:#B3261E;border:1px solid #EFC9C6;' },
+    };
+    return base + (active ? map[kind].on : map[kind].off);
+  }
+
+  renderVals() {
+    const st = this.state, v = st.view;
+    const rows = this.PLAYERS.map(p => {
+      const m = st.marks[p.id];
+      const edge = m === 'present' ? '#1F8A4C' : m === 'late' ? '#C9A84C' : '#ECE7E1';
+      const ring = m === 'present' ? '#1F8A4C' : m === 'late' ? '#C9A84C' : '#E2DACF';
+      return { ...p, edge, ring,
+        pStyle: this.btnStyle(m === 'present', 'p'), lStyle: this.btnStyle(m === 'late', 'l'),
+        setP: () => this.setMark(p.id, 'present'), setL: () => this.setMark(p.id, 'late') };
+    });
+    const vals = Object.values(st.marks);
+    const present = vals.filter(x => x === 'present').length, late = vals.filter(x => x === 'late').length;
+    const total = this.PLAYERS.length, marked = present + late;
+    const circ = 2 * Math.PI * 19;
+
+    const packages = this.PKGS.map(pk => {
+      const c1 = 2 * Math.PI * 29, c2 = 2 * Math.PI * 34;
+      const gold = pk.id === 'pp1';
+      const ringColor = gold ? '#C9A84C' : '#9C1116';
+      return { ...pk, circ: c1, off: c1 * (1 - pk.used / pk.total), circ2: c2, off2: c2 * (1 - pk.used / pk.total),
+        ringColor, remaining: pk.total - pk.used, tagBg: gold ? '#F5ECD3' : '#F6E2E0', tagInk: gold ? '#937328' : '#9C1116',
+        logSession: () => this.setState({ view: 'sessions', reportName: pk.first }) };
+    });
+    const rankings = this.RANK.map((r, i) => ({ ...r, rankColor: i === 0 ? '#C9A84C' : '#141414' }));
+
+    // ===== FIX 7: filterable leaderboard =====
+    const statDef = { avg: ['Batting Average', v => v.avg.toFixed(1), v => v.avg], runs: ['Most Runs', v => String(v.runs), v => v.runs], wkts: ['Wickets', v => String(v.wkts), v => v.wkts], sr: ['Strike Rate', v => String(v.sr), v => v.sr] };
+    const curStat = statDef[st.lbStat] || statDef.runs;
+    const mkChips = (arr, cur, key) => arr.map(o => ({ label: o, pick: () => this.setState({ [key]: o }),
+      bg: o === cur ? '#9C1116' : '#fff', fg: o === cur ? '#fff' : 'rgba(20,20,20,0.6)', border: o === cur ? '#9C1116' : '#ECE7E1' }));
+    const lbGroups = mkChips(['All', 'Under 16', 'Advanced', 'Juniors'], st.lbGroup, 'lbGroup');
+    const lbAges = mkChips(['All', 'U12', 'U14', 'U16'], st.lbAge, 'lbAge');
+    const lbStats = [['avg', 'Batting Avg'], ['runs', 'Most Runs'], ['wkts', 'Wickets'], ['sr', 'Strike Rate']].map(([id, label]) => ({ label, pick: () => this.setState({ lbStat: id }),
+      bg: id === st.lbStat ? '#141414' : '#fff', fg: id === st.lbStat ? '#fff' : 'rgba(20,20,20,0.6)', border: id === st.lbStat ? '#141414' : '#ECE7E1' }));
+    const lbFiltered = this.RANK
+      .filter(p => (st.lbGroup === 'All' || p.group === st.lbGroup) && (st.lbAge === 'All' || p.ageCat === st.lbAge))
+      .map(p => ({ ...p, value: curStat[1](p), sortVal: curStat[2](p), line: 'Avg ' + p.avg.toFixed(1) + ' · ' + p.wkts + ' wkts · SR ' + p.sr }))
+      .sort((a, b) => b.sortVal - a.sortVal);
+    const leaderboard = lbFiltered.map((p, i) => ({ ...p, rank: String(i + 1), rankColor: i === 0 ? '#C9A84C' : '#141414' }));
+    const medals = ['#C9A84C', '#9CA3AF', '#B45309'];
+    const rings = ['linear-gradient(145deg,#EFDC97,#C9A84C)', 'linear-gradient(145deg,#D6DAE0,#9CA3AF)', 'linear-gradient(145deg,#D9A56A,#B45309)'];
+    const avSizes = ['76px', '64px', '64px'];
+    const barHs = ['52px', '34px', '22px'];
+    const order = [1, 0, 2];
+    const podium = order.filter(idx => lbFiltered[idx]).map(idx => { const p = lbFiltered[idx]; return {
+      name: p.name.split(' ')[0], av: p.av, value: p.value, place: String(idx + 1),
+      medal: medals[idx], ring: rings[idx], av_size: avSizes[idx], barH: barHs[idx],
+      barBg: idx === 0 ? '#C9A84C' : '#E7E0D4' }; });
+    // ===== MATCHES: filter + per-match detail =====
+    const mq = (st.matchSearch || '').trim().toLowerCase();
+    // match payments
+    let mpColl = 0, mpScreen = 0, mpPend = 0;
+    const mPays = this.MATCH_PAYS.map(mp => {
+      const rows = mp.rows.map(r => this.payRow(r));
+      const paidCount = rows.filter(r => r.k === 'bank' || r.k === 'cash').length;
+      const collected = paidCount * mp.fee, total = mp.rows.length * mp.fee;
+      mpColl += collected;
+      mpScreen += rows.filter(r => r.k === 'screenshot').length * mp.fee;
+      mpPend += rows.filter(r => r.k === 'pending').length * mp.fee;
+      return { ...mp, rows, collected, total, barW: Math.round((collected / total) * 100) + '%' };
+    });
+    const mPaySummary = { collected: mpColl + ' AED', screenshot: mpScreen + ' AED', pending: mpPend + ' AED' };
+    const mResultFilters = ['All', 'Won', 'Lost'].map(o => ({ label: o, pick: () => this.setState({ matchResult: o }),
+      bg: o === st.matchResult ? '#9C1116' : '#fff', fg: o === st.matchResult ? '#fff' : 'rgba(20,20,20,0.6)', border: o === st.matchResult ? '#9C1116' : '#ECE7E1' }));
+    const matchesFiltered = this.MATCHES
+      .filter(m => (st.matchResult === 'All' || m.result === st.matchResult) && (!mq || (m.title + ' ' + m.meta).toLowerCase().includes(mq)));
+    const matches = matchesFiltered.map(m => ({ ...m, resultInk: m.result === 'Won' ? '#1F8A4C' : '#B3261E', resultBg: m.result === 'Won' ? '#E7F4EC' : '#FBE9E8', open: () => this.setState({ openMatchId: m.id }) }));
+    const openMatch = this.MATCHES.find(m => m.id === st.openMatchId);
+    const md = openMatch ? { ...openMatch,
+      heroBg: openMatch.result === 'Won' ? 'linear-gradient(135deg,#1F6E40,#0B4D24)' : 'linear-gradient(135deg,#6E0C10,#3a0a14)',
+      performers: openMatch.performers.map(p => ({ ...p, open: () => this.setState({ histPlayerId: p.id }) })),
+      badgeCount: openMatch.performers.filter(p => p.badge).length } : {};
+    const ph = this.PLAYER_HISTORY[st.histPlayerId] || null;
+
+    const titles = {
+      home: ['Dashboard', 'Wednesday · 13 June'],
+      sessions: ['1-on-1 Sessions', 'Assigned packages & post-session reports'],
+      attend: ['Attendance', 'Mark today\u2019s squad'],
+      matches: ['Matches', 'Season match log'],
+      rank: ['Rankings', 'Squad performance this season'],
+      badges: ['Achievements', 'Squad badges earned'],
+    };
+    const T = titles[v] || ['', ''];
+
+    const navS = (id) => ({ bg: v === id ? '#9C1116' : 'transparent', fg: v === id ? '#FAF7F4' : 'rgba(250,247,244,0.62)' });
+    const s = { home: navS('home'), sessions: navS('sessions'), attend: navS('attend'), matches: navS('matches'), rank: navS('rank'), badges: navS('badges') };
+
+    const now = new Date(); const h = now.getHours();
+    const greet = h < 12 ? 'Good morning, Zanish' : h < 17 ? 'Good afternoon, Zanish' : 'Good evening, Zanish';
+
+    return {
+      isHome: v === 'home', isSessions: v === 'sessions', isAtt: v === 'attend', isMatches: v === 'matches', isRankings: v === 'rank', isBadges: v === 'badges',
+      viewTitle: T[0], viewSub: T[1],
+      greeting: greet, dateLabel: 'Wednesday · 13 June',
+      welcomeLine: '142 sessions logged this season. That\u2019s dedication, recorded.',
+      goHome: () => this.setState({ view: 'home' }), goSessions: () => this.setState({ view: 'sessions' }),
+      goAttendance: () => this.setState({ view: 'attend' }), goMatches: () => this.setState({ view: 'matches' }),
+      goRankings: () => this.setState({ view: 'rank' }), goBadges: () => this.setState({ view: 'badges' }),
+      allPresent: () => this.allPresent(), submitAtt: () => this.setState({ gfOpen: true }),
+      gfOpen: st.gfOpen, closeGf: () => this.setState({ gfOpen: false, gfDraft: '' }),
+      gfDraft: st.gfDraft || '', onGfDraft: (e) => this.setState({ gfDraft: e.target.value }),
+      gfGenLabel: (st.gfDraft || '').length > 60 ? 'Rewrite with AI' : 'Polish with AI',
+      gfGenerate: () => { const n = (st.gfDraft || '').trim() || 'a strong, focused session'; this.setState({ gfDraft: 'Assalamu Alaikum 👋 Great Under 16 session today — we worked on ' + n + '. The group showed real intensity and good attitude. Keep encouraging them at home! — Coach Zanish, Loop' }); },
+      gfSend: () => { this.setState({ gfOpen: false, gfDraft: '', toast: 'Attendance submitted · feedback sent to attending parents' }); setTimeout(() => this.setState({ toast: '' }), 2600); },
+      gfSkip: () => { this.setState({ gfOpen: false, gfDraft: '', toast: 'Attendance submitted to admin' }); setTimeout(() => this.setState({ toast: '' }), 2600); },
+      openAddBlock: () => this.setState({ addBlockOpen: true, blkPay: 'unpaid' }),
+      closeAddBlock: () => this.setState({ addBlockOpen: false }),
+      addBlockOpen: st.addBlockOpen,
+      blkPaid: () => this.setState({ blkPay: 'paid' }), blkUnpaid: () => this.setState({ blkPay: 'unpaid' }),
+      blkPaidBg: st.blkPay === 'paid' ? '#E7F4EC' : '#fff', blkPaidInk: st.blkPay === 'paid' ? '#1F8A4C' : 'rgba(20,20,20,0.55)', blkPaidBorder: st.blkPay === 'paid' ? '2px solid #1F8A4C' : '1px solid #ECE7E1',
+      blkUnpaidBg: st.blkPay === 'unpaid' ? '#FBF1DD' : '#fff', blkUnpaidInk: st.blkPay === 'unpaid' ? '#A9791B' : 'rgba(20,20,20,0.55)', blkUnpaidBorder: st.blkPay === 'unpaid' ? '2px solid #C9A84C' : '1px solid #ECE7E1',
+      saveBlock: () => { this.setState({ addBlockOpen: false, toast: 'Block created' + (st.blkPay === 'unpaid' ? ' · payment pending' : '') }); setTimeout(() => this.setState({ toast: '' }), 2400); },
+      attPrevDay: () => this.setState(s => ({ attDayOffset: (s.attDayOffset || 0) - 1 })),
+      attNextDay: () => this.setState(s => ({ attDayOffset: Math.min(0, (s.attDayOffset || 0) + 1) })),
+      ...this.attDateBatchVals(),
+      att: { rows, present, late, total, marked, circ, markedOff: circ * (1 - marked / total) },
+      packages, rankings, matches, s,
+      matchListShow: !openMatch && st.matchSub === 'log', matchDetailShow: !!openMatch && st.matchSub === 'log', md,
+      mLogTab: () => this.setState({ matchSub: 'log' }), mPayTab: () => this.setState({ matchSub: 'pay', openMatchId: null }),
+      mIsLog: st.matchSub === 'log', mIsPay: st.matchSub === 'pay',
+      mLogBg: st.matchSub === 'log' ? '#fff' : 'transparent', mLogFg: st.matchSub === 'log' ? '#9C1116' : 'rgba(20,20,20,0.5)',
+      mPayBg: st.matchSub === 'pay' ? '#fff' : 'transparent', mPayFg: st.matchSub === 'pay' ? '#9C1116' : 'rgba(20,20,20,0.5)',
+      matchPays: mPays, payCollected: mPaySummary.collected, payScreenshot: mPaySummary.screenshot, payPending: mPaySummary.pending,
+      matchEmpty: matches.length === 0,
+      matchSearch: st.matchSearch, matchClearShow: st.matchSearch ? 'block' : 'none',
+      onMatchSearch: (e) => this.setState({ matchSearch: e.target.value }),
+      clearMatchSearch: () => this.setState({ matchSearch: '' }),
+      matchResultFilters: mResultFilters,
+      openMatch: (id) => this.setState({ openMatchId: id }),
+      closeMatch: () => this.setState({ openMatchId: null }),
+      playerHistShow: !!ph, ph: ph || {}, closePlayerHist: () => this.setState({ histPlayerId: null, evDraft: '' }),
+      evDraft: st.evDraft || '', onEvDraft: (e) => this.setState({ evDraft: e.target.value }),
+      evGenLabel: (st.evDraft || '').length > 50 ? 'Rewrite professionally' : 'Rephrase professionally',
+      evGenerate: () => { const nm = (ph ? ph.name.split(' ')[0] : 'your son'); const r = (st.evDraft || '').trim() || 'we made a tactical call for the team that day'; this.setState({ evDraft: 'Assalamu Alaikum 👋 Thanks for your question about ' + nm + '. ' + r.charAt(0).toUpperCase() + r.slice(1) + '. His record this season — ' + (ph ? ph.totRuns + ' runs across ' + ph.matches + ' matches at an average of ' + ph.avg : '') + ' — shows steady progress, and every selection is made to develop him and give the team its best balance. Always happy to talk it through. — Coach Zanish, Loop' }); },
+      evSend: () => { this.setState({ histPlayerId: null, evDraft: '', toast: 'Evidence report sent to parent' }); setTimeout(() => this.setState({ toast: '' }), 2600); },
+      exportMatches: () => { this.setState({ toast: 'Exported ' + matches.length + ' matches to Excel' }); setTimeout(() => this.setState({ toast: '' }), 2400); },
+      openAddMatch: () => this.setState({ addMatchOpen: true, amMode: 'new' }),
+      closeAddMatch: () => this.setState({ addMatchOpen: false }),
+      addMatchOpen: st.addMatchOpen,
+      amNewTab: () => this.setState({ amMode: 'new' }), amPrevTab: () => this.setState({ amMode: 'prev' }),
+      amIsNew: st.amMode === 'new', amIsPrev: st.amMode === 'prev',
+      amNewBg: st.amMode === 'new' ? '#fff' : 'transparent', amNewFg: st.amMode === 'new' ? '#9C1116' : 'rgba(20,20,20,0.5)',
+      amPrevBg: st.amMode === 'prev' ? '#fff' : 'transparent', amPrevFg: st.amMode === 'prev' ? '#9C1116' : 'rgba(20,20,20,0.5)',
+      amModeSub: st.amMode === 'prev' ? 'Backfill an older match into the record' : 'Record today\u2019s match & per-player stats',
+      amDate: st.amMode === 'prev' ? '24 May 2026' : '18 Jun 2026',
+      amSaveLabel: st.amMode === 'prev' ? 'Save Past Match' : 'Save Match',
+      amRows: [
+        { av: 'FZ', name: 'Faris Al Zaabi', pos: '1', runs: '72', wkts: '1', note: 'Opened — set the tempo' },
+        { av: 'AA', name: 'Ahmed Al Rashidi', pos: '4', runs: '41', wkts: '0', note: 'Moved to 4 to face spin' },
+        { av: 'KS', name: 'Kabir Singh', pos: '7', runs: '12', wkts: '3', note: 'Death-overs role' },
+        { av: 'RF', name: 'Rayan Fernandez', pos: '5', runs: '24', wkts: '0', note: 'Finisher' },
+      ],
+      saveMatch: () => { this.setState({ addMatchOpen: false, toast: (st.amMode === 'prev' ? 'Past match' : 'Match') + ' saved to the season record' }); setTimeout(() => this.setState({ toast: '' }), 2400); },
+      toast: st.toast,
+      lbGroups, lbAges, lbStats, leaderboard, podium, lbStatLabel: curStat[0], lbEmpty: leaderboard.length === 0,
+      reportName: st.reportName,
+    };
+  }
+}
+</script>
+</body>
+</html>

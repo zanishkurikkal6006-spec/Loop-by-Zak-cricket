@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  .lp-scroll::-webkit-scrollbar { width: 0; }
+  .lp-scroll { scrollbar-width: none; }
+  @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+</style>
+</helmet>
+
+<div style="min-height:100vh; background:#E7E4DF; font-family:'Jost',sans-serif; color:#141414; padding:40px 24px 56px; display:flex; flex-direction:column; align-items:center; gap:22px;">
+
+  <div style="width:100%; max-width:460px; display:flex; align-items:center; justify-content:space-between;">
+    <div style="display:flex; align-items:center; gap:11px;">
+      <svg width="34" height="34" viewBox="-100 -100 200 200"><circle r="83.19" fill="#9C1116"></circle><circle r="73" fill="none" stroke="#C9A84C" stroke-width="4.4"></circle><path d="M23.6 -49.24 L11.04 -49.24 L11.04 -49.25 L-44.6 -49.25 L-28.43 -21.25 L-3.9 -21.25 L-5.74 -18.07 L-44.6 49.24 L-23.6 49.24 L-23.6 49.25 L44.6 49.24 L28.44 21.25 L3.9 21.25 L5.74 18.06 L44.6 -49.24 Z" fill="#FAF7F4"></path></svg>
+      <div style="font-size:11px; font-weight:600; letter-spacing:0.28em; color:#9C1116; text-transform:uppercase;">Admin · Mobile</div>
+    </div>
+    <div style="font-size:11px; letter-spacing:0.06em; color:rgba(20,20,20,0.45);">390 × 844 · tap the nav</div>
+  </div>
+
+  <!-- PHONE -->
+  <div style="position:relative; width:390px; height:844px; border-radius:50px; background:#0c0f15; padding:13px; box-shadow:0 40px 80px -36px rgba(20,20,20,0.65), inset 0 0 0 2px #2a2f3a;">
+    <div style="position:relative; width:100%; height:100%; border-radius:38px; overflow:hidden; background:#FAF7F4; display:flex; flex-direction:column;">
+
+      <!-- status bar -->
+      <div style="position:absolute; top:0; left:0; right:0; height:46px; z-index:30; display:flex; align-items:center; justify-content:space-between; padding:0 28px; pointer-events:none;">
+        <span style="font-size:14px; font-weight:600; color:#FAF7F4;">9:41</span>
+        <span style="display:flex; gap:6px; align-items:center; color:#FAF7F4;">
+          <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="6" width="3" height="5" rx="1"></rect><rect x="4.5" y="3.5" width="3" height="7.5" rx="1"></rect><rect x="9" y="1" width="3" height="10" rx="1"></rect><rect x="13.5" y="0" width="3" height="11" rx="1" opacity="0.4"></rect></svg>
+          <svg width="24" height="11" viewBox="0 0 24 11" fill="none"><rect x="0.5" y="0.5" width="20" height="10" rx="2.6" stroke="currentColor" opacity="0.5"></rect><rect x="2" y="2" width="16" height="7" rx="1.4" fill="currentColor"></rect></svg>
+        </span>
+      </div>
+
+      <!-- header -->
+      <div style="flex:none; background:linear-gradient(150deg, #9C1116 0%, #7a0f13 55%, #6E0C10 100%); padding:54px 20px 16px; position:relative; overflow:hidden;">
+        <div style="position:absolute; inset:0; opacity:0.07; background-image:repeating-linear-gradient(48deg, transparent 0 11px, rgba(201,168,76,0.9) 11px 13px, transparent 13px 15px);"></div>
+        <div style="position:relative; display:flex; align-items:center; justify-content:space-between;">
+          <div>
+            <div style="font-size:10px; font-weight:600; letter-spacing:0.3em; color:rgba(255,233,210,0.72); text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ kicker }}</div>
+            <div style="font-family:'Bebas Neue',sans-serif; font-size:27px; line-height:1; letter-spacing:0.02em; color:#FAF7F4; margin-top:3px;">{{ title }}</div>
+          </div>
+          <div style="width:40px; height:40px; border-radius:11px; background:#FAF7F4; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:16px; color:#9C1116;">DA</div>
+        </div>
+      </div>
+
+      <!-- BODY -->
+      <div class="lp-scroll" style="flex:1; overflow-y:auto;">
+
+        <!-- ===== HOME ===== -->
+        <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+          <div style="padding:16px 16px 96px; display:flex; flex-direction:column; gap:13px;">
+            <!-- 2x2 stats -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:11px;">
+              <div style="background:#fff; border:1px solid #ECE7E1; border-radius:14px; padding:15px;"><div style="font-size:10px; font-weight:600; letter-spacing:0.12em; color:rgba(20,20,20,0.45); text-transform:uppercase;">Players</div><div style="font-family:'Bebas Neue',sans-serif; font-size:32px; line-height:0.8; margin-top:9px;">42</div></div>
+              <div style="background:#fff; border:1px solid #ECE7E1; border-radius:14px; padding:15px;"><div style="font-size:10px; font-weight:600; letter-spacing:0.12em; color:rgba(20,20,20,0.45); text-transform:uppercase;">Reports</div><div style="font-family:'Bebas Neue',sans-serif; font-size:32px; line-height:0.8; margin-top:9px;">128</div></div>
+              <div style="background:#fff; border:1px solid #ECE7E1; border-radius:14px; padding:15px;"><div style="font-size:10px; font-weight:600; letter-spacing:0.12em; color:rgba(20,20,20,0.45); text-transform:uppercase;">Programs</div><div style="font-family:'Bebas Neue',sans-serif; font-size:32px; line-height:0.8; margin-top:9px;">5</div></div>
+              <div style="background:linear-gradient(150deg,#fff,#FBF0DE); border:1px solid #EAD7AE; border-radius:14px; padding:15px;"><div style="font-size:10px; font-weight:600; letter-spacing:0.12em; color:#A9791B; text-transform:uppercase;">Pending Pay</div><div style="font-family:'Bebas Neue',sans-serif; font-size:32px; line-height:0.8; color:#A9791B; margin-top:9px;">6</div></div>
+            </div>
+            <!-- blue policy -->
+            <div style="display:flex; align-items:center; gap:11px; background:#EAF1FB; border:1px solid #C3D7F2; border-radius:13px; padding:12px 14px;">
+              <span style="width:28px; height:28px; flex:none; border-radius:8px; background:#2563EB; display:flex; align-items:center; justify-content:center;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5"></path><path d="M12 16h.01"></path></svg></span>
+              <div style="flex:1;"><div style="font-size:12.5px; font-weight:600; color:#1E3A6E;">Sessions count for every player.</div><div style="font-size:11px; color:#3D5A8A; margin-top:1px;">Even with payment pending — tap to collect.</div></div>
+            </div>
+            <!-- alerts -->
+            <div style="font-size:11px; font-weight:600; letter-spacing:0.18em; color:rgba(20,20,20,0.5); text-transform:uppercase; margin-top:3px;">Needs Attention</div>
+            <sc-for list="{{ alerts }}" as="al" hint-placeholder-count="2">
+              <div style="display:flex; align-items:center; gap:11px; background:{{ al.bg }}; border:1px solid {{ al.border }}; border-radius:12px; padding:12px 14px;">
+                <span style="width:8px; height:8px; flex:none; border-radius:50%; background:{{ al.dot }};"></span>
+                <span style="flex:1; font-size:12.5px; font-weight:500; color:{{ al.ink }};">{{ al.text }}</span>
+                <span style="font-size:11.5px; font-weight:600; color:{{ al.dot }};">{{ al.action }}</span>
+              </div>
+            </sc-for>
+            <!-- financial overview -->
+            <div style="position:relative; overflow:hidden; border-radius:16px; padding:18px; background:linear-gradient(135deg, #6E0C10 0%, #3a0a14 55%, #141414 100%); color:#FAF7F4; margin-top:3px;">
+              <div style="position:absolute; top:-40px; right:-26px; width:120px; height:120px; border:1px solid rgba(201,168,76,0.2); border-radius:50%;"></div>
+              <div style="position:relative; font-size:11.5px; font-weight:600; margin-bottom:14px;">Financial Overview · June</div>
+              <div style="position:relative; display:flex; justify-content:space-between;">
+                <div><div style="font-size:9px; letter-spacing:0.1em; color:rgba(250,247,244,0.5); text-transform:uppercase;">Collected</div><div style="font-family:'Bebas Neue',sans-serif; font-size:26px; line-height:0.85; margin-top:4px;">34.2k</div></div>
+                <div><div style="font-size:9px; letter-spacing:0.1em; color:rgba(250,247,244,0.5); text-transform:uppercase;">Outstanding</div><div style="font-family:'Bebas Neue',sans-serif; font-size:26px; line-height:0.85; margin-top:4px; color:#E7B96A;">4.2k</div></div>
+                <div><div style="font-size:9px; letter-spacing:0.1em; color:rgba(250,247,244,0.5); text-transform:uppercase;">Net</div><div style="font-family:'Bebas Neue',sans-serif; font-size:26px; line-height:0.85; margin-top:4px; color:#7BD49B;">28.6k</div></div>
+              </div>
+            </div>
+            <!-- attendance by group (counts, not %) -->
+            <div style="background:#fff; border:1px solid #ECE7E1; border-radius:15px; padding:15px; margin-top:3px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;"><span style="font-size:12.5px; font-weight:600;">Attendance by Group</span><div style="display:flex; gap:5px;"><sc-for list="{{ attRangeTabs }}" as="t" hint-placeholder-count="2"><button onClick="{{ t.pick }}" style="height:28px; padding:0 10px; border:1px solid {{ t.border }}; border-radius:7px; background:{{ t.bg }}; color:{{ t.fg }}; font-family:'Jost',sans-serif; font-size:10.5px; font-weight:600; cursor:pointer;">{{ t.label }}</button></sc-for></div></div>
+              <div style="font-size:11px; color:rgba(20,20,20,0.5); margin-bottom:12px;">Unique kids who attended · {{ attRangeLabel }}</div>
+              <div style="display:flex; flex-direction:column; gap:9px;">
+                <sc-for list="{{ attByGroup }}" as="g" hint-placeholder-count="3">
+                  <div style="display:flex; align-items:center; gap:12px; padding:11px 13px; border:1px solid #ECE7E1; border-left:3px solid {{ g.color }}; border-radius:11px;">
+                    <div style="flex:1; min-width:0;"><div style="font-size:13px; font-weight:600;">{{ g.group }}</div><div style="font-size:10.5px; color:rgba(20,20,20,0.5); margin-top:1px;">{{ g.sessions }} sessions · {{ g.visits }} visits</div></div>
+                    <div style="text-align:right;"><span style="font-family:'Bebas Neue',sans-serif; font-size:26px; line-height:0.8; color:{{ g.color }};">{{ g.attended }}</span><span style="font-size:11px; color:rgba(20,20,20,0.45);"> / {{ g.enrolled }}</span></div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-top:11px; padding-top:10px; border-top:1px solid #F1ECE6;"><span style="font-size:11.5px; color:rgba(20,20,20,0.55);">Total · {{ attRangeLabel }}</span><span style="font-size:12.5px; font-weight:600;">{{ attTotalKids }} kids · {{ attTotalVisits }} visits</span></div>
+            </div>
+            <!-- coach activity -->
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-top:6px;"><span style="font-size:11px; font-weight:600; letter-spacing:0.18em; color:rgba(20,20,20,0.5); text-transform:uppercase;">Coach Activity</span><button onClick="{{ openAddCoach }}" style="font-size:11.5px; font-weight:600; color:#9C1116; background:none; border:none; cursor:pointer;">+ Add Coach</button></div>
+            <sc-for list="{{ coaches }}" as="c" hint-placeholder-count="2">
+              <div style="background:#fff; border:1px solid #ECE7E1; border-radius:15px; padding:15px;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div style="width:42px; height:42px; flex:none; border-radius:50%; padding:2px; background:linear-gradient(145deg,#EFDC97,#C9A84C);"><div style="width:100%; height:100%; border-radius:50%; background:#2a2a2a; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:15px; color:#FAF7F4;">{{ c.ci }}</div></div>
+                  <div style="flex:1; min-width:0;"><div style="font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ c.name }}</div><div style="font-size:11.5px; color:rgba(20,20,20,0.5);">{{ c.spec }}</div></div>
+                  <button onClick="{{ c.assign }}" style="flex:none; height:36px; padding:0 13px; border:none; border-radius:10px; background:linear-gradient(135deg,#EFDC97,#C9A84C); color:#3A2A06; font-family:'Jost',sans-serif; font-size:11.5px; font-weight:700; cursor:pointer;">🎯 Assign</button>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:12px;">
+                  <div style="background:#FBF4E2; border:1px solid #EAD7AE; border-radius:9px; padding:7px 4px; text-align:center;"><div style="font-family:'Bebas Neue',sans-serif; font-size:18px; line-height:0.8; color:#937328;">{{ c.oneToOne }}</div><div style="font-size:7.5px; font-weight:600; color:#937328; text-transform:uppercase; margin-top:3px;">1-on-1</div></div>
+                  <div style="background:#FAF7F4; border:1px solid #ECE7E1; border-radius:9px; padding:7px 4px; text-align:center;"><div style="font-family:'Bebas Neue',sans-serif; font-size:18px; line-height:0.8;">{{ c.sessions }}</div><div style="font-size:7.5px; font-weight:600; color:rgba(20,20,20,0.5); text-transform:uppercase; margin-top:3px;">Sess</div></div>
+                  <div style="background:#FAF7F4; border:1px solid #ECE7E1; border-radius:9px; padding:7px 4px; text-align:center;"><div style="font-family:'Bebas Neue',sans-serif; font-size:18px; line-height:0.8;">{{ c.players }}</div><div style="font-size:7.5px; font-weight:600; color:rgba(20,20,20,0.5); text-transform:uppercase; margin-top:3px;">Plyr</div></div>
+                  <div style="background:#FAF7F4; border:1px solid #ECE7E1; border-radius:9px; padding:7px 4px; text-align:center;"><div style="font-family:'Bebas Neue',sans-serif; font-size:18px; line-height:0.8;">{{ c.messages }}</div><div style="font-size:7.5px; font-weight:600; color:rgba(20,20,20,0.5); text-transform:uppercase; margin-top:3px;">Msg</div></div>
+                </div>
+              </div>
+            </sc-for>
+            <!-- programs tile -->
+            <button onClick="{{ goPrograms }}" style="display:flex; align-items:center; justify-content:space-between; background:#141414; border:none; border-radius:14px; padding:16px; cursor:pointer; font-family:'Jost',sans-serif;"><span style="font-size:13px; font-weight:600; color:#FAF7F4;">🏏 Programs · 5 active</span><span style="font-size:11.5px; color:#C9A84C;">Manage →</span></button>
+          </div>
+        </sc-if>
+
+        <!-- ===== PLAYERS ===== -->
+        <sc-if value="{{ isPlayers }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:16px 16px 96px;">
+            <div style="display:flex; gap:9px; margin-bottom:13px;">
+              <div style="flex:1; display:flex; align-items:center; gap:8px; height:42px; padding:0 13px; background:#fff; border:1px solid #ECE7E1; border-radius:11px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A938A" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><span style="font-size:13px; color:#9A938A;">Search…</span></div>
+              <button onClick="{{ openAddPlayer }}" style="height:42px; padding:0 16px; border:none; border-radius:11px; background:#9C1116; color:#fff; font-family:'Jost',sans-serif; font-size:12.5px; font-weight:600; cursor:pointer;">+ Add</button>
+            </div>
+            <div style="display:flex; gap:7px; margin-bottom:13px; overflow-x:auto;" class="lp-scroll">
+              <sc-for list="{{ groups }}" as="g" hint-placeholder-count="4">
+                <span onClick="{{ g.pick }}" style="flex:none; padding:7px 13px; border-radius:999px; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap; background:{{ g.bg }}; color:{{ g.fg }}; border:1px solid {{ g.border }};">{{ g.label }}</span>
+              </sc-for>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:9px;">
+              <sc-for list="{{ players }}" as="pl" hint-placeholder-count="6">
+                <div onClick="{{ pl.openDetail }}" style="display:flex; align-items:center; gap:12px; padding:12px 14px; background:#fff; border:1px solid #ECE7E1; border-radius:14px; cursor:pointer;">
+                  <div style="width:42px; height:42px; flex:none; border-radius:50%; padding:2.5px; background:{{ pl.ring }};"><div style="width:100%; height:100%; border-radius:50%; background:#F3EEE8; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:15px; color:#6E0C10;">{{ pl.av }}</div></div>
+                  <div style="flex:1; min-width:0;"><div style="display:flex; align-items:center; gap:7px;"><span style="font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ pl.name }}</span><span style="font-size:11px;">{{ pl.badgeEmoji }}</span></div><div style="font-size:11px; color:rgba(20,20,20,0.5); margin-top:1px;">{{ pl.group }} · {{ pl.age }} · {{ pl.center }}</div></div>
+                  <span style="flex:none; font-size:9.5px; font-weight:600; color:{{ pl.pkInk }}; background:{{ pl.pkBg }}; padding:5px 9px; border-radius:7px;">{{ pl.pkg }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ===== FINANCE ===== -->
+        <sc-if value="{{ isFinance }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:16px 16px 96px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:11px; margin-bottom:14px;">
+              <div style="background:#141414; border-radius:14px; padding:15px; color:#FAF7F4;"><div style="font-size:9.5px; font-weight:600; letter-spacing:0.1em; color:rgba(250,247,244,0.55); text-transform:uppercase;">Collected</div><div style="font-family:'Bebas Neue',sans-serif; font-size:28px; line-height:0.8; margin-top:8px;">34.2k</div></div>
+              <div style="background:#fff; border:1px solid #EAD7AE; border-radius:14px; padding:15px;"><div style="font-size:9.5px; font-weight:600; letter-spacing:0.1em; color:#937328; text-transform:uppercase;">Outstanding</div><div style="font-family:'Bebas Neue',sans-serif; font-size:28px; line-height:0.8; color:#937328; margin-top:8px;">4.2k</div></div>
+              <div style="background:#fff; border:1px solid #ECE7E1; border-radius:14px; padding:15px;"><div style="font-size:9.5px; font-weight:600; letter-spacing:0.1em; color:rgba(20,20,20,0.45); text-transform:uppercase;">Ground</div><div style="font-family:'Bebas Neue',sans-serif; font-size:28px; line-height:0.8; color:#B3261E; margin-top:8px;">3.2k</div></div>
+              <div style="background:#fff; border:1px solid #C2E2CE; border-radius:14px; padding:15px;"><div style="font-size:9.5px; font-weight:600; letter-spacing:0.1em; color:#1F8A4C; text-transform:uppercase;">Net</div><div style="font-family:'Bebas Neue',sans-serif; font-size:28px; line-height:0.8; color:#1F8A4C; margin-top:8px;">28.6k</div></div>
+            </div>
+            <div style="background:#fff; border:1px solid #ECE7E1; border-radius:15px; padding:17px; margin-bottom:14px;">
+              <div style="font-size:12.5px; font-weight:600; margin-bottom:14px;">Monthly Revenue</div>
+              <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:9px; height:110px;">
+                <sc-for list="{{ finBars }}" as="b" hint-placeholder-count="6">
+                  <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end;"><div style="width:62%; display:flex; flex-direction:column; justify-content:flex-end; height:100%;"><div style="width:100%; border-radius:4px 4px 0 0; background:#C9A84C; height:{{ b.gold }};"></div><div style="width:100%; background:#1F8A4C; height:{{ b.green }};"></div></div><span style="font-size:9px; color:rgba(20,20,20,0.45);">{{ b.m }}</span></div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="background:#fff; border:1px solid #ECE7E1; border-radius:15px; overflow:hidden;">
+              <sc-for list="{{ finance }}" as="f" hint-placeholder-count="5">
+                <div style="display:flex; align-items:center; padding:13px 15px; border-bottom:1px solid #F3EEE8;"><div style="flex:1; min-width:0;"><div style="font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ f.family }}</div><div style="font-size:11px; color:rgba(20,20,20,0.5);">{{ f.item }}</div></div><span style="font-family:'Bebas Neue',sans-serif; font-size:17px; margin:0 11px;">{{ f.amount }}</span><span style="flex:none; font-size:9px; font-weight:700; color:{{ f.ink }}; background:{{ f.bg }}; padding:4px 8px; border-radius:7px; text-transform:uppercase;">{{ f.status }}</span></div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ===== ATTENDANCE ===== -->
+        <sc-if value="{{ isAttend }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:14px 16px 96px;">
+            <div style="display:flex; gap:7px; margin-bottom:14px;">
+              <sc-for list="{{ attTabs }}" as="t" hint-placeholder-count="3">
+                <button onClick="{{ t.go }}" style="flex:1; height:36px; border:1px solid {{ t.border }}; border-radius:10px; background:{{ t.bg }}; color:{{ t.fg }}; font-family:'Jost',sans-serif; font-size:11.5px; font-weight:600; cursor:pointer;">{{ t.label }}</button>
+              </sc-for>
+            </div>
+            <sc-if value="{{ attIsQueue }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex; flex-direction:column; gap:12px;">
+                <sc-for list="{{ submissions }}" as="su" hint-placeholder-count="3">
+                  <div style="background:#fff; border:1px solid #ECE7E1; border-left:3px solid {{ su.edge }}; border-radius:15px; padding:15px;">
+                    <div style="font-size:14px; font-weight:600;">{{ su.group }} · {{ su.type }}</div>
+                    <div style="font-size:11.5px; color:rgba(20,20,20,0.5); margin-top:2px;">{{ su.coach }} · {{ su.date }}</div>
+                    <div style="display:flex; gap:14px; margin-top:11px; padding:9px 12px; background:#FAF7F4; border-radius:10px;"><span style="font-size:12px; font-weight:600; color:#1F8A4C;">✅ {{ su.present }}</span><span style="font-size:12px; font-weight:600; color:#A9791B;">⏰ {{ su.late }}</span><span style="font-size:11px; color:rgba(20,20,20,0.45);">both attended</span></div>
+                    <button onClick="{{ su.confirm }}" style="width:100%; height:42px; margin-top:11px; border:none; border-radius:11px; background:{{ su.btnBg }}; color:{{ su.btnFg }}; font-family:'Jost',sans-serif; font-size:12px; font-weight:600; cursor:pointer;">{{ su.btnLabel }}</button>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ attIsTake }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div style="display:flex; align-items:flex-start; gap:9px; background:#FBF1DD; border:1px solid #EAD7AE; border-radius:12px; padding:11px 13px; margin-bottom:13px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A9791B" stroke-width="2" style="flex:none; margin-top:1px;"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg><span style="font-size:12px; line-height:1.5; color:#6E4E12;"><strong>Cover for a coach</strong> · credits the coach you choose &amp; auto-confirms.</span></div>
+                <!-- date stepper -->
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+                  <button onClick="{{ attPrevDay }}" style="width:38px; height:40px; flex:none; border:1px solid #ECE7E1; border-radius:10px; background:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9C1116" stroke-width="2.2"><path d="m15 18-6-6 6-6"></path></svg></button>
+                  <div style="flex:1; height:40px; border:1px solid #C9A84C; border-radius:10px; background:#FCF7EC; display:flex; align-items:center; justify-content:center; gap:7px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#937328" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2.5"></rect><path d="M3 9h18M8 2v4M16 2v4"></path></svg><span style="font-size:12.5px; font-weight:600; color:#937328;">{{ attDateLabel }}</span></div>
+                  <button onClick="{{ attNextDay }}" style="width:38px; height:40px; flex:none; border:1px solid {{ attNextBorder }}; border-radius:10px; background:#fff; cursor:{{ attNextCursor }}; display:flex; align-items:center; justify-content:center;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="{{ attNextInk }}" stroke-width="2.2"><path d="m9 18 6-6-6-6"></path></svg></button>
+                </div>
+                <!-- batch chips -->
+                <div style="display:flex; gap:7px; overflow-x:auto; margin-bottom:12px;" class="lp-scroll">
+                  <sc-for list="{{ attBatches }}" as="b" hint-placeholder-count="3"><button onClick="{{ b.pick }}" style="flex:none; height:34px; padding:0 13px; border-radius:999px; cursor:pointer; font-family:'Jost',sans-serif; font-size:11.5px; font-weight:600; white-space:nowrap; background:{{ b.bg }}; color:{{ b.fg }}; border:1px solid {{ b.border }};">{{ b.label }}</button></sc-for>
+                </div>
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:11px 14px; background:#FCF7EC; border:1px solid #C9A84C; border-radius:11px; margin-bottom:12px;"><span style="font-size:12px; color:#937328;">Credit to coach</span><span style="font-size:13px; font-weight:600; color:#937328;">Coach Zanish ▾</span></div>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                  <sc-for list="{{ takeRows }}" as="r" hint-placeholder-count="6">
+                    <div style="display:flex; align-items:center; gap:11px; padding:9px 11px; background:#fff; border:1px solid #ECE7E1; border-left:3px solid {{ r.edge }}; border-radius:12px;">
+                      <div style="width:36px; height:36px; flex:none; border-radius:50%; background:#F3EEE8; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:13px; color:#6E0C10;">{{ r.av }}</div>
+                      <span style="flex:1; min-width:0; font-size:13.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ r.name }}</span>
+                      <div style="display:flex; gap:5px;"><button onClick="{{ r.setP }}" style="{{ r.pStyle }}">P</button><button onClick="{{ r.setL }}" style="{{ r.lStyle }}">L</button></div>k="{{ r.setA }}" style="{{ r.aStyle }}">A</button></div>
+                    </div>
+                  </sc-for>
+                </div>
+                <button onClick="{{ submitTake }}" style="width:100%; height:50px; margin-top:14px; border:none; border-radius:13px; background:linear-gradient(180deg,#b1141a,#7c0f14); color:#FAF7F4; font-family:'Jost',sans-serif; font-size:12.5px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer;">Submit &amp; Confirm</button>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <!-- ===== PAYMENTS ===== -->
+        <sc-if value="{{ isPayments }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:14px 16px 96px;">
+            <div style="display:flex; gap:6px; margin-bottom:14px; overflow-x:auto;" class="lp-scroll">
+              <sc-for list="{{ payTabs }}" as="t" hint-placeholder-count="4">
+                <button onClick="{{ t.go }}" style="flex:none; height:34px; padding:0 13px; border:1px solid {{ t.border }}; border-radius:9px; background:{{ t.bg }}; color:{{ t.fg }}; font-family:'Jost',sans-serif; font-size:11.5px; font-weight:600; cursor:pointer; white-space:nowrap;">{{ t.label }}</button>
+              </sc-for>
+            </div>
+            <!-- packages -->
+            <sc-if value="{{ payIsPackages }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex; flex-direction:column; gap:9px;">
+                <div style="font-size:11px; font-weight:600; letter-spacing:0.16em; color:rgba(20,20,20,0.5); text-transform:uppercase; margin-bottom:2px;">Player Package Status</div>
+                <sc-for list="{{ pkgStatus }}" as="ps" hint-placeholder-count="5">
+                  <div style="display:flex; align-items:center; gap:12px; padding:11px 13px; background:#fff; border:1px solid #ECE7E1; border-left:3px solid {{ ps.color }}; border-radius:12px;">
+                    <div style="position:relative; width:42px; height:42px; flex:none;"><svg width="42" height="42" viewBox="0 0 42 42"><circle cx="21" cy="21" r="16" fill="none" stroke="#F1ECE4" stroke-width="5"></circle><circle cx="21" cy="21" r="16" fill="none" stroke="{{ ps.color }}" stroke-width="5" stroke-linecap="round" stroke-dasharray="{{ ps.circ }}" stroke-dashoffset="{{ ps.off }}" transform="rotate(-90 21 21)"></circle></svg><div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:12px;">{{ ps.ringLabel }}</div></div>
+                    <div style="flex:1; min-width:0;"><div style="font-size:13.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ ps.name }}</div><div style="font-size:11px; color:{{ ps.color }}; margin-top:1px;">{{ ps.label }}</div></div>
+                    <span style="flex:none; font-size:9px; font-weight:700; color:{{ ps.sInk }}; background:{{ ps.sBg }}; padding:4px 8px; border-radius:7px; text-transform:uppercase;">{{ ps.tag }}</span>
+                  </div>
+                </sc-for>
+                <button style="height:44px; margin-top:4px; border:1.5px dashed #C9A84C; border-radius:12px; background:rgba(201,168,76,0.07); color:#937328; font-family:'Jost',sans-serif; font-size:12px; font-weight:600; cursor:pointer;">+ Add Package Type</button>
+              </div>
+            </sc-if>
+            <!-- match fees -->
+            <sc-if value="{{ payIsMatch }}" hint-placeholder-val="{{ false }}">
+              <div style="background:#fff; border:1px solid #ECE7E1; border-radius:15px; padding:16px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;"><div style="font-size:14px; font-weight:600;">vs Blue Hawks</div><div style="font-family:'Bebas Neue',sans-serif; font-size:18px; color:#1F8A4C;">200<span style="font-size:11px; color:rgba(20,20,20,0.4);">/250</span></div></div>
+                <div style="height:7px; border-radius:4px; background:#F1ECE4; overflow:hidden; margin-bottom:12px;"><div style="height:100%; width:80%; background:#1F8A4C; border-radius:4px;"></div></div>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                  <div style="display:flex; align-items:center; gap:10px;"><span style="flex:1; font-size:13px; font-weight:500;">Ahmed Al Rashidi</span><span style="font-size:11px; font-weight:600; color:#1F8A4C;">✅ Bank</span></div>
+                  <div style="display:flex; align-items:center; gap:10px;"><span style="flex:1; font-size:13px; font-weight:500;">Kabir Singh</span><button style="height:30px; padding:0 11px; border:none; border-radius:8px; background:#9C1116; color:#fff; font-size:10.5px; font-weight:600; cursor:pointer;">Confirm Bank</button></div>
+                  <div style="display:flex; align-items:center; gap:10px;"><span style="flex:1; font-size:13px; font-weight:500;">Rayan Fernandez</span><button style="height:30px; padding:0 11px; border:none; border-radius:8px; background:#9C1116; color:#fff; font-size:10.5px; font-weight:600; cursor:pointer;">Mark Paid</button></div>
+                </div>
+              </div>
+            </sc-if>
+            <!-- ground -->
+            <sc-if value="{{ payIsGround }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <button onClick="{{ openGround }}" style="width:100%; height:44px; margin-bottom:12px; border:none; border-radius:12px; background:#9C1116; color:#fff; font-family:'Jost',sans-serif; font-size:12px; font-weight:600; cursor:pointer;">+ Add Ground Booking</button>
+                <div style="background:#fff; border:1px solid #ECE7E1; border-radius:15px; overflow:hidden;">
+                  <sc-for list="{{ ground }}" as="gr" hint-placeholder-count="4">
+                    <div style="display:flex; align-items:center; padding:13px 15px; border-bottom:1px solid #F3EEE8;"><div style="flex:1; min-width:0;"><div style="font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ gr.venue }}</div><div style="font-size:11px; color:rgba(20,20,20,0.5);">{{ gr.meta }}</div></div><span style="font-family:'Bebas Neue',sans-serif; font-size:17px; margin:0 10px;">{{ gr.amount }}</span><span style="flex:none; font-size:9px; font-weight:700; color:{{ gr.ink }}; background:{{ gr.bg }}; padding:4px 8px; border-radius:7px; text-transform:uppercase;">{{ gr.status }}</span></div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+            <!-- settings -->
+            <sc-if value="{{ payIsSettings }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex; flex-direction:column; gap:14px;">
+                <div style="background:#fff; border:1px solid #ECE7E1; border-radius:15px; padding:17px;">
+                  <div style="font-size:12.5px; font-weight:600; margin-bottom:12px;">Training Centers</div>
+                  <div style="display:flex; align-items:center; justify-content:space-between; padding:11px 13px; border:1px solid #ECE7E1; border-radius:11px; margin-bottom:8px;"><div><div style="font-size:13px; font-weight:600;">Danube Sports City</div><div style="font-size:11px; color:rgba(20,20,20,0.5);">Dubai · 3 nets</div></div><span style="font-family:'Bebas Neue',sans-serif; font-size:20px; color:#9C1116;">26</span></div>
+                  <div style="display:flex; align-items:center; justify-content:space-between; padding:11px 13px; border:1px solid #ECE7E1; border-radius:11px;"><div><div style="font-size:13px; font-weight:600;">ICC Academy</div><div style="font-size:11px; color:rgba(20,20,20,0.5);">Dubai · 4 nets</div></div><span style="font-family:'Bebas Neue',sans-serif; font-size:20px; color:#9C1116;">16</span></div>
+                </div>
+                <div style="background:#fff; border:1px solid #ECE7E1; border-radius:15px; padding:17px;">
+                  <div style="font-size:12.5px; font-weight:600; margin-bottom:12px;">Bank Details</div>
+                  <div style="display:flex; flex-direction:column; gap:9px;">
+                    <div style="height:42px; border:1px solid #ECE7E1; border-radius:10px; background:#FAF7F4; display:flex; align-items:center; padding:0 12px; font-size:13px;">Emirates NBD</div>
+                    <div style="height:42px; border:1px solid #ECE7E1; border-radius:10px; background:#FAF7F4; display:flex; align-items:center; padding:0 12px; font-size:13px; font-family:'Bebas Neue',sans-serif; letter-spacing:0.06em;">AE07 0260 0010 1500 7732 498</div>
+                    <button onClick="{{ saveBank }}" style="height:44px; border:none; border-radius:11px; background:linear-gradient(180deg,#b1141a,#7c0f14); color:#FAF7F4; font-family:'Jost',sans-serif; font-size:12px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer;">Save</button>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <!-- ===== PROGRAMS ===== -->
+        <sc-if value="{{ isPrograms }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:16px 16px 96px;">
+            <button onClick="{{ openProgram }}" style="width:100%; height:46px; margin-bottom:14px; border:none; border-radius:12px; background:#9C1116; color:#fff; font-family:'Jost',sans-serif; font-size:12.5px; font-weight:600; cursor:pointer;">+ Create Program</button>
+            <div style="display:flex; flex-direction:column; gap:11px;">
+              <sc-for list="{{ programs }}" as="pg" hint-placeholder-count="5">
+                <div style="background:#fff; border:1px solid #ECE7E1; border-left:3px solid {{ pg.accent }}; border-radius:14px; padding:15px;">
+                  <div style="display:flex; align-items:center; gap:11px;"><span style="width:40px; height:40px; border-radius:11px; background:{{ pg.tint }}; display:flex; align-items:center; justify-content:center; font-size:20px;">{{ pg.emoji }}</span><div style="flex:1; min-width:0;"><div style="font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ pg.name }}</div><div style="font-size:11px; color:rgba(20,20,20,0.5);">{{ pg.enrolled }} enrolled</div></div></div>
+                  <div style="font-size:12px; line-height:1.5; color:rgba(20,20,20,0.55); margin-top:11px;">{{ pg.desc }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+      </div>
+
+      <!-- BOTTOM NAV -->
+      <div style="flex:none; height:66px; background:#fff; border-top:1px solid #ECE7E1; display:flex; padding:0 4px;">
+        <button onClick="{{ goHome }}" style="flex:1; border:none; background:none; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding-top:6px; color:{{ c.home }};"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.6 12 3.5l9 7.1"></path><path d="M5.4 9.2V19a1 1 0 0 0 1 1h11.2a1 1 0 0 0 1-1V9.2"></path><path d="M9.6 20v-5.4a1 1 0 0 1 1-1h2.8a1 1 0 0 1 1 1V20"></path></svg><span style="font-size:9.5px; font-weight:600;">Home</span></button>
+        <button onClick="{{ goPlayers }}" style="flex:1; border:none; background:none; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding-top:6px; color:{{ c.players }};"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.1"></circle><path d="M3.6 19.5a5.6 5.6 0 0 1 10.8 0"></path><path d="M16 6.4a3 3 0 0 1 0 5.7"></path><path d="M17.5 19.5a5.6 5.6 0 0 0-2.8-4.8"></path></svg><span style="font-size:9.5px; font-weight:600;">Players</span></button>
+        <button onClick="{{ goFinance }}" style="flex:1; border:none; background:none; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding-top:6px; color:{{ c.finance }};"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16"></path><path d="m4 15 4-4 3 3 6-7"></path><path d="M18 5h3v3"></path></svg><span style="font-size:9.5px; font-weight:600;">Finance</span></button>
+        <button onClick="{{ goAttend }}" style="flex:1; border:none; background:none; cursor:pointer; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding-top:6px; color:{{ c.attend }};"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.6"></circle><path d="m8.2 12.2 2.5 2.5 5-5.4"></path></svg><span style="font-size:9.5px; font-weight:600;">Attend</span><span style="position:absolute; top:5px; right:24px; min-width:15px; height:15px; border-radius:999px; background:#9C1116; color:#fff; font-size:9px; font-weight:700; display:flex; align-items:center; justify-content:center; padding:0 3px;">3</span></button>
+        <button onClick="{{ goPayments }}" style="flex:1; border:none; background:none; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding-top:6px; color:{{ c.payments }};"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2.4"></rect><path d="M3 10h18"></path><path d="M7 14.5h3"></path></svg><span style="font-size:9.5px; font-weight:600;">Pay</span></button>
+      </div>
+
+      <!-- home indicator -->
+      <div style="position:absolute; bottom:7px; left:50%; transform:translateX(-50%); width:128px; height:5px; border-radius:3px; background:#141414; opacity:0.18; z-index:40; pointer-events:none;"></div>
+
+      <!-- ===== BOTTOM-SHEET MODALS ===== -->
+      <sc-if value="{{ anySheet }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ closeModals }}" style="position:absolute; inset:0; z-index:50; background:rgba(20,20,20,0.45); display:flex; align-items:flex-end;">
+          <div onClick="{{ stopProp }}" style="width:100%; max-height:80%; overflow-y:auto; background:#FAF7F4; border-radius:24px 24px 0 0; animation:sheetUp 0.28s ease; padding-bottom:18px;" class="lp-scroll">
+            <div style="position:sticky; top:0; background:#FAF7F4; padding:16px 18px 12px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #ECE7E1;">
+              <div style="font-family:'Bebas Neue',sans-serif; font-size:21px; letter-spacing:0.02em;">{{ sheetTitle }}</div>
+              <button onClick="{{ closeModals }}" style="width:30px; height:30px; border:none; border-radius:50%; background:#F1ECE6; cursor:pointer; display:flex; align-items:center; justify-content:center;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6E6A64" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+            </div>
+            <div style="padding:18px;">{{ sheetBody }}</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- TOAST -->
+      <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute; bottom:80px; left:50%; transform:translateX(-50%); z-index:70; display:flex; align-items:center; gap:9px; background:#141414; color:#FAF7F4; padding:12px 18px; border-radius:12px; box-shadow:0 18px 40px -16px rgba(0,0,0,0.6); width:max-content; max-width:90%;">
+          <span style="width:22px; height:22px; flex:none; border-radius:50%; background:#C9A84C; display:flex; align-items:center; justify-content:center;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3A2A06" stroke-width="3"><path d="M20 6 9 17l-5-5"></path></svg></span>
+          <span style="font-size:12.5px; font-weight:500;">{{ toast }}</span>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+
+  <div style="font-size:11px; letter-spacing:0.16em; color:rgba(20,20,20,0.45); text-transform:uppercase;">Admin mobile · bottom nav · bottom-sheet modals</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { view: 'home', payTab: 'packages', attTab: 'pending', selId: 'p1', groupFilter: 'All',
+    sheet: '', toast: '', confirmed: {}, takeMarks: { t1: 'present', t2: 'present', t3: 'late', t4: null, t5: null, t6: null },
+    mAddMode: 'single', mPkg: 'new', mBulk: 'fresh', attDayOffset: 0, attBatch: 'b1', attRange: 'week' };
+
+  BATCHES = [
+    { id: 'b1', label: 'Elite Evening' }, { id: 'b2', label: 'Launch Pad / Level Up' }, { id: 'b3', label: 'Elite Batch 2' }, { id: 'b4', label: 'Custom / one-off' },
+  ];
+  attDateBatchVals() {
+    const off = this.state.attDayOffset || 0;
+    const d = new Date(2026, 5, 18); d.setDate(d.getDate() + off);
+    const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'], mons = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const label = off === 0 ? 'Today · ' + days[d.getDay()] + ' ' + d.getDate() + ' ' + mons[d.getMonth()] : days[d.getDay()] + ' ' + d.getDate() + ' ' + mons[d.getMonth()];
+    const atToday = off >= 0;
+    return { attDateLabel: label, attNextBorder: atToday ? '#F1ECE6' : '#ECE7E1', attNextInk: atToday ? '#D9CFC4' : '#9C1116', attNextCursor: atToday ? 'default' : 'pointer',
+      attBatches: this.BATCHES.map(x => ({ label: x.label, pick: () => this.setState({ attBatch: x.id }),
+        bg: x.id === this.state.attBatch ? '#9C1116' : '#fff', fg: x.id === this.state.attBatch ? '#fff' : 'rgba(20,20,20,0.6)', border: x.id === this.state.attBatch ? '#9C1116' : '#ECE7E1' })) };
+  }
+
+  COACHES = [
+    { ci: 'ZK', name: 'Coach Zanish', spec: 'Batting Specialist', oneToOne: 38, sessions: 142, players: 24, messages: 64 },
+    { ci: 'AP', name: 'Coach Arun', spec: 'Spin Bowling', oneToOne: 16, sessions: 88, players: 15, messages: 41 },
+  ];
+  ALERTS = [
+    { kind: 'red', text: '2 players have no package', action: 'Assign →' },
+    { kind: 'red', text: 'Ground fee · Sharjah · 800 AED', action: 'Collect →' },
+    { kind: 'amber', text: '3 attendance pending', action: 'Confirm →' },
+  ];
+  GROUPS = ['All', 'Under 16', 'Juniors', 'Advanced'];
+  PLAYERS = [
+    { id: 'p1', av: 'AA', name: 'Ahmed Al Rashidi', group: 'Under 16', age: 14, center: 'Danube', badgeEmoji: '🏏⚡', pkState: 'gold' },
+    { id: 'p2', av: 'RF', name: 'Rayan Fernandez', group: 'Juniors', age: 13, center: 'ICC', badgeEmoji: '🛡️', pkState: 'healthy' },
+    { id: 'p3', av: 'KS', name: 'Kabir Singh', group: 'Under 16', age: 15, center: 'Danube', badgeEmoji: '🏏🎯', pkState: 'none' },
+    { id: 'p4', av: 'FZ', name: 'Faris Al Zaabi', group: 'Advanced', age: 16, center: 'Danube', badgeEmoji: '⚡', pkState: 'low' },
+    { id: 'p5', av: 'MI', name: 'Mohammed Irfan', group: 'Juniors', age: 12, center: 'ICC', badgeEmoji: '', pkState: 'comp' },
+    { id: 'p6', av: 'ZK', name: 'Zayd Khan', group: 'Under 16', age: 14, center: 'Danube', badgeEmoji: '🛡️', pkState: 'exhausted' },
+  ];
+  PKMAP = {
+    gold: { sInk: '#937328', sBg: '#F5ECD3', status: 'Gold' }, healthy: { sInk: '#1F8A4C', sBg: '#E7F4EC', status: 'Paid' },
+    low: { sInk: '#A9791B', sBg: '#FBF1DD', status: 'Low' }, exhausted: { sInk: '#B3261E', sBg: '#FBE9E8', status: '0 left' },
+    none: { sInk: '#B3261E', sBg: '#FBE9E8', status: 'No pkg' }, comp: { sInk: '#7C3AED', sBg: '#F1EAFE', status: 'Comp' },
+  };
+  PKG_STATUS = [
+    { name: 'Kabir Singh', used: 6, total: 12, st: 'healthy' }, { name: 'Faris Al Zaabi', used: 4, total: 6, st: 'low' },
+    { name: 'Zayd Khan', used: 6, total: 6, st: 'exhausted' }, { name: 'Rayan Fernandez', used: 8, total: 0, st: 'unlimited' },
+    { name: 'Mohammed Irfan', used: 5, total: 12, st: 'comp' },
+  ];
+  GROUND = [
+    { venue: 'Danube Sports City', meta: 'Mon 9 Jun · U16', amount: '600', st: 'paid' },
+    { venue: 'ICC Academy', meta: 'Wed 11 Jun · Juniors', amount: '500', st: 'paid' },
+    { venue: 'Sharjah Cricket Stadium', meta: 'Fri 20 Jun · Advanced', amount: '800', st: 'pending' },
+  ];
+  SUBMISSIONS = [
+    { id: 's1', group: 'Under 16', type: 'Central Wicket', coach: 'Coach Zanish', date: 'Wed 13 Jun', present: 6, late: 1 },
+    { id: 's2', group: 'Juniors', type: 'Spin Clinic', coach: 'Coach Arun', date: 'Wed 13 Jun', present: 4, late: 0 },
+    { id: 's3', group: 'Advanced', type: 'Match Sim', coach: 'Coach Zanish', date: 'Tue 12 Jun', present: 5, late: 0 },
+  ];
+  HISTORY = [
+    { id: 'h1', group: 'Under 16', type: 'Batting Nets', coach: 'Coach Zanish', date: 'Mon 11 Jun', present: 7, late: 1 },
+    { id: 'h2', group: 'Juniors', type: 'Fielding', coach: 'Coach Arun', date: 'Sun 10 Jun', present: 5, late: 0 },
+  ];
+  TAKE = [
+    { id: 't1', av: 'AA', name: 'Ahmed Al Rashidi' }, { id: 't2', av: 'KS', name: 'Kabir Singh' }, { id: 't3', av: 'FZ', name: 'Faris Al Zaabi' },
+    { id: 't4', av: 'MI', name: 'Mohammed Irfan' }, { id: 't5', av: 'ZK', name: 'Zayd Khan' }, { id: 't6', av: 'HM', name: 'Hassan Mahmood' },
+  ];
+  FIN_BARS = [ { m: 'Jan', green: '34%', gold: '8%' }, { m: 'Feb', green: '42%', gold: '10%' }, { m: 'Mar', green: '50%', gold: '12%' }, { m: 'Apr', green: '46%', gold: '9%' }, { m: 'May', green: '62%', gold: '14%' }, { m: 'Jun', green: '72%', gold: '18%' } ];
+  FINANCE = [
+    { family: 'Khalid (Faris)', item: '1-on-1 · 6 block', amount: '900', st: 'paid' },
+    { family: 'Mohammed (Ahmed)', item: 'Monthly · June', amount: '900', st: 'paid' },
+    { family: 'Harpreet (Kabir)', item: 'Monthly · June', amount: '900', st: 'overdue' },
+    { family: 'Bilal (Zayd)', item: 'Ground fee', amount: '800', st: 'pending' },
+  ];
+  PROGRAMS = [
+    { emoji: '🏏', name: 'Elite Batting', enrolled: 12, accent: '#7C3AED', tint: '#F1EAFE', desc: 'High-performance batting stream for top-order players.' },
+    { emoji: '💥', name: 'Pace Academy', enrolled: 8, accent: '#B3261E', tint: '#FBE9E8', desc: 'Fast-bowling biomechanics and death-overs craft.' },
+    { emoji: '🎯', name: 'Spin Lab', enrolled: 6, accent: '#0891B2', tint: '#E5F6FB', desc: 'Flight, drift and variations for spinners.' },
+    { emoji: '💪', name: 'Strength & Conditioning', enrolled: 18, accent: '#1F8A4C', tint: '#E7F4EC', desc: 'Age-appropriate athletic development.' },
+    { emoji: '🧠', name: 'Game Awareness', enrolled: 10, accent: '#C9A84C', tint: '#F5ECD3', desc: 'Match situations and decision-making.' },
+  ];
+
+  fireToast(msg) { this.setState({ toast: msg }); setTimeout(() => this.setState({ toast: '' }), 2400); }
+  setTakeMark(id, status) { this.setState(s => ({ takeMarks: { ...s.takeMarks, [id]: s.takeMarks[id] === status ? null : status } })); }
+  takeBtn(active, kind) {
+    const base = 'width:32px;height:32px;border-radius:8px;font-family:Jost,sans-serif;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;';
+    const map = { p: { on: 'background:#1F8A4C;color:#fff;border:1px solid #1F8A4C;', off: 'background:#fff;color:#1F8A4C;border:1px solid #D6E7DC;' },
+      l: { on: 'background:#C9A84C;color:#fff;border:1px solid #C9A84C;', off: 'background:#fff;color:#A9791B;border:1px solid #EAD7AE;' },
+      a: { on: 'background:#B3261E;color:#fff;border:1px solid #B3261E;', off: 'background:#fff;color:#B3261E;border:1px solid #EFC9C6;' } };
+    return base + (active ? map[kind].on : map[kind].off);
+  }
+
+  sheetField(label, value) {
+    return React.createElement('div', { style: { marginBottom: '13px' } },
+      React.createElement('div', { style: { fontSize: '11px', fontWeight: 600, color: 'rgba(20,20,20,0.5)', marginBottom: '6px' } }, label),
+      React.createElement('div', { style: { height: '46px', border: '1px solid #ECE7E1', borderRadius: '11px', background: '#fff', display: 'flex', alignItems: 'center', padding: '0 13px', fontSize: '13.5px', color: '#3a3a38' } }, value));
+  }
+  sheetBtn(label) {
+    return React.createElement('button', { style: { width: '100%', height: '50px', marginTop: '8px', border: 'none', borderRadius: '13px', background: 'linear-gradient(180deg,#b1141a,#7c0f14)', color: '#FAF7F4', fontFamily: 'Jost,sans-serif', fontSize: '12.5px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer' }, onClick: () => this.setState({ sheet: '' }) }, label);
+  }
+
+  seg(opts, val, onPick, big) {
+    return React.createElement('div', { style: { display: 'flex', gap: '6px', background: '#F1ECE6', borderRadius: '10px', padding: '4px', marginBottom: '14px' } },
+      opts.map(o => React.createElement('button', { key: o.v, onClick: () => onPick(o.v),
+        style: { flex: o.flex || 1, height: (big ? 40 : 34) + 'px', border: 'none', borderRadius: '7px', cursor: 'pointer', fontFamily: 'Jost,sans-serif', fontSize: '12px', fontWeight: 600,
+          background: val === o.v ? '#fff' : 'transparent', color: val === o.v ? '#9C1116' : 'rgba(20,20,20,0.5)' } }, o.label)));
+  }
+  ringMini(used, size) {
+    const c = 2 * Math.PI * 26, left = size - used;
+    return React.createElement('div', { style: { position: 'relative', width: '64px', height: '64px', flex: 'none' } },
+      React.createElement('svg', { width: 64, height: 64, viewBox: '0 0 64 64' },
+        React.createElement('circle', { cx: 32, cy: 32, r: 26, fill: 'none', stroke: '#F1E4C4', strokeWidth: 6 }),
+        React.createElement('circle', { cx: 32, cy: 32, r: 26, fill: 'none', stroke: '#C9A84C', strokeWidth: 6, strokeLinecap: 'round', strokeDasharray: c, strokeDashoffset: c * (1 - used / size), transform: 'rotate(-90 32 32)' })),
+      React.createElement('div', { style: { position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' } },
+        React.createElement('span', { style: { fontFamily: 'Bebas Neue,sans-serif', fontSize: '22px', lineHeight: 0.72, color: '#141414' } }, String(left)),
+        React.createElement('span', { style: { fontSize: '8px', color: 'rgba(20,20,20,0.5)' } }, 'left')));
+  }
+  midTableMobile() {
+    const rows = [ { n: 'Omar Abdullah', g: 'U16', s: 24, u: 6 }, { n: 'Vikram Reddy', g: 'Juniors', s: 12, u: 10 }, { n: 'Yusuf Al Marri', g: 'Advanced', s: 8, u: 8 } ];
+    const head = React.createElement('div', { style: { display: 'flex', padding: '9px 11px', background: '#FAF7F4', borderBottom: '1px solid #ECE7E1', fontSize: '9px', fontWeight: 600, letterSpacing: '0.05em', color: 'rgba(20,20,20,0.45)', textTransform: 'uppercase' } },
+      React.createElement('span', { style: { flex: 1.5 } }, 'Name'), React.createElement('span', { style: { width: '40px', textAlign: 'center' } }, 'Size'), React.createElement('span', { style: { width: '40px', textAlign: 'center' } }, 'Used'), React.createElement('span', { style: { width: '44px', textAlign: 'center' } }, 'Left'));
+    const body = rows.map((r, i) => { const left = r.s - r.u; const color = left >= 3 ? '#1F8A4C' : left >= 1 ? '#C9A84C' : '#B3261E';
+      return React.createElement('div', { key: i, style: { display: 'flex', alignItems: 'center', padding: '10px 11px', borderBottom: '1px solid #F3EEE8', fontSize: '12px' } },
+        React.createElement('span', { style: { flex: 1.5, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, r.n),
+        React.createElement('span', { style: { width: '40px', textAlign: 'center' } }, String(r.s)),
+        React.createElement('span', { style: { width: '40px', textAlign: 'center' } }, String(r.u)),
+        React.createElement('span', { style: { width: '44px', textAlign: 'center', fontFamily: 'Bebas Neue,sans-serif', fontSize: '17px', color } }, String(left))); });
+    return React.createElement('div', { style: { border: '1px solid #ECE7E1', borderRadius: '12px', overflow: 'hidden' } }, head, ...body);
+  }
+
+  buildSheet(kind) {
+    if (kind === 'assignpkg') {
+      const st = this.state;
+      const seg = this.seg([{ v: 'fresh', label: 'Fresh package' }, { v: 'existing', label: 'Existing' }], st.apkgMode || 'fresh', (v) => this.setState({ apkgMode: v }), true);
+      const body = (st.apkgMode === 'existing')
+        ? React.createElement('div', { style: { border: '1px solid #EAD7AE', borderRadius: '13px', background: '#FCF7EC', padding: '15px', marginBottom: '13px' } },
+            React.createElement('div', { style: { fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.06em', color: '#937328', textTransform: 'uppercase', marginBottom: '12px' } }, 'Carry over running package'),
+            React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '14px' } }, this.ringMini(6, 24),
+              React.createElement('div', { style: { flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '9px' } },
+                React.createElement('div', null, React.createElement('div', { style: { fontSize: '10px', fontWeight: 600, color: '#937328', marginBottom: '4px' } }, 'Size'), React.createElement('div', { style: { height: '40px', border: '1px solid #E3CE94', borderRadius: '10px', background: '#fff', display: 'flex', alignItems: 'center', padding: '0 11px', fontSize: '14px', fontWeight: 600 } }, '24')),
+                React.createElement('div', null, React.createElement('div', { style: { fontSize: '10px', fontWeight: 600, color: '#937328', marginBottom: '4px' } }, 'Used'), React.createElement('div', { style: { height: '40px', border: '1px solid #E3CE94', borderRadius: '10px', background: '#fff', display: 'flex', alignItems: 'center', padding: '0 11px', fontSize: '14px', fontWeight: 600 } }, '6')))),
+            React.createElement('div', { style: { marginTop: '11px', fontSize: '12px', color: '#7A5F22' } }, React.createElement('strong', { style: { fontWeight: 700 } }, '18 sessions remaining'), ' auto-calculated'))
+        : this.sheetField('Package type', '8 Sessions, 380 AED');
+      const pay = React.createElement('div', { style: { marginBottom: '13px' } },
+        React.createElement('div', { style: { fontSize: '11px', fontWeight: 600, color: 'rgba(20,20,20,0.5)', marginBottom: '7px' } }, 'Payment received?'),
+        React.createElement('div', { style: { display: 'flex', gap: '8px' } },
+          React.createElement('div', { style: { flex: 1, height: '44px', border: '2px solid #1F8A4C', borderRadius: '11px', background: '#E7F4EC', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 600, color: '#1F8A4C' } }, 'Yes'),
+          React.createElement('div', { style: { flex: 1, height: '44px', border: '1px solid #ECE7E1', borderRadius: '11px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 600, color: 'rgba(20,20,20,0.55)' } }, 'No')),
+        React.createElement('div', { style: { fontSize: '11px', color: 'rgba(20,20,20,0.5)', marginTop: '7px' } }, 'Sessions still count regardless of payment.'));
+      return React.createElement('div', null, seg, body, pay, this.sheetField('Start date', '15 Jun 2026'), this.sheetBtn('Assign Package'));
+    }
+    if (kind === 'assign') return React.createElement('div', null,
+      React.createElement('div', { style: { background: 'linear-gradient(135deg,#FBF4E2,#F3E6BE)', border: '1px solid #E3CE94', borderRadius: '13px', padding: '13px 15px', marginBottom: '16px', fontSize: '12px', lineHeight: 1.5, color: '#7A5F22' } }, 'Appears in the coach\u2019s 1-on-1 tab as an active block. Parent gets a WhatsApp after every session.'),
+      this.sheetField('Player', 'Ahmed Al Rashidi'), this.sheetField('Total sessions', '8'), this.sheetField('Focus', 'Batting \u2014 cover drive'), this.sheetBtn('Assign Sessions'));
+    if (kind === 'coach') return React.createElement('div', null,
+      this.sheetField('Coach name *', 'Coach Arun Prasad'), this.sheetField('Specialisation', 'Spin Bowling'), this.sheetField('Phone', '+971 50 ___ ____'), this.sheetField('Groups', 'Under 16, Juniors'), this.sheetBtn('Add Coach'));
+    if (kind === 'player') {
+      const st = this.state;
+      const toggle = this.seg([{ v: 'single', label: 'Single' }, { v: 'bulk', label: 'Bulk' }], st.mAddMode, (v) => this.setState({ mAddMode: v }), true);
+      if (st.mAddMode === 'single') {
+        const pkgSeg = React.createElement('div', { style: { marginTop: '4px', marginBottom: '13px' } },
+          React.createElement('div', { style: { fontSize: '11px', fontWeight: 600, color: 'rgba(20,20,20,0.5)', marginBottom: '8px' } }, 'Package status'),
+          React.createElement('div', { style: { display: 'flex', gap: '8px' } },
+            ['new', 'existing'].map(k => React.createElement('button', { key: k, onClick: () => this.setState({ mPkg: k }),
+              style: { flex: k === 'existing' ? 1.5 : 1, height: '44px', borderRadius: '11px', cursor: 'pointer', fontFamily: 'Jost,sans-serif', fontSize: '12px', fontWeight: 600,
+                border: st.mPkg === k ? '2px solid #9C1116' : '1px solid #ECE7E1', background: st.mPkg === k ? '#F6E2E0' : '#fff', color: st.mPkg === k ? '#9C1116' : 'rgba(20,20,20,0.55)' } }, k === 'new' ? 'New player' : 'Already has a package'))));
+        const fields = React.createElement('div', null,
+          this.sheetField('Full name *', 'Abdul Rahman Al Hashimi'), this.sheetField('Age, Group', '14, Under 16'), this.sheetField('Center', 'Danube Sports City'), this.sheetField('Parent WhatsApp *', '+971 50 ___ ____'), pkgSeg);
+        const tail = st.mPkg === 'new'
+          ? React.createElement('div', { style: { background: '#EAF1FB', border: '1px solid #C3D7F2', borderRadius: '11px', padding: '11px 13px', marginBottom: '8px', fontSize: '12px', color: '#3D5A8A' } }, 'Assign a package after adding, from Payments, Packages.')
+          : React.createElement('div', { style: { border: '1px solid #EAD7AE', borderRadius: '13px', background: '#FCF7EC', padding: '15px', marginBottom: '8px' } },
+              React.createElement('div', { style: { fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.06em', color: '#937328', textTransform: 'uppercase', marginBottom: '12px' } }, 'Migrate running package'),
+              React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '14px' } }, this.ringMini(6, 24),
+                React.createElement('div', { style: { flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '9px' } },
+                  React.createElement('div', null, React.createElement('div', { style: { fontSize: '10px', fontWeight: 600, color: '#937328', marginBottom: '4px' } }, 'Size'), React.createElement('div', { style: { height: '40px', border: '1px solid #E3CE94', borderRadius: '10px', background: '#fff', display: 'flex', alignItems: 'center', padding: '0 11px', fontSize: '14px', fontWeight: 600 } }, '24')),
+                  React.createElement('div', null, React.createElement('div', { style: { fontSize: '10px', fontWeight: 600, color: '#937328', marginBottom: '4px' } }, 'Used'), React.createElement('div', { style: { height: '40px', border: '1px solid #E3CE94', borderRadius: '10px', background: '#fff', display: 'flex', alignItems: 'center', padding: '0 11px', fontSize: '14px', fontWeight: 600 } }, '6')))),
+              React.createElement('div', { style: { marginTop: '11px', fontSize: '12px', color: '#7A5F22' } }, React.createElement('strong', { style: { fontWeight: 700 } }, '18 sessions remaining'), ' auto-calculated'));
+        return React.createElement('div', null, toggle, fields, tail, this.sheetBtn('Add Player'));
+      }
+      const bulkToggle = this.seg([{ v: 'fresh', label: 'New players' }, { v: 'mid', label: 'Mid-package' }], st.mBulk, (v) => this.setState({ mBulk: v }));
+      if (st.mBulk === 'fresh') return React.createElement('div', null, toggle, bulkToggle,
+        React.createElement('div', { style: { background: '#FBF1DD', border: '1px solid #EAD7AE', borderRadius: '11px', padding: '11px 13px', marginBottom: '11px', fontSize: '12px', color: '#6E4E12' } }, 'One per line: Name, Age, Group, Phone'),
+        React.createElement('div', { style: { height: '110px', border: '1px solid #ECE7E1', borderRadius: '11px', background: '#fff', padding: '12px', fontSize: '12.5px', lineHeight: 1.7, color: '#3a3a38' } }, 'Imran Khalid, 13, Juniors, +971 50 111 2233'),
+        this.sheetBtn('Add 3 Players'));
+      return React.createElement('div', null, toggle, bulkToggle,
+        React.createElement('div', { style: { background: '#FCF7EC', border: '1px solid #EAD7AE', borderRadius: '11px', padding: '11px 13px', marginBottom: '12px', fontSize: '12px', color: '#7A5F22' } }, React.createElement('span', null, 'Migrate mid-package kids. '), React.createElement('strong', null, 'Remaining auto-calculates.')),
+        this.midTableMobile(),
+        React.createElement('div', { style: { fontSize: '10.5px', color: 'rgba(20,20,20,0.45)', marginTop: '8px' } }, 'Format: Name, Group, Phone, Size, Used'),
+        this.sheetBtn('Import 3 Players'));
+    }
+    if (kind === 'ground') return React.createElement('div', null,
+      this.sheetField('Venue', 'Sharjah Cricket Stadium'), this.sheetField('Date · Amount', '20 Jun \u00b7 800 AED'), this.sheetField('Group', 'Advanced'), this.sheetField('Note', 'Friendly vs Sharjah Stars'), this.sheetBtn('Add Booking'));
+    if (kind === 'program') return React.createElement('div', null,
+      this.sheetField('Program name', 'Wicketkeeping Academy'), this.sheetField('Emoji', '\ud83e\udde4'), this.sheetField('Description', 'Specialist glove-work & footwork'), this.sheetField('Enrol', 'Mohammed Irfan, Kabir Singh'), this.sheetBtn('Create Program'));
+    return null;
+  }
+
+  renderVals() {
+    const st = this.state, v = st.view;
+    const heads = {
+      home: ['Sat · 14 Jun', 'Dashboard'], players: ['42 players', 'Players'],
+      finance: ['June · AED', 'Finance'], attend: ['Coach submissions', 'Attendance'],
+      payments: ['Packages & fees', 'Payments'], programs: ['Coaching streams', 'Programs'],
+    };
+    const H = heads[v] || ['', ''];
+
+    const navColor = (id) => (v === id ? '#9C1116' : '#A39C92');
+    const c = { home: navColor('home'), players: navColor('players'), finance: navColor('finance'), attend: navColor('attend'), payments: navColor('payments') };
+
+    const alertColors = { red: { bg: '#FBE9E8', border: '#EFC9C6', dot: '#B3261E', ink: '#7C1B16' }, amber: { bg: '#FBF1DD', border: '#EAD7AE', dot: '#A9791B', ink: '#6E4E12' } };
+    const alerts = this.ALERTS.map(a => ({ ...a, ...alertColors[a.kind] }));
+    const coaches = this.COACHES.map(co => ({ ...co, assign: () => this.setState({ sheet: 'assign' }) }));
+
+    const groups = this.GROUPS.map(g => {
+      const active = g === st.groupFilter;
+      return { label: g, pick: () => this.setState({ groupFilter: g }), bg: active ? '#9C1116' : '#fff', fg: active ? '#fff' : 'rgba(20,20,20,0.6)', border: active ? '#9C1116' : '#ECE7E1' };
+    });
+    const players = this.PLAYERS.filter(p => st.groupFilter === 'All' || p.group === st.groupFilter).map(p => {
+      const m = this.PKMAP[p.pkState];
+      return { ...p, ring: p.pkState === 'gold' ? 'linear-gradient(145deg,#EFDC97,#C9A84C)' : 'linear-gradient(145deg,#E0D8CE,#C9C0B4)',
+        pkg: m.status, pkInk: m.sInk, pkBg: m.sBg, openDetail: () => this.setState({ selId: p.id, sheet: 'assignpkg', apkgMode: 'fresh' }) };
+    });
+
+    const counterMap = { healthy: { color: '#1F8A4C', sInk: '#1F8A4C', sBg: '#E7F4EC', tag: 'Healthy' }, low: { color: '#C9A84C', sInk: '#A9791B', sBg: '#FBF1DD', tag: 'Low' },
+      exhausted: { color: '#B3261E', sInk: '#B3261E', sBg: '#FBE9E8', tag: '0 left' }, unlimited: { color: '#2563EB', sInk: '#2563EB', sBg: '#EAF1FB', tag: 'Unltd' }, comp: { color: '#7C3AED', sInk: '#7C3AED', sBg: '#F1EAFE', tag: 'Comp' } };
+    const pkgStatus = this.PKG_STATUS.map(ps => {
+      const cm = counterMap[ps.st]; const cc = 2 * Math.PI * 16; const unl = ps.st === 'unlimited'; const left = ps.total - ps.used;
+      return { name: ps.name, color: cm.color, sInk: cm.sInk, sBg: cm.sBg, tag: cm.tag, circ: cc, off: unl ? 0 : cc * (1 - ps.used / ps.total),
+        ringLabel: unl ? '∞' : (ps.st === 'comp' ? ps.used + '/' + ps.total : left),
+        label: unl ? 'Monthly unlimited' : ps.st === 'comp' ? 'Complimentary · ' + left + ' left' : ps.st === 'exhausted' ? 'Used all · still counting' : left + ' of ' + ps.total + ' left' };
+    });
+    const groundMap = { paid: { ink: '#1F8A4C', bg: '#E7F4EC', status: 'Paid' }, pending: { ink: '#A9791B', bg: '#FBF1DD', status: 'Pending' } };
+    const ground = this.GROUND.map(g => ({ venue: g.venue, meta: g.meta, amount: g.amount, ...groundMap[g.st] }));
+
+    const payTabsDef = [['packages', 'Packages'], ['match', 'Match Fees'], ['ground', 'Ground'], ['settings', 'Settings']];
+    const payTabs = payTabsDef.map(([id, label]) => ({ label, go: () => this.setState({ payTab: id }), bg: id === st.payTab ? '#9C1116' : '#fff', fg: id === st.payTab ? '#fff' : 'rgba(20,20,20,0.6)', border: id === st.payTab ? '#9C1116' : '#ECE7E1' }));
+
+    const attTabsDef = [['pending', 'Pending'], ['history', 'History'], ['take', '✏️ Take']];
+    const attTabs = attTabsDef.map(([id, label]) => ({ label, go: () => this.setState({ attTab: id }), bg: id === st.attTab ? '#9C1116' : '#fff', fg: id === st.attTab ? '#fff' : 'rgba(20,20,20,0.6)', border: id === st.attTab ? '#9C1116' : '#ECE7E1' }));
+    const isHistory = st.attTab === 'history';
+    const submissions = (isHistory ? this.HISTORY : this.SUBMISSIONS).map(su => {
+      const done = isHistory || !!st.confirmed[su.id];
+      return { ...su, edge: done ? '#1F8A4C' : '#C9A84C', btnLabel: done ? '✓ Confirmed · WhatsApp sent' : '✅ Confirm & Send WhatsApp',
+        btnBg: done ? '#E7F4EC' : '#1F8A4C', btnFg: done ? '#1F8A4C' : '#fff',
+        confirm: () => { if (!done) { this.setState(s => ({ confirmed: { ...s.confirmed, [su.id]: true } })); this.fireToast('WhatsApp sent to ' + su.present + ' parents'); } } };
+    });
+    const takeRows = this.TAKE.map(p => {
+      const mk = st.takeMarks[p.id];
+      const edge = mk === 'present' ? '#1F8A4C' : mk === 'late' ? '#C9A84C' : '#ECE7E1';
+      return { ...p, edge, pStyle: this.takeBtn(mk === 'present', 'p'), lStyle: this.takeBtn(mk === 'late', 'l'),
+        setP: () => this.setTakeMark(p.id, 'present'), setL: () => this.setTakeMark(p.id, 'late') };
+    });
+
+    const finStMap = { paid: { ink: '#1F8A4C', bg: '#E7F4EC', status: 'Paid' }, overdue: { ink: '#B3261E', bg: '#FBE9E8', status: 'Due' }, pending: { ink: '#A9791B', bg: '#FBF1DD', status: 'Pend' } };
+    const finance = this.FINANCE.map(f => ({ family: f.family, item: f.item, amount: f.amount, ...finStMap[f.st] }));
+    const programs = this.PROGRAMS.map(pg => ({ ...pg }));
+
+    const sheetTitles = { assign: 'Assign Private Sessions', coach: 'Add Coach', player: 'Add Player', ground: 'Add Ground Booking', program: 'Create Program', assignpkg: 'Assign Package' };
+
+    return {
+      kicker: H[0], title: H[1], c,
+      isHome: v === 'home', isPlayers: v === 'players', isFinance: v === 'finance', isAttend: v === 'attend', isPayments: v === 'payments', isPrograms: v === 'programs',
+      goHome: () => this.setState({ view: 'home' }), goPlayers: () => this.setState({ view: 'players' }), goFinance: () => this.setState({ view: 'finance' }),
+      goAttend: () => this.setState({ view: 'attend' }), goPayments: () => this.setState({ view: 'payments' }), goPrograms: () => this.setState({ view: 'programs' }),
+      alerts, coaches, groups, players, pkgStatus, ground, finance, programs, finBars: this.FIN_BARS,
+      ...(() => { const ag = { week: [ { group: 'Elite', color: '#9C1116', attended: 16, enrolled: 18, sessions: 4, visits: 41 }, { group: 'Level Up', color: '#C9A84C', attended: 11, enrolled: 14, sessions: 3, visits: 22 }, { group: 'Launch Pad', color: '#1F8A4C', attended: 8, enrolled: 10, sessions: 3, visits: 14 } ], month: [ { group: 'Elite', color: '#9C1116', attended: 18, enrolled: 18, sessions: 17, visits: 168 }, { group: 'Level Up', color: '#C9A84C', attended: 13, enrolled: 14, sessions: 13, visits: 96 }, { group: 'Launch Pad', color: '#1F8A4C', attended: 9, enrolled: 10, sessions: 12, visits: 61 } ] }[st.attRange || 'week'];
+        return { attByGroup: ag, attTotalKids: ag.reduce((a, g) => a + g.attended, 0), attTotalVisits: ag.reduce((a, g) => a + g.visits, 0),
+          attRangeLabel: (st.attRange || 'week') === 'week' ? 'this week' : 'this month',
+          attRangeTabs: [['week', 'Week'], ['month', 'Month']].map(([id, label]) => ({ label, pick: () => this.setState({ attRange: id }), bg: (st.attRange || 'week') === id ? '#9C1116' : '#fff', fg: (st.attRange || 'week') === id ? '#fff' : 'rgba(20,20,20,0.6)', border: (st.attRange || 'week') === id ? '#9C1116' : '#ECE7E1' })) }; })(),
+      payTabs, payIsPackages: st.payTab === 'packages', payIsMatch: st.payTab === 'match', payIsGround: st.payTab === 'ground', payIsSettings: st.payTab === 'settings',
+      attTabs, attIsQueue: st.attTab !== 'take', attIsTake: st.attTab === 'take', submissions, takeRows,
+      attPrevDay: () => this.setState(s => ({ attDayOffset: (s.attDayOffset || 0) - 1 })),
+      attNextDay: () => this.setState(s => ({ attDayOffset: Math.min(0, (s.attDayOffset || 0) + 1) })),
+      ...this.attDateBatchVals(),
+      openAddCoach: () => this.setState({ sheet: 'coach' }), openAddPlayer: () => this.setState({ sheet: 'player', mAddMode: 'single', mPkg: 'new', mBulk: 'fresh' }),
+      openGround: () => this.setState({ sheet: 'ground' }), openProgram: () => this.setState({ sheet: 'program' }),
+      submitTake: () => { this.setState({ attTab: 'history' }); this.fireToast('Submitted & confirmed · credited Coach Zanish'); },
+      saveBank: () => this.fireToast('Bank details saved'),
+      closeModals: () => this.setState({ sheet: '' }),
+      stopProp: (e) => { if (e && e.stopPropagation) e.stopPropagation(); },
+      anySheet: !!st.sheet, sheetTitle: sheetTitles[st.sheet] || '', sheetBody: this.buildSheet(st.sheet),
+      toast: st.toast,
+    };
+  }
+}
+</script>
+</body>
+</html>

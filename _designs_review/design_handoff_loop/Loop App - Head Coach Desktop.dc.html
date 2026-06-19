@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  .lp-scroll::-webkit-scrollbar { width: 8px; }
+  .lp-scroll::-webkit-scrollbar-thumb { background: #D9D2C8; border-radius: 4px; }
+</style>
+</helmet>
+
+<div style="min-height:100vh; background:#E7E4DF; font-family:'Jost',sans-serif; color:#141414; padding:32px 24px 48px; display:flex; flex-direction:column; align-items:center; gap:16px;">
+
+  <div style="width:100%; max-width:1280px; display:flex; align-items:center; justify-content:space-between;">
+    <div style="font-size:11px; font-weight:600; letter-spacing:0.3em; color:#9C1116; text-transform:uppercase;">Head Coach · Desktop</div>
+    <div style="font-size:11px; letter-spacing:0.06em; color:rgba(20,20,20,0.45);">Development oversight · all coaches</div>
+  </div>
+
+  <!-- ===== LOGIN (3-role picker) ===== -->
+  <sc-if value="{{ showLogin }}" hint-placeholder-val="{{ true }}">
+    <div style="width:1280px; max-width:100%; height:760px; border-radius:18px; overflow:hidden; box-shadow:0 50px 100px -40px rgba(20,20,20,0.55); display:flex;">
+      <!-- left brand -->
+      <div style="width:46%; position:relative; overflow:hidden; background:radial-gradient(125% 90% at 30% 8%, #34151a 0%, #1a0d0e 54%, #100a0b 100%); display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        <div style="position:absolute; inset:0; opacity:0.06; background-image:repeating-linear-gradient(48deg, transparent 0 13px, rgba(201,168,76,0.9) 14px 16px, transparent 16px 17px);"></div>
+        <div style="position:absolute; top:50%; left:50%; width:460px; height:460px; transform:translate(-50%,-50%); border:1px solid rgba(201,168,76,0.12); border-radius:50%;"></div>
+        <svg width="118" height="118" viewBox="-100 -100 200 200" style="position:relative; filter:drop-shadow(0 18px 30px rgba(0,0,0,0.5));"><circle r="83.19" fill="#9C1116"></circle><circle r="78" fill="none" stroke="#C9A84C" stroke-width="1.1" stroke-opacity="0.8"></circle><circle r="69" fill="none" stroke="#C9A84C" stroke-width="1.1" stroke-opacity="0.8"></circle><circle r="73.5" fill="none" stroke="#C9A84C" stroke-width="5.6" stroke-dasharray="2 9" stroke-linecap="round"></circle><path d="M23.6 -49.24 L11.04 -49.24 L11.04 -49.25 L-44.6 -49.25 L-28.43 -21.25 L-3.9 -21.25 L-5.74 -18.07 L-44.6 49.24 L-23.6 49.24 L-23.6 49.25 L44.6 49.24 L28.44 21.25 L3.9 21.25 L5.74 18.06 L44.6 -49.24 Z" fill="#FAF7F4"></path></svg>
+        <div style="position:relative; font-family:'Bebas Neue',sans-serif; font-size:58px; line-height:0.82; letter-spacing:0.05em; color:#FAF7F4; margin-top:24px;">LOOP</div>
+        <div style="position:relative; display:flex; align-items:center; gap:12px; margin-top:11px;"><span style="width:24px; height:1px; background:rgba(201,168,76,0.5);"></span><span style="font-size:11px; font-weight:500; letter-spacing:0.42em; color:#C9A84C; text-transform:uppercase;">By Zak Cricket</span><span style="width:24px; height:1px; background:rgba(201,168,76,0.5);"></span></div>
+      </div>
+      <!-- right: role picker -->
+      <div style="flex:1; background:#FAF7F4; display:flex; flex-direction:column; justify-content:center; padding:0 64px;">
+        <div style="font-size:11px; font-weight:600; letter-spacing:0.3em; color:#9C1116; text-transform:uppercase;">Sign in</div>
+        <div style="font-family:'Bebas Neue',sans-serif; font-size:40px; line-height:0.95; letter-spacing:0.02em; margin-top:8px;">Choose your view</div>
+        <div style="font-size:13.5px; color:rgba(20,20,20,0.55); margin-top:6px;">One login, three destinations — by role.</div>
+        <div style="display:flex; flex-direction:column; gap:13px; margin-top:30px;">
+          <div style="display:flex; align-items:center; gap:15px; padding:18px; border:1px solid #ECE7E1; border-radius:15px; background:#fff; opacity:0.7;">
+            <span style="width:46px; height:46px; flex:none; border-radius:13px; background:#F6E2E0; display:flex; align-items:center; justify-content:center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9C1116" stroke-width="2"><rect x="3" y="6" width="18" height="12" rx="2.4"></rect><path d="M3 10h18"></path></svg></span>
+            <div style="flex:1;"><div style="font-size:15px; font-weight:600;">Admin</div><div style="font-size:12px; color:rgba(20,20,20,0.5);">Operations, finance &amp; payments</div></div>
+            <span style="font-size:11px; color:rgba(20,20,20,0.4);">Separate app</span>
+          </div>
+          <button onClick="{{ login }}" style="display:flex; align-items:center; gap:15px; padding:18px; border:2px solid #9C1116; border-radius:15px; background:#fff; cursor:pointer; text-align:left; font-family:'Jost',sans-serif;" style-hover="background:#FFF8F7;">
+            <span style="width:46px; height:46px; flex:none; border-radius:13px; background:linear-gradient(145deg,#EFDC97,#C9A84C); display:flex; align-items:center; justify-content:center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3A2A06" stroke-width="2"><path d="M12 3 4 7v5c0 4.5 3.2 8.3 8 9 4.8-.7 8-4.5 8-9V7z"></path><path d="m9 12 2 2 4-4"></path></svg></span>
+            <div style="flex:1;"><div style="font-size:15px; font-weight:600;">Head Coach</div><div style="font-size:12px; color:rgba(20,20,20,0.55);">Development oversight across all coaches</div></div>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9C1116" stroke-width="2.2"><path d="m9 18 6-6-6-6"></path></svg>
+          </button>
+          <div style="display:flex; align-items:center; gap:15px; padding:18px; border:1px solid #ECE7E1; border-radius:15px; background:#fff; opacity:0.7;">
+            <span style="width:46px; height:46px; flex:none; border-radius:13px; background:#F3EEE8; display:flex; align-items:center; justify-content:center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6E0C10" stroke-width="2"><circle cx="12" cy="8" r="3.4"></circle><path d="M4.5 20a7.5 7.5 0 0 1 15 0"></path></svg></span>
+            <div style="flex:1;"><div style="font-size:15px; font-weight:600;">Coach</div><div style="font-size:12px; color:rgba(20,20,20,0.5);">Own players, attendance, reports, matches</div></div>
+            <span style="font-size:11px; color:rgba(20,20,20,0.4);">Separate app</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ===== APP ===== -->
+  <sc-if value="{{ showApp }}" hint-placeholder-val="{{ false }}">
+    <div style="width:1280px; max-width:100%; height:860px; background:#FAF7F4; border-radius:18px; overflow:hidden; box-shadow:0 50px 100px -40px rgba(20,20,20,0.55); display:flex; border:1px solid rgba(20,20,20,0.08);">
+
+      <!-- SIDEBAR -->
+      <div style="width:240px; flex:none; background:#141414; display:flex; flex-direction:column; padding:22px 16px;">
+        <div style="display:flex; align-items:center; gap:11px; padding:6px 8px 22px;">
+          <svg width="38" height="38" viewBox="-100 -100 200 200"><circle r="83.19" fill="#9C1116"></circle><circle r="73" fill="none" stroke="#C9A84C" stroke-width="4.4"></circle><path d="M23.6 -49.24 L11.04 -49.24 L11.04 -49.25 L-44.6 -49.25 L-28.43 -21.25 L-3.9 -21.25 L-5.74 -18.07 L-44.6 49.24 L-23.6 49.24 L-23.6 49.25 L44.6 49.24 L28.44 21.25 L3.9 21.25 L5.74 18.06 L44.6 -49.24 Z" fill="#FAF7F4"></path></svg>
+          <div><div style="font-family:'Bebas Neue',sans-serif; font-size:22px; line-height:0.82; letter-spacing:0.04em; color:#FAF7F4;">LOOP</div><div style="font-size:7.5px; font-weight:500; letter-spacing:0.3em; color:#C9A84C; text-transform:uppercase; margin-top:2px;">Head Coach</div></div>
+        </div>
+        <div style="font-size:9.5px; font-weight:600; letter-spacing:0.22em; color:rgba(250,247,244,0.34); text-transform:uppercase; padding:0 10px 10px;">Development</div>
+        <div style="display:flex; flex-direction:column; gap:3px;">
+          <button onClick="{{ goHome }}" style="display:flex; align-items:center; gap:12px; height:44px; padding:0 12px; border:none; border-radius:11px; cursor:pointer; font-family:'Jost',sans-serif; font-size:13.5px; font-weight:600; text-align:left; white-space:nowrap; background:{{ s.home.bg }}; color:{{ s.home.fg }};"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.6 12 3.5l9 7.1"></path><path d="M5.4 9.2V19a1 1 0 0 0 1 1h11.2a1 1 0 0 0 1-1V9.2"></path></svg>Coaches</button>
+          <button onClick="{{ goReports }}" style="display:flex; align-items:center; gap:12px; height:44px; padding:0 12px; border:none; border-radius:11px; cursor:pointer; font-family:'Jost',sans-serif; font-size:13.5px; font-weight:600; text-align:left; white-space:nowrap; background:{{ s.reports.bg }}; color:{{ s.reports.fg }};"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>All Reports<span style="margin-left:auto; font-size:10px; font-weight:700; background:#C9A84C; color:#3A2A06; border-radius:999px; padding:2px 7px;">5</span></button>
+          <button onClick="{{ goFlags }}" style="display:flex; align-items:center; gap:12px; height:44px; padding:0 12px; border:none; border-radius:11px; cursor:pointer; font-family:'Jost',sans-serif; font-size:13.5px; font-weight:600; text-align:left; white-space:nowrap; background:{{ s.flags.bg }}; color:{{ s.flags.fg }};"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15V4a1 1 0 0 1 1-1h14l-3 4 3 4H5"></path><path d="M4 22v-7"></path></svg>Flags<span style="margin-left:auto; font-size:10px; font-weight:700; background:#9C1116; color:#fff; border-radius:999px; padding:2px 7px;">3</span></button>
+        </div>
+        <div style="font-size:9.5px; font-weight:600; letter-spacing:0.22em; color:rgba(250,247,244,0.34); text-transform:uppercase; padding:18px 10px 10px;">Performance</div>
+        <div style="display:flex; flex-direction:column; gap:3px;">
+          <button onClick="{{ goMatches }}" style="display:flex; align-items:center; gap:12px; height:44px; padding:0 12px; border:none; border-radius:11px; cursor:pointer; font-family:'Jost',sans-serif; font-size:13.5px; font-weight:600; text-align:left; white-space:nowrap; background:{{ s.matches.bg }}; color:{{ s.matches.fg }};"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8.5h13"></path><path d="M7.5 8.5V19.5"></path><path d="M12 8.5V19.5"></path><path d="M16.5 8.5V19.5"></path><path d="M9 8.5 9.8 5"></path><path d="m15 8.5-.8-3.5"></path></svg>Matches</button>
+          <button onClick="{{ goRankings }}" style="display:flex; align-items:center; gap:12px; height:44px; padding:0 12px; border:none; border-radius:11px; cursor:pointer; font-family:'Jost',sans-serif; font-size:13.5px; font-weight:600; text-align:left; white-space:nowrap; background:{{ s.rankings.bg }}; color:{{ s.rankings.fg }};"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.6 9 6.2 3.2"></path><path d="m15.4 9 2.4-5.8"></path><circle cx="12" cy="15" r="5.7"></circle></svg>Rankings</button>
+          <button onClick="{{ goBadges }}" style="display:flex; align-items:center; gap:12px; height:44px; padding:0 12px; border:none; border-radius:11px; cursor:pointer; font-family:'Jost',sans-serif; font-size:13.5px; font-weight:600; text-align:left; white-space:nowrap; background:{{ s.badges.bg }}; color:{{ s.badges.fg }};"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"></circle><path d="m8.5 14-1.5 7 5-3 5 3-1.5-7"></path></svg>Achievements</button>
+        </div>
+        <div style="margin-top:auto; display:flex; align-items:center; gap:11px; padding:11px 10px; border-radius:13px; background:rgba(250,247,244,0.06);">
+          <div style="width:38px; height:38px; flex:none; border-radius:50%; padding:2px; background:linear-gradient(145deg,#EFDC97,#C9A84C);"><div style="width:100%; height:100%; border-radius:50%; background:#2a2a2a; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:14px; color:#FAF7F4;">RS</div></div>
+          <div style="flex:1; min-width:0;"><div style="font-size:12.5px; font-weight:600; color:#FAF7F4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Coach Rashid</div><div style="font-size:10.5px; color:#C9A84C;">Head Coach</div></div>
+        </div>
+      </div>
+
+      <!-- MAIN -->
+      <div style="flex:1; min-width:0; display:flex; flex-direction:column;">
+        <div style="flex:none; height:74px; border-bottom:1px solid #ECE7E1; display:flex; align-items:center; justify-content:space-between; padding:0 28px;">
+          <div><div style="font-family:'Bebas Neue',sans-serif; font-size:24px; line-height:0.9; letter-spacing:0.02em;">{{ viewTitle }}</div><div style="font-size:12px; color:rgba(20,20,20,0.5); margin-top:2px;">{{ viewSub }}</div></div>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div style="display:flex; align-items:center; gap:7px; height:34px; padding:0 13px; background:#E7F4EC; border:1px solid #C2E2CE; border-radius:999px;"><span style="width:7px; height:7px; border-radius:50%; background:#1F8A4C;"></span><span style="font-size:11.5px; font-weight:600; color:#1F6E40;">Development view · no finance</span></div>
+          </div>
+        </div>
+
+        <div class="lp-scroll" style="flex:1; overflow-y:auto; padding:24px 28px 36px;">
+
+          <!-- ===== COACHES DASHBOARD ===== -->
+          <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+            <div>
+              <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:20px;">
+                <div style="background:#fff; border:1px solid #ECE7E1; border-radius:15px; padding:18px;"><div style="font-size:11px; font-weight:600; letter-spacing:0.14em; color:rgba(20,20,20,0.45); text-transform:uppercase;">Coaches</div><div style="font-family:'Bebas Neue',sans-serif; font-size:38px; line-height:0.8; margin-top:12px;">4</div></div>
+                <div style="background:#fff; border:1px solid #ECE7E1; border-radius:15px; padding:18px;"><div style="font-size:11px; font-weight:600; letter-spacing:0.14em; color:rgba(20,20,20,0.45); text-transform:uppercase;">Reports · 30d</div><div style="font-family:'Bebas Neue',sans-serif; font-size:38px; line-height:0.8; margin-top:12px;">86</div></div>
+                <div style="background:linear-gradient(150deg,#fff,#FBF4E2); border:1px solid #EAD7AE; border-radius:15px; padding:18px;"><div style="font-size:11px; font-weight:600; letter-spacing:0.14em; color:#937328; text-transform:uppercase;">Pending Drafts</div><div style="font-family:'Bebas Neue',sans-serif; font-size:38px; line-height:0.8; color:#937328; margin-top:12px;">5</div></div>
+                <div style="background:#fff; border:1px solid #EFC9C6; border-radius:15px; padding:18px;"><div style="font-size:11px; font-weight:600; letter-spacing:0.14em; color:#B3261E; text-transform:uppercase;">Needs Attention</div><div style="font-family:'Bebas Neue',sans-serif; font-size:38px; line-height:0.8; color:#B3261E; margin-top:12px;">3</div></div>
+              </div>
+              <div style="font-size:13px; font-weight:600; margin-bottom:14px;">Coach Activity</div>
+              <div style="display:flex; flex-direction:column; gap:13px;">
+                <sc-for list="{{ coaches }}" as="c" hint-placeholder-count="4">
+                  <div onClick="{{ c.open }}" style="background:#fff; border:1px solid {{ c.border }}; border-left:3px solid {{ c.edge }}; border-radius:16px; padding:18px; cursor:pointer;" style-hover="border-color:#D9CFC4;">
+                    <div style="display:flex; align-items:center; gap:15px;">
+                      <div style="width:48px; height:48px; flex:none; border-radius:50%; padding:2.5px; background:linear-gradient(145deg,#EFDC97,#C9A84C);"><div style="width:100%; height:100%; border-radius:50%; background:#2a2a2a; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:18px; color:#FAF7F4;">{{ c.ci }}</div></div>
+                      <div style="flex:1; min-width:0;"><div style="font-size:15.5px; font-weight:600;">{{ c.name }}</div><div style="font-size:12px; color:rgba(20,20,20,0.5); margin-top:1px;">{{ c.spec }} · {{ c.players }} players</div></div>
+                      <div style="display:flex; gap:22px; align-items:center;">
+                        <div style="text-align:center;"><div style="font-family:'Bebas Neue',sans-serif; font-size:24px; line-height:0.8; color:#141414;">{{ c.sessions }}</div><div style="font-size:8.5px; letter-spacing:0.1em; color:rgba(20,20,20,0.45); text-transform:uppercase; margin-top:3px;">Sessions</div></div>
+                        <div style="text-align:center;"><div style="font-family:'Bebas Neue',sans-serif; font-size:24px; line-height:0.8; color:#1F8A4C;">{{ c.sent }}</div><div style="font-size:8.5px; letter-spacing:0.1em; color:rgba(20,20,20,0.45); text-transform:uppercase; margin-top:3px;">Sent</div></div>
+                        <div style="text-align:center;"><div style="font-family:'Bebas Neue',sans-serif; font-size:24px; line-height:0.8; color:{{ c.pendInk }};">{{ c.pending }}</div><div style="font-size:8.5px; letter-spacing:0.1em; color:rgba(20,20,20,0.45); text-transform:uppercase; margin-top:3px;">Pending</div></div>
+                        <span style="font-size:10px; font-weight:700; letter-spacing:0.06em; color:{{ c.tagInk }}; background:{{ c.tagBg }}; padding:6px 11px; border-radius:8px; text-transform:uppercase; width:128px; text-align:center;">{{ c.tag }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- ===== COACH DETAIL ===== -->
+          <sc-if value="{{ isCoach }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <button onClick="{{ goHome }}" style="display:flex; align-items:center; gap:7px; height:36px; padding:0 13px; border:1px solid #ECE7E1; border-radius:10px; background:#fff; color:rgba(20,20,20,0.6); font-family:'Jost',sans-serif; font-size:12px; font-weight:600; cursor:pointer; margin-bottom:16px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"></path></svg>All coaches</button>
+              <div style="display:flex; align-items:center; gap:16px; background:#fff; border:1px solid #ECE7E1; border-radius:16px; padding:20px; margin-bottom:18px;">
+                <div style="width:58px; height:58px; flex:none; border-radius:50%; padding:3px; background:linear-gradient(145deg,#EFDC97,#C9A84C);"><div style="width:100%; height:100%; border-radius:50%; background:#2a2a2a; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:22px; color:#FAF7F4;">{{ cd.ci }}</div></div>
+                <div style="flex:1;"><div style="font-family:'Bebas Neue',sans-serif; font-size:26px; line-height:0.95;">{{ cd.name }}</div><div style="font-size:12.5px; color:rgba(20,20,20,0.5); margin-top:3px;">{{ cd.spec }} · {{ cd.players }} players · {{ cd.sessions }} sessions this season</div></div>
+                <div style="display:flex; gap:10px;">
+                  <div style="text-align:center; padding:10px 16px; background:#E7F4EC; border-radius:12px;"><div style="font-family:'Bebas Neue',sans-serif; font-size:24px; color:#1F8A4C;">{{ cd.sent }}</div><div style="font-size:8.5px; letter-spacing:0.1em; color:#1F6E40; text-transform:uppercase; margin-top:2px;">Sent</div></div>
+                  <div style="text-align:center; padding:10px 16px; background:#FBF1DD; border-radius:12px;"><div style="font-family:'Bebas Neue',sans-serif; font-size:24px; color:#A9791B;">{{ cd.pending }}</div><div style="font-size:8.5px; letter-spacing:0.1em; color:#A9791B; text-transform:uppercase; margin-top:2px;">Pending</div></div>
+                </div>
+              </div>
+              <!-- read-only note -->
+              <div style="display:flex; align-items:center; gap:9px; background:#EAF1FB; border:1px solid #C3D7F2; border-radius:12px; padding:11px 15px; margin-bottom:18px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5"></path><path d="M12 16h.01"></path></svg><span style="font-size:12px; color:#3D5A8A;">You can review &amp; monitor — the coach still owns sending. This is oversight, not control.</span></div>
+              <div style="font-size:12px; font-weight:600; letter-spacing:0.12em; color:rgba(20,20,20,0.5); text-transform:uppercase; margin-bottom:12px;">Reports — sent &amp; pending</div>
+              <div style="display:flex; flex-direction:column; gap:10px;">
+                <sc-for list="{{ cd.reports }}" as="r" hint-placeholder-count="4">
+                  <div onClick="{{ r.openFull }}" style="display:flex; align-items:center; gap:14px; background:#fff; border:1px solid #ECE7E1; border-radius:14px; padding:14px 16px; cursor:pointer;" style-hover="border-color:#C9A84C;">
+                    <span style="width:36px; height:36px; flex:none; border-radius:10px; background:{{ r.iconBg }}; display:flex; align-items:center; justify-content:center;">{{ r.icon }}</span>
+                    <div style="flex:1; min-width:0;"><div style="font-size:14px; font-weight:600;">{{ r.player }} <span style="font-size:11.5px; font-weight:500; color:rgba(20,20,20,0.45);">· {{ r.kind }}</span></div><div style="font-size:12px; color:rgba(20,20,20,0.5); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ r.snippet }}</div></div>
+                    <span style="flex:none; font-size:11.5px; color:rgba(20,20,20,0.45);">{{ r.when }}</span>
+                    <span style="flex:none; font-size:9.5px; font-weight:700; letter-spacing:0.06em; color:{{ r.stInk }}; background:{{ r.stBg }}; padding:5px 10px; border-radius:7px; text-transform:uppercase;">{{ r.status }}</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9C2B8" stroke-width="2.2" style="flex:none;"><path d="m9 18 6-6-6-6"></path></svg>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- ===== ALL REPORTS ===== -->
+          <sc-if value="{{ isReports }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
+                <sc-for list="{{ repFilters }}" as="f" hint-placeholder-count="3"><button onClick="{{ f.pick }}" style="height:34px; padding:0 14px; border:1px solid {{ f.border }}; border-radius:9px; background:{{ f.bg }}; color:{{ f.fg }}; font-family:'Jost',sans-serif; font-size:12px; font-weight:600; cursor:pointer;">{{ f.label }}</button></sc-for>
+              </div>
+              <div style="background:#fff; border:1px solid #ECE7E1; border-radius:16px; overflow:hidden;">
+                <div style="display:flex; padding:12px 20px; background:#FAF7F4; border-bottom:1px solid #ECE7E1; font-size:10px; font-weight:600; letter-spacing:0.12em; color:rgba(20,20,20,0.45); text-transform:uppercase;"><span style="flex:1.3;">Player</span><span style="flex:1;">Coach</span><span style="width:110px;">Type</span><span style="width:90px;">When</span><span style="width:90px; text-align:right;">Status</span></div>
+                <sc-for list="{{ allReports }}" as="r" hint-placeholder-count="6">
+                  <div onClick="{{ r.openFull }}" style="display:flex; align-items:center; padding:13px 20px; border-bottom:1px solid #F3EEE8; cursor:pointer;" style-hover="background:#FAF7F4;">
+                    <span style="flex:1.3; font-size:13.5px; font-weight:600;">{{ r.player }}</span>
+                    <span style="flex:1; font-size:12.5px; color:rgba(20,20,20,0.6);">{{ r.coach }}</span>
+                    <span style="width:110px; font-size:11.5px; color:rgba(20,20,20,0.5);">{{ r.kind }}</span>
+                    <span style="width:90px; font-size:12px; color:rgba(20,20,20,0.5);">{{ r.when }}</span>
+                    <span style="width:90px; text-align:right;"><span style="font-size:9.5px; font-weight:700; color:{{ r.stInk }}; background:{{ r.stBg }}; padding:5px 9px; border-radius:7px; text-transform:uppercase;">{{ r.status }}</span></span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- ===== FLAGS ===== -->
+          <sc-if value="{{ isFlags }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="font-size:12.5px; color:rgba(20,20,20,0.6); margin-bottom:16px;">Coaches who haven't reported in a while, and players not progressing — surfaced for a quiet word, not a penalty.</div>
+              <div style="display:flex; flex-direction:column; gap:11px;">
+                <sc-for list="{{ flags }}" as="fl" hint-placeholder-count="3">
+                  <div style="display:flex; align-items:center; gap:14px; background:#fff; border:1px solid {{ fl.border }}; border-left:3px solid {{ fl.edge }}; border-radius:14px; padding:15px 17px;">
+                    <span style="width:38px; height:38px; flex:none; border-radius:10px; background:{{ fl.iconBg }}; display:flex; align-items:center; justify-content:center;">{{ fl.icon }}</span>
+                    <div style="flex:1; min-width:0;"><div style="font-size:14px; font-weight:600;">{{ fl.title }}</div><div style="font-size:12px; color:rgba(20,20,20,0.55); margin-top:2px;">{{ fl.detail }}</div></div>
+                    <button style="flex:none; height:36px; padding:0 14px; border:1px solid #ECE7E1; border-radius:10px; background:#fff; color:#9C1116; font-family:'Jost',sans-serif; font-size:11.5px; font-weight:600; cursor:pointer;">{{ fl.action }}</button>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- ===== MATCHES ===== -->
+          <sc-if value="{{ isMatches }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <!-- LIST -->
+              <sc-if value="{{ mListShow }}" hint-placeholder-val="{{ true }}">
+                <div>
+                  <div style="font-size:12.5px; color:rgba(20,20,20,0.6); margin-bottom:16px;">Every match logged across the academy — tap any match to see every player's stats (the evidence behind selection &amp; role calls).</div>
+                  <div style="background:#fff; border:1px solid #ECE7E1; border-radius:16px; overflow:hidden;">
+                    <div style="display:flex; padding:12px 20px; background:#FAF7F4; border-bottom:1px solid #ECE7E1; font-size:10px; font-weight:600; letter-spacing:0.12em; color:rgba(20,20,20,0.45); text-transform:uppercase;"><span style="flex:1.5;">Match</span><span style="flex:1;">Group · Coach</span><span style="width:90px;">Date</span><span style="width:100px;">Score</span><span style="width:80px; text-align:right;">Result</span></div>
+                    <sc-for list="{{ matches }}" as="mt" hint-placeholder-count="3">
+                      <div onClick="{{ mt.open }}" style="display:flex; align-items:center; padding:14px 20px; border-bottom:1px solid #F3EEE8; cursor:pointer;" style-hover="background:#FAF7F4;">
+                        <div style="flex:1.5; font-size:14px; font-weight:600;">{{ mt.title }}</div>
+                        <div style="flex:1; font-size:12px; color:rgba(20,20,20,0.55);">{{ mt.meta }}</div>
+                        <div style="width:90px; font-size:12.5px; color:rgba(20,20,20,0.55);">{{ mt.date }}</div>
+                        <div style="width:100px; font-family:'Bebas Neue',sans-serif; font-size:19px;">{{ mt.score }}</div>
+                        <div style="width:80px; text-align:right;"><span style="font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:{{ mt.resultInk }}; background:{{ mt.resultBg }}; padding:5px 10px; border-radius:8px;">{{ mt.result }}</span></div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+              <!-- DETAIL: per-player scorecard -->
+              <sc-if value="{{ mDetailShow }}" hint-placeholder-val="{{ false }}">
+                <div>
+                  <button onClick="{{ closeMatch }}" style="display:flex; align-items:center; gap:7px; height:36px; padding:0 13px; border:1px solid #ECE7E1; border-radius:10px; background:#fff; color:rgba(20,20,20,0.6); font-family:'Jost',sans-serif; font-size:12px; font-weight:600; cursor:pointer; margin-bottom:16px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"></path></svg>All matches</button>
+                  <div style="position:relative; overflow:hidden; border-radius:16px; padding:24px; margin-bottom:18px; background:{{ mdHeroBg }}; color:#FAF7F4;">
+                    <div style="position:absolute; top:-40px; right:-30px; width:150px; height:150px; border:1px solid rgba(255,255,255,0.14); border-radius:50%;"></div>
+                    <div style="position:relative; display:flex; align-items:center; justify-content:space-between; gap:20px;">
+                      <div><div style="font-size:11px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; opacity:0.7;">{{ md.date }} · {{ md.meta }}</div><div style="font-family:'Bebas Neue',sans-serif; font-size:36px; line-height:0.95; margin-top:6px;">{{ md.title }}</div><div style="font-size:14px; margin-top:6px; opacity:0.85;">{{ md.resultLine }}</div></div>
+                      <div style="text-align:right;"><div style="font-family:'Bebas Neue',sans-serif; font-size:44px; line-height:0.8;">{{ md.score }}</div><div style="font-size:12px; opacity:0.7; margin-top:4px;">vs {{ md.oppScore }}</div></div>
+                    </div>
+                  </div>
+                  <div style="font-size:12px; font-weight:600; letter-spacing:0.12em; color:rgba(20,20,20,0.5); text-transform:uppercase; margin-bottom:12px;">Full scorecard · every player</div>
+                  <div style="background:#fff; border:1px solid #ECE7E1; border-radius:16px; overflow:hidden;">
+                    <div style="display:flex; padding:11px 18px; background:#FAF7F4; border-bottom:1px solid #ECE7E1; font-size:9.5px; font-weight:600; letter-spacing:0.1em; color:rgba(20,20,20,0.45); text-transform:uppercase;"><span style="width:30px;">#</span><span style="flex:1.4;">Player</span><span style="width:54px; text-align:center;">Runs</span><span style="width:50px; text-align:center;">Balls</span><span style="flex:1;">How out</span><span style="width:54px; text-align:center;">Wkts</span></div>
+                    <sc-for list="{{ md.card }}" as="pf" hint-placeholder-count="5">
+                      <div style="display:flex; align-items:center; padding:12px 18px; border-bottom:1px solid #F3EEE8;">
+                        <span style="width:30px; font-family:'Bebas Neue',sans-serif; font-size:16px; color:rgba(20,20,20,0.4);">{{ pf.pos }}</span>
+                        <div style="flex:1.4; display:flex; align-items:center; gap:10px;"><div style="width:30px; height:30px; border-radius:50%; background:#F3EEE8; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:12px; color:#6E0C10;">{{ pf.av }}</div><span style="font-size:13.5px; font-weight:600;">{{ pf.name }}</span><span style="font-size:13px;">{{ pf.badge }}</span></div>
+                        <span style="width:54px; text-align:center; font-family:'Bebas Neue',sans-serif; font-size:17px; color:#9C1116;">{{ pf.runs }}</span>
+                        <span style="width:50px; text-align:center; font-size:12px; color:rgba(20,20,20,0.5);">{{ pf.balls }}</span>
+                        <span style="flex:1; font-size:12px; color:rgba(20,20,20,0.55);">{{ pf.out }}</span>
+                        <span style="width:54px; text-align:center; font-family:'Bebas Neue',sans-serif; font-size:17px; color:#141414;">{{ pf.wkts }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <!-- ===== RANKINGS ===== -->
+          <sc-if value="{{ isRankings }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px; flex-wrap:wrap;">
+                <span style="font-size:11px; font-weight:600; color:rgba(20,20,20,0.45); text-transform:uppercase; letter-spacing:0.1em;">Group</span>
+                <sc-for list="{{ lbGroups }}" as="g" hint-placeholder-count="4"><button onClick="{{ g.pick }}" style="height:32px; padding:0 12px; border:1px solid {{ g.border }}; border-radius:9px; background:{{ g.bg }}; color:{{ g.fg }}; font-family:'Jost',sans-serif; font-size:11.5px; font-weight:600; cursor:pointer;">{{ g.label }}</button></sc-for>
+                <span style="width:1px; height:22px; background:#E0D8CE; margin:0 3px;"></span>
+                <span style="font-size:11px; font-weight:600; color:rgba(20,20,20,0.45); text-transform:uppercase; letter-spacing:0.1em;">Age</span>
+                <sc-for list="{{ lbAges }}" as="a" hint-placeholder-count="4"><button onClick="{{ a.pick }}" style="height:32px; padding:0 12px; border:1px solid {{ a.border }}; border-radius:9px; background:{{ a.bg }}; color:{{ a.fg }}; font-family:'Jost',sans-serif; font-size:11.5px; font-weight:600; cursor:pointer;">{{ a.label }}</button></sc-for>
+              </div>
+              <div style="display:flex; gap:7px; margin-bottom:16px; flex-wrap:wrap;">
+                <sc-for list="{{ lbStats }}" as="s2" hint-placeholder-count="4"><button onClick="{{ s2.pick }}" style="height:36px; padding:0 15px; border:1px solid {{ s2.border }}; border-radius:10px; background:{{ s2.bg }}; color:{{ s2.fg }}; font-family:'Jost',sans-serif; font-size:12px; font-weight:600; cursor:pointer;">{{ s2.label }}</button></sc-for>
+              </div>
+              <!-- podium -->
+              <div style="display:flex; align-items:flex-end; justify-content:center; gap:14px; margin-bottom:18px;">
+                <sc-for list="{{ podium }}" as="p" hint-placeholder-count="3">
+                  <div style="display:flex; flex-direction:column; align-items:center; width:150px;">
+                    <div style="position:relative; width:{{ p.avSize }}; height:{{ p.avSize }};">
+                      <div style="width:100%; height:100%; border-radius:50%; padding:3px; background:{{ p.ring }};"><div style="width:100%; height:100%; border-radius:50%; background:#F3EEE8; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:20px; color:#6E0C10;">{{ p.av }}</div></div>
+                      <div style="position:absolute; bottom:-6px; left:50%; transform:translateX(-50%); width:24px; height:24px; border-radius:50%; background:{{ p.medal }}; border:2px solid #FAF7F4; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:13px; color:#fff;">{{ p.place }}</div>
+                    </div>
+                    <div style="font-size:13px; font-weight:600; margin-top:13px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;">{{ p.name }}</div>
+                    <div style="font-family:'Bebas Neue',sans-serif; font-size:26px; line-height:0.8; color:#9C1116; margin-top:4px;">{{ p.value }}</div>
+                    <div style="font-size:10px; letter-spacing:0.1em; color:rgba(20,20,20,0.45); text-transform:uppercase; margin-top:3px;">{{ lbStatLabel }}</div>
+                    <div style="width:100%; height:{{ p.barH }}; background:{{ p.barBg }}; border-radius:8px 8px 0 0; margin-top:11px;"></div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="background:#fff; border:1px solid #ECE7E1; border-radius:16px; overflow:hidden;">
+                <div style="display:flex; padding:12px 20px; background:#FAF7F4; border-bottom:1px solid #ECE7E1; font-size:10px; font-weight:600; letter-spacing:0.12em; color:rgba(20,20,20,0.45); text-transform:uppercase;"><span style="width:50px;">#</span><span style="flex:1;">Player</span><span style="width:120px;">Group · Age</span><span style="flex:1;">Form</span><span style="width:90px; text-align:right;">{{ lbStatLabel }}</span></div>
+                <sc-for list="{{ leaderboard }}" as="rk" hint-placeholder-count="5">
+                  <div style="display:flex; align-items:center; padding:14px 20px; border-bottom:1px solid #F3EEE8;">
+                    <div style="width:50px; font-family:'Bebas Neue',sans-serif; font-size:24px; color:{{ rk.rankColor }};">{{ rk.rank }}</div>
+                    <div style="flex:1; display:flex; align-items:center; gap:12px;"><div style="width:36px; height:36px; border-radius:50%; background:#F3EEE8; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:13px; color:#6E0C10;">{{ rk.av }}</div><span style="font-size:14px; font-weight:600;">{{ rk.name }}</span></div>
+                    <div style="width:120px; font-size:11.5px; color:rgba(20,20,20,0.5);">{{ rk.group }} · {{ rk.ageCat }}</div>
+                    <div style="flex:1; font-size:12.5px; color:rgba(20,20,20,0.55);">{{ rk.line }}</div>
+                    <div style="width:90px; text-align:right; font-family:'Bebas Neue',sans-serif; font-size:22px; color:#9C1116;">{{ rk.value }}</div>
+                  </div>
+                </sc-for>
+                <sc-if value="{{ lbEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:30px; text-align:center; font-size:13px; color:rgba(20,20,20,0.45);">No players match these filters.</div></sc-if>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- ===== ACHIEVEMENTS ===== -->
+          <sc-if value="{{ isBadges }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="font-size:12.5px; color:rgba(20,20,20,0.6); margin-bottom:16px;">Badges earned academy-wide — celebrate standouts and spot who's progressing.</div>
+              <div style="background:#fff; border:1px solid #ECE7E1; border-radius:16px; padding:24px;">
+                <div style="display:flex; flex-direction:column; gap:14px;">
+                  <sc-for list="{{ badgeRows }}" as="b" hint-placeholder-count="5">
+                    <div style="display:flex; align-items:center; gap:16px; padding:14px; border:1px solid #F1ECE6; border-radius:14px;">
+                      <span style="width:48px; height:48px; flex:none; border-radius:50%; background:{{ b.tint }}; border:2px solid {{ b.accent }}; display:flex; align-items:center; justify-content:center; font-size:22px;">{{ b.emoji }}</span>
+                      <div style="flex:1; min-width:0;"><div style="display:flex; align-items:baseline; gap:10px;"><span style="font-size:14.5px; font-weight:600;">{{ b.name }}</span><span style="font-size:11.5px; color:rgba(20,20,20,0.45);">{{ b.crit }}</span></div><div style="display:flex; align-items:center; gap:9px; margin-top:9px;"><div style="flex:1; max-width:240px; height:8px; border-radius:5px; background:#F1ECE4; overflow:hidden;"><div style="height:100%; width:{{ b.barW }}; border-radius:5px; background:{{ b.accent }};"></div></div><span style="font-size:12px; font-weight:600; color:{{ b.accent }};">{{ b.count }} earned</span></div><div style="font-size:11.5px; color:rgba(20,20,20,0.55); margin-top:7px;">{{ b.holders }}</div></div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- REPORT READER -->
+  <sc-if value="{{ readerOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed; inset:0; z-index:90; background:rgba(20,20,20,0.5); display:flex; align-items:center; justify-content:center; padding:40px;">
+      <div style="width:540px; max-width:100%; background:#FAF7F4; border-radius:18px; box-shadow:0 40px 80px -30px rgba(0,0,0,0.6); overflow:hidden;">
+        <div style="background:linear-gradient(135deg,#1c1110,#141414); padding:20px 22px; display:flex; align-items:flex-start; justify-content:space-between;">
+          <div><div style="font-size:9.5px; font-weight:600; letter-spacing:0.24em; color:#C9A84C; text-transform:uppercase;">{{ rd.kind }}</div><div style="font-family:'Bebas Neue',sans-serif; font-size:24px; line-height:0.95; color:#FAF7F4; margin-top:4px;">{{ rd.player }}</div><div style="font-size:11.5px; color:rgba(250,247,244,0.55); margin-top:3px;">{{ rd.coach }} · {{ rd.when }} · {{ rd.statusWord }}</div></div>
+          <button onClick="{{ closeReader }}" style="width:32px; height:32px; border:none; border-radius:50%; background:rgba(250,247,244,0.14); cursor:pointer; display:flex; align-items:center; justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FAF7F4" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+        </div>
+        <div style="padding:22px;">
+          <div style="display:flex; align-items:center; gap:6px; margin-bottom:10px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#937328" stroke-width="2"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"></path><circle cx="12" cy="12" r="3.2" fill="#937328" stroke="none"></circle></svg><span style="font-size:9.5px; font-weight:700; letter-spacing:0.14em; color:#937328; text-transform:uppercase;">Full report — exactly what the parent received</span></div>
+          <div style="background:#fff; border:1px solid #ECE7E1; border-radius:14px; padding:18px; font-size:13.5px; line-height:1.65; color:#2a2a2a; white-space:pre-line;">{{ rd.fullText }}</div>
+          <div style="font-size:11px; color:rgba(20,20,20,0.45); margin-top:12px; line-height:1.5;">Read-only · you monitor quality &amp; frequency. The coach owns sending.</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <div style="font-size:11px; letter-spacing:0.16em; color:rgba(20,20,20,0.45); text-transform:uppercase;">Head Coach · development oversight · read &amp; monitor</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { screen: 'login', view: 'home', repFilter: 'All', openCoachId: 'c1', openMatchId: '', lbGroup: 'All', lbAge: 'All', lbStat: 'runs', readerId: null };
+
+  expandFull(r, coach) {
+    const first = (r.player || '').split(' ')[0];
+    if (r.kind === 'Block report') return 'Assalamu Alaikum 👋\n\nHere is ' + first + '\u2019s development report for the completed block.\n\nFocus areas: ' + r.snippet + '\n\nProgress: ' + first + ' has shown clear, steady improvement this block — sharper technique and a stronger match temperament. A pleasure to coach.\n\nNext block we\u2019ll build on this with situational practice.\n\n— ' + (coach || 'Coach') + ', Loop';
+    return 'Assalamu Alaikum 👋\n\n' + first + ' had a great session today! ' + r.snippet + ' Real focus and a good attitude throughout — responding well to coaching.\n\nKeep encouraging ' + first + ' at home, the progress is real.\n\n— ' + (coach || 'Coach') + ', Loop';
+  }
+
+  COACHES = [
+    { id: 'c1', ci: 'ZK', name: 'Coach Zanish', spec: 'Batting', players: 24, sessions: 142, sent: 64, pending: 1, st: 'good' },
+    { id: 'c2', ci: 'AP', name: 'Coach Arun', spec: 'Spin Bowling', players: 15, sessions: 88, sent: 41, pending: 2, st: 'good' },
+    { id: 'c3', ci: 'SM', name: 'Coach Samir', spec: 'Pace', players: 12, sessions: 54, sent: 9, pending: 0, st: 'quiet' },
+    { id: 'c4', ci: 'FH', name: 'Coach Faisal', spec: 'Fielding', players: 18, sessions: 76, sent: 28, pending: 2, st: 'good' },
+  ];
+
+  REPORTS = {
+    c1: [
+      { player: 'Ahmed Al Rashidi', kind: 'Block report', snippet: 'Cover drive sharper, head position steady. Ready for spin.', when: '14 Jun', status: 'sent' },
+      { player: 'Ahmed Al Rashidi', kind: '1-on-1 · coach-added', snippet: 'Self-coordinated block · session 1 logged · payment pending.', when: 'Today', status: 'sent' },
+      { player: 'Faris Al Zaabi', kind: 'Quick feedback', snippet: 'Great tempo at the top, pull shot improving fast.', when: '13 Jun', status: 'sent' },
+      { player: 'Kabir Singh', kind: 'Quick feedback', snippet: 'Draft — needs a line on death bowling.', when: 'Today', status: 'draft' },
+      { player: 'Zayd Khan', kind: 'Quick feedback', snippet: 'Yorkers landing well under pressure.', when: '11 Jun', status: 'sent' },
+    ],
+    c2: [
+      { player: 'Rayan Fernandez', kind: 'Quick feedback', snippet: 'Flight and dip coming along nicely.', when: '12 Jun', status: 'sent' },
+      { player: 'Mohammed Irfan', kind: 'Quick feedback', snippet: 'Draft saved, awaiting send.', when: 'Today', status: 'draft' },
+      { player: 'Aarav Sharma', kind: 'Block report', snippet: 'Wrong-un control much improved this block.', when: '9 Jun', status: 'draft' },
+    ],
+    c3: [
+      { player: 'Daniyal Sheikh', kind: 'Quick feedback', snippet: 'Run-up rhythm steadier.', when: '2 Jun', status: 'sent' },
+    ],
+    c4: [
+      { player: 'Omar Abdullah', kind: 'Quick feedback', snippet: 'Catching at gully much sharper.', when: '13 Jun', status: 'sent' },
+      { player: 'Vikram Reddy', kind: 'Block report', snippet: 'Draft — fielding block summary.', when: 'Today', status: 'draft' },
+    ],
+  };
+
+  FLAGS = [
+    { kind: 'quiet', title: 'Coach Samir hasn\u2019t sent a report in 15 days', detail: '54 sessions delivered, only 9 reports sent — parents may feel out of the loop.', action: 'Open coach' },
+    { kind: 'player', title: 'Daniyal Sheikh — no progress note in 3 weeks', detail: 'Attendance dropped and no development feedback logged recently.', action: 'View player' },
+    { kind: 'draft', title: '5 reports sitting as drafts', detail: 'Across Arun, Faisal & Zanish — nudge to review and send.', action: 'See drafts' },
+  ];
+
+  MATCHES = [
+    { id: 'm1', title: 'vs Blue Hawks', meta: 'Under 16 · Coach Zanish', date: '9 Jun', result: 'Won', score: '184/6', oppScore: '171/9', resultLine: 'Won by 13 runs',
+      card: [
+        { pos: 1, av: 'FZ', name: 'Faris Al Zaabi', runs: '72', balls: '48', out: 'c & b Khan', wkts: '1', badge: '⚡' },
+        { pos: 2, av: 'AA', name: 'Ahmed Al Rashidi', runs: '41', balls: '39', out: 'b Sharma', wkts: '0', badge: '' },
+        { pos: 3, av: 'KS', name: 'Kabir Singh', runs: '18', balls: '12', out: 'not out', wkts: '3', badge: '🎯' },
+        { pos: 4, av: 'RF', name: 'Rayan Fernandez', runs: '24', balls: '20', out: 'run out', wkts: '0', badge: '' },
+        { pos: 5, av: 'ZK', name: 'Zayd Khan', runs: '9', balls: '7', out: 'not out', wkts: '2', badge: '' },
+      ] },
+    { id: 'm2', title: 'vs Green Tigers', meta: 'Under 16 · Coach Zanish', date: '1 Jun', result: 'Won', score: '152/4', oppScore: '149 a/o', resultLine: 'Won by 6 wickets',
+      card: [
+        { pos: 1, av: 'AA', name: 'Ahmed Al Rashidi', runs: '63', balls: '51', out: 'not out', wkts: '0', badge: '' },
+        { pos: 2, av: 'FZ', name: 'Faris Al Zaabi', runs: '28', balls: '22', out: 'c Patel', wkts: '0', badge: '' },
+        { pos: 3, av: 'KS', name: 'Kabir Singh', runs: '12', balls: '9', out: 'b Ali', wkts: '4', badge: '🎯' },
+      ] },
+    { id: 'm3', title: 'vs Sharjah Stars', meta: 'Advanced · Coach Faisal', date: '24 May', result: 'Lost', score: '141 a/o', oppScore: '142/5', resultLine: 'Lost by 5 wickets',
+      card: [
+        { pos: 1, av: 'OA', name: 'Omar Abdullah', runs: '38', balls: '40', out: 'lbw Raza', wkts: '0', badge: '' },
+        { pos: 2, av: 'FZ', name: 'Faris Al Zaabi', runs: '44', balls: '33', out: 'c keeper', wkts: '1', badge: '' },
+        { pos: 3, av: 'YM', name: 'Yusuf Al Marri', runs: '11', balls: '15', out: 'b Khan', wkts: '2', badge: '' },
+      ] },
+  ];
+  RANKINGS = [
+    { av: 'FZ', name: 'Faris Al Zaabi', group: 'Elite', ageCat: 'U16', avg: 42.0, runs: 294, wkts: 4, sr: 138, line: 'Avg 42.0 · SR 138' },
+    { av: 'AA', name: 'Ahmed Al Rashidi', group: 'Elite', ageCat: 'U16', avg: 35.5, runs: 213, wkts: 2, sr: 121, line: 'Avg 35.5 · SR 121' },
+    { av: 'KS', name: 'Kabir Singh', group: 'Elite', ageCat: 'U16', avg: 22.0, runs: 146, wkts: 11, sr: 119, line: '11 wkts · Econ 6.2' },
+    { av: 'RF', name: 'Rayan Fernandez', group: 'Level Up', ageCat: 'U14', avg: 24.0, runs: 120, wkts: 6, sr: 104, line: 'Avg 24.0 · 6 wkts' },
+    { av: 'OA', name: 'Omar Abdullah', group: 'Elite', ageCat: 'U16', avg: 31.0, runs: 168, wkts: 1, sr: 112, line: 'Avg 31.0 · SR 112' },
+    { av: 'MI', name: 'Mohammed Irfan', group: 'Launch Pad', ageCat: 'U12', avg: 18.0, runs: 64, wkts: 0, sr: 96, line: 'Avg 18.0 · SR 96' },
+    { av: 'ZK', name: 'Zayd Khan', group: 'Level Up', ageCat: 'U14', avg: 16.0, runs: 88, wkts: 7, sr: 131, line: '7 wkts · SR 131' },
+    { av: 'AH', name: 'Aarav Sharma', group: 'Launch Pad', ageCat: 'U12', avg: 21.0, runs: 72, wkts: 3, sr: 101, line: 'Avg 21.0 · 3 wkts' },
+  ];
+  BADGES = [
+    { emoji: '\ud83d\udd25', name: 'Hat-Trick Hero', crit: 'Three in three', accent: '#9C1116', tint: '#FBE9E8', count: 1, holders: 'Kabir Singh' },
+    { emoji: '\u26a1', name: 'Thunderstrike', crit: 'Strike rate 140+', accent: '#D23B2F', tint: '#FBE9E8', count: 4, holders: 'Faris, Ahmed +2' },
+    { emoji: '\ud83d\udee1\ufe0f', name: 'Iron Presence', crit: '100% in a month', accent: '#15803D', tint: '#E7F4EC', count: 11, holders: 'Ahmed, Kabir, Saeed +8' },
+    { emoji: '\ud83c\udfaf', name: 'Sharpshooter', crit: '5+ wickets', accent: '#D97706', tint: '#FBF1DD', count: 5, holders: 'Kabir, Zayd +3' },
+    { emoji: '\ud83c\udfcf', name: 'Summit Club', crit: 'Scored a century', accent: '#B45309', tint: '#FBF1DD', count: 2, holders: 'Faris, Omar' },
+  ];
+
+  icon(kind) {
+    const wrap = (path, stroke) => React.createElement('svg', { width: 18, height: 18, viewBox: '0 0 24 24', fill: 'none', stroke, strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' }, ...path.map((d, i) => React.createElement('path', { key: i, d })));
+    const map = {
+      block: ['#937328', ['M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z', 'M14 2v6h6']],
+      quick: ['#1F8A4C', ['M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z']],
+      quiet: ['#A9791B', ['M12 8v5', 'M12 17h.01', 'M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z']],
+      player: ['#B3261E', ['M18 20a6 6 0 0 0-12 0', 'M12 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8z']],
+      draft: ['#937328', ['M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7', 'M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z']],
+    };
+    const e = map[kind] || map.quick;
+    return wrap(e[1], e[0]);
+  }
+  iconHTML(kind) {
+    const c = { block: ['#937328', '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path>'],
+      quick: ['#1F8A4C', '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>'],
+      quiet: ['#A9791B', '<path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path>'],
+      player: ['#B3261E', '<circle cx="12" cy="8" r="3.4"></circle><path d="M5 20a7 7 0 0 1 14 0"></path>'],
+      draft: ['#937328', '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"></path>'] };
+    const e = c[kind] || c.quick;
+    return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="' + e[0] + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + e[1] + '</svg>';
+  }
+
+  leaderboardVals(st) {
+    const stat = st.lbStat, grp = st.lbGroup, age = st.lbAge;
+    const statMeta = { runs: { label: 'Runs', key: 'runs' }, avg: { label: 'Batting Avg', key: 'avg' }, wkts: { label: 'Wickets', key: 'wkts' }, sr: { label: 'Strike Rate', key: 'sr' } };
+    const sm = statMeta[stat] || statMeta.runs;
+    const groups = ['All', 'Elite', 'Level Up', 'Launch Pad'];
+    const ages = ['All', 'U12', 'U14', 'U16'];
+    const mkF = (arr, cur, key) => arr.map(o => ({ label: o, pick: () => this.setState({ [key]: o }),
+      bg: o === cur ? '#9C1116' : '#fff', fg: o === cur ? '#fff' : 'rgba(20,20,20,0.6)', border: o === cur ? '#9C1116' : '#ECE7E1' }));
+    const lbStats = ['runs', 'avg', 'wkts', 'sr'].map(o => ({ label: statMeta[o].label, pick: () => this.setState({ lbStat: o }),
+      bg: o === stat ? '#141414' : '#fff', fg: o === stat ? '#fff' : 'rgba(20,20,20,0.6)', border: o === stat ? '#141414' : '#ECE7E1' }));
+    let rows = this.RANKINGS.filter(r => (grp === 'All' || r.group === grp) && (age === 'All' || r.ageCat === age));
+    rows.sort((a, b) => b[sm.key] - a[sm.key]);
+    const fmt = (r) => stat === 'avg' ? r.avg.toFixed(1) : stat === 'sr' ? String(r.sr) : stat === 'wkts' ? String(r.wkts) : String(r.runs);
+    const leaderboard = rows.map((r, i) => ({ ...r, rank: String(i + 1), rankColor: i === 0 ? '#C9A84C' : '#141414', value: fmt(r) }));
+    const medals = ['#C9A84C', '#9AA3AD', '#B07B49'];
+    const sizes = ['78px', '66px', '60px']; const barHs = ['46px', '32px', '24px']; const places = ['1', '2', '3'];
+    const order = [1, 0, 2];
+    const podium = order.filter(idx => rows[idx]).map(idx => { const r = rows[idx]; return {
+      av: r.av, name: r.name, value: fmt(r), place: places[idx], medal: medals[idx],
+      ring: idx === 0 ? 'linear-gradient(145deg,#EFDC97,#C9A84C)' : 'linear-gradient(145deg,#E0D8CE,#C9C0B4)',
+      avSize: sizes[idx], barH: barHs[idx], barBg: idx === 0 ? '#C9A84C' : '#E0D8CE' }; });
+    return { lbGroups: mkF(groups, grp, 'lbGroup'), lbAges: mkF(ages, age, 'lbAge'), lbStats, lbStatLabel: sm.label,
+      leaderboard, podium, lbEmpty: leaderboard.length === 0 };
+  }
+
+  renderVals() {
+    const st = this.state, v = st.view;
+    const navS = (id) => ({ bg: v === id ? '#9C1116' : 'transparent', fg: v === id ? '#FAF7F4' : 'rgba(250,247,244,0.62)' });
+    const s = { home: navS('home'), reports: navS('reports'), flags: navS('flags'), matches: navS('matches'), rankings: navS('rankings'), badges: navS('badges') };
+    const titles = { home: ['Coaches', 'Development activity across the academy'], coach: ['Coach', 'Reports, drafts & development'], reports: ['All Reports', 'Every report being sent academy-wide'], flags: ['Flags', 'Quiet coaches & stalled players'], matches: ['Matches', 'Academy-wide match log'], rankings: ['Rankings', 'Season leaderboard'], badges: ['Achievements', 'Academy-wide badges'] };
+    const T = titles[v] || ['', ''];
+
+    const statusMap = { sent: { stInk: '#1F8A4C', stBg: '#E7F4EC', status: 'Sent' }, draft: { stInk: '#A9791B', stBg: '#FBF1DD', status: 'Draft' } };
+    const coachTag = { good: { tag: 'Reporting well', tagInk: '#1F8A4C', tagBg: '#E7F4EC', edge: '#1F8A4C', border: '#ECE7E1' }, quiet: { tag: 'Quiet · 15 days', tagInk: '#A9791B', tagBg: '#FBF1DD', edge: '#C9A84C', border: '#EAD7AE' } };
+
+    const coaches = this.COACHES.map(c => ({ ...c, ...coachTag[c.st],
+      pendInk: c.pending > 0 ? '#A9791B' : 'rgba(20,20,20,0.3)',
+      open: () => this.setState({ view: 'coach', openCoachId: c.id }) }));
+
+    const cdRaw = this.COACHES.find(c => c.id === st.openCoachId) || this.COACHES[0];
+    const cd = { ...cdRaw, reports: (this.REPORTS[cdRaw.id] || []).map((r, i) => ({ ...r, ...statusMap[r.status],
+      icon: this.icon(r.kind === 'Block report' ? 'block' : 'quick'),
+      iconBg: r.kind === 'Block report' ? '#FBF1DD' : '#E7F4EC',
+      openFull: () => this.setState({ readerId: cdRaw.id + ':' + i }) })) };
+
+    // all reports flat
+    let all = [];
+    this.COACHES.forEach(c => (this.REPORTS[c.id] || []).forEach((r, i) => all.push({ ...r, coach: c.name, _cid: c.id, _idx: i })));
+    const rf = st.repFilter;
+    const allReports = all.filter(r => rf === 'All' || (rf === 'Sent' && r.status === 'sent') || (rf === 'Drafts' && r.status === 'draft'))
+      .map(r => ({ ...r, ...statusMap[r.status], openFull: () => this.setState({ readerId: r._cid + ':' + r._idx }) }));
+    const repFilters = ['All', 'Sent', 'Drafts'].map(o => ({ label: o, pick: () => this.setState({ repFilter: o }),
+      bg: o === rf ? '#9C1116' : '#fff', fg: o === rf ? '#fff' : 'rgba(20,20,20,0.6)', border: o === rf ? '#9C1116' : '#ECE7E1' }));
+
+    const flagStyle = { quiet: { edge: '#C9A84C', border: '#EAD7AE', iconBg: '#FBF1DD' }, player: { edge: '#B3261E', border: '#EFC9C6', iconBg: '#FBE9E8' }, draft: { edge: '#C9A84C', border: '#EAD7AE', iconBg: '#FBF1DD' } };
+    const flags = this.FLAGS.map(f => ({ ...f, ...flagStyle[f.kind], icon: this.icon(f.kind) }));
+
+    return {
+      showLogin: st.screen === 'login', showApp: st.screen === 'app',
+      login: () => this.setState({ screen: 'app', view: 'home' }),
+      s, viewTitle: T[0], viewSub: T[1],
+      isHome: v === 'home', isCoach: v === 'coach', isReports: v === 'reports', isFlags: v === 'flags',
+      isMatches: v === 'matches', isRankings: v === 'rankings', isBadges: v === 'badges',
+      goHome: () => this.setState({ view: 'home' }), goReports: () => this.setState({ view: 'reports' }), goFlags: () => this.setState({ view: 'flags' }),
+      goMatches: () => this.setState({ view: 'matches' }), goRankings: () => this.setState({ view: 'rankings' }), goBadges: () => this.setState({ view: 'badges' }),
+      coaches, cd, allReports, repFilters, flags,
+      readerOpen: !!st.readerId, closeReader: () => this.setState({ readerId: null }),
+      rd: (() => { if (!st.readerId) return {}; const [cid, idx] = st.readerId.split(':'); const c = this.COACHES.find(x => x.id === cid); const r = c ? (this.REPORTS[cid] || [])[+idx] : null; if (!r) return {};
+        return { player: r.player, kind: r.kind, coach: c.name, when: r.when, statusWord: r.status === 'sent' ? 'Sent to parent' : 'Draft — not yet sent', fullText: this.expandFull(r, c.name) }; })(),
+      goMatchList: () => this.setState({ openMatchId: '' }),
+      closeMatch: () => this.setState({ openMatchId: '' }),
+      mListShow: !st.openMatchId, mDetailShow: !!st.openMatchId,
+      matches: this.MATCHES.map(m => ({ ...m, resultInk: m.result === 'Won' ? '#1F8A4C' : '#B3261E', resultBg: m.result === 'Won' ? '#E7F4EC' : '#FBE9E8', open: () => this.setState({ openMatchId: m.id }) })),
+      md: (() => { const m = this.MATCHES.find(x => x.id === st.openMatchId) || this.MATCHES[0]; return { ...m, mdHeroBg: m.result === 'Won' ? 'linear-gradient(135deg,#1F6E40,#0E3D22)' : 'linear-gradient(135deg,#6E0C10,#3a0a14)' }; })(),
+      mdHeroBg: (this.MATCHES.find(x => x.id === st.openMatchId) || this.MATCHES[0]).result === 'Won' ? 'linear-gradient(135deg,#1F6E40,#0E3D22)' : 'linear-gradient(135deg,#6E0C10,#3a0a14)',
+      ...this.leaderboardVals(st),
+      badgeRows: this.BADGES.map(b => ({ ...b, barW: Math.round((b.count / 24) * 100) + '%' })),
+    };
+  }
+}
+</script>
+</body>
+</html>

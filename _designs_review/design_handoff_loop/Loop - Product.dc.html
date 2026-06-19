@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  .lp-scroll::-webkit-scrollbar { width: 8px; }
+  .lp-scroll::-webkit-scrollbar-thumb { background: #D9D2C8; border-radius: 4px; }
+</style>
+</helmet>
+
+<div style="min-height:100vh; background:#E7E4DF; font-family:'Jost',sans-serif; color:#141414;">
+
+  <!-- ===================== LOGIN ===================== -->
+  <sc-if value="{{ showLogin }}" hint-placeholder-val="{{ true }}">
+    <div style="min-height:100vh; display:flex; flex-wrap:wrap;">
+      <div style="flex:1 1 380px; position:relative; overflow:hidden; background:radial-gradient(125% 90% at 32% 6%, #34151a 0%, #1a0d0e 52%, #100a0b 100%); display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:300px; padding:48px 24px;">
+        <div style="position:absolute; inset:0; opacity:0.06; background-image:repeating-linear-gradient(48deg, transparent 0 13px, rgba(201,168,76,0.9) 14px 16px, transparent 16px 17px);"></div>
+        <div style="position:absolute; top:50%; left:50%; width:480px; height:480px; transform:translate(-50%,-50%); border:1px solid rgba(201,168,76,0.12); border-radius:50%; pointer-events:none;"></div>
+        <svg width="120" height="120" viewBox="-100 -100 200 200" style="position:relative; filter:drop-shadow(0 18px 30px rgba(0,0,0,0.5));"><circle r="83.19" fill="#9C1116"></circle><circle r="78" fill="none" stroke="#C9A84C" stroke-width="1.1" stroke-opacity="0.85"></circle><circle r="69" fill="none" stroke="#C9A84C" stroke-width="1.1" stroke-opacity="0.85"></circle><circle r="73.5" fill="none" stroke="#C9A84C" stroke-width="5.6" stroke-dasharray="2 9" stroke-linecap="round"></circle><path d="M23.6 -49.24 L11.04 -49.24 L11.04 -49.25 L-44.6 -49.25 L-28.43 -21.25 L-3.9 -21.25 L-5.74 -18.07 L-44.6 49.24 L-23.6 49.24 L-23.6 49.25 L44.6 49.24 L28.44 21.25 L3.9 21.25 L5.74 18.06 L44.6 -49.24 Z" fill="#FAF7F4"></path></svg>
+        <div style="position:relative; font-family:'Bebas Neue',sans-serif; font-size:72px; line-height:0.78; letter-spacing:0.04em; color:#FAF7F4; margin-top:26px;">LOOP</div>
+        <div style="position:relative; display:flex; align-items:center; gap:13px; margin-top:13px;"><span style="width:30px; height:1px; background:rgba(201,168,76,0.5);"></span><span style="font-size:12px; font-weight:500; letter-spacing:0.42em; color:#C9A84C; text-transform:uppercase;">By Zak Cricket</span><span style="width:30px; height:1px; background:rgba(201,168,76,0.5);"></span></div>
+        <div style="position:relative; font-size:13.5px; color:rgba(250,247,244,0.55); margin-top:22px; max-width:320px; text-align:center; line-height:1.6;">The complete cricket academy platform — coach, parent &amp; player, all in one loop.</div>
+      </div>
+      <div style="flex:1 1 360px; background:#FAF7F4; display:flex; flex-direction:column; justify-content:center; padding:48px 7%; min-height:300px;">
+        <div style="font-size:11px; font-weight:600; letter-spacing:0.3em; color:#9C1116; text-transform:uppercase;">Sign in</div>
+        <div style="font-family:'Bebas Neue',sans-serif; font-size:44px; line-height:0.95; letter-spacing:0.02em; margin-top:8px;">Welcome back</div>
+        <div style="font-size:13.5px; color:rgba(20,20,20,0.55); margin-top:6px;">One login — your view opens to your role.</div>
+        <div style="display:flex; flex-direction:column; gap:11px; margin-top:28px; max-width:420px;">
+          <div style="display:flex; align-items:center; gap:11px; height:54px; padding:0 18px; border-radius:14px; background:#fff; border:1px solid #ECE7E1;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9C1116" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg><span style="font-size:15px; color:rgba(20,20,20,0.7);">you@zakcricket.ae</span></div>
+          <div style="display:flex; align-items:center; gap:11px; height:54px; padding:0 18px; border-radius:14px; background:#fff; border:1px solid #ECE7E1;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9C1116" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg><span style="font-size:15px; letter-spacing:0.3em; color:rgba(20,20,20,0.7);">••••••••</span></div>
+        </div>
+        <button onClick="{{ goPicker }}" style="max-width:420px; height:56px; margin-top:16px; border:none; border-radius:14px; background:linear-gradient(180deg,#b1141a,#7c0f14); color:#FAF7F4; font-family:'Jost',sans-serif; font-size:14px; font-weight:600; letter-spacing:0.2em; text-transform:uppercase; cursor:pointer; box-shadow:0 14px 26px -12px rgba(156,17,22,0.7);">Sign In</button>
+        <div style="font-size:12px; color:rgba(20,20,20,0.45); margin-top:16px;">Parent or player? Use the link your academy sent you.</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ===================== HUB ===================== -->
+  <sc-if value="{{ showHub }}" hint-placeholder-val="{{ false }}">
+    <div style="min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:32px 20px 64px;">
+      <div style="width:100%; max-width:1080px; display:flex; align-items:center; justify-content:space-between; margin-bottom:30px; flex-wrap:wrap; gap:14px;">
+        <div style="display:flex; align-items:center; gap:13px;">
+          <svg width="40" height="40" viewBox="-100 -100 200 200"><circle r="83.19" fill="#9C1116"></circle><circle r="73" fill="none" stroke="#C9A84C" stroke-width="4.4"></circle><path d="M23.6 -49.24 L11.04 -49.24 L11.04 -49.25 L-44.6 -49.25 L-28.43 -21.25 L-3.9 -21.25 L-5.74 -18.07 L-44.6 49.24 L-23.6 49.24 L-23.6 49.25 L44.6 49.24 L28.44 21.25 L3.9 21.25 L5.74 18.06 L44.6 -49.24 Z" fill="#FAF7F4"></path></svg>
+          <div><div style="font-family:'Bebas Neue',sans-serif; font-size:25px; line-height:0.82; letter-spacing:0.04em;">LOOP</div><div style="font-size:8px; font-weight:600; letter-spacing:0.32em; color:#6E0C10; text-transform:uppercase; margin-top:2px;">By Zak Cricket</div></div>
+        </div>
+        <button onClick="{{ logout }}" style="display:flex; align-items:center; gap:8px; height:38px; padding:0 15px; border:1px solid #ECE7E1; border-radius:10px; background:#fff; color:rgba(20,20,20,0.6); font-family:'Jost',sans-serif; font-size:12px; font-weight:600; cursor:pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path></svg>Sign out</button>
+      </div>
+
+      <div style="width:100%; max-width:1080px; margin-bottom:6px;"><div style="font-size:11px; font-weight:600; letter-spacing:0.3em; color:#9C1116; text-transform:uppercase;">Choose your view</div><div style="font-family:'Bebas Neue',sans-serif; font-size:36px; line-height:0.95; letter-spacing:0.02em; margin-top:5px;">The complete platform</div><div style="font-size:13.5px; color:rgba(20,20,20,0.55); margin-top:6px;">Tap any screen — it opens right here, full-size, with a back button. Phone &amp; desktop both included.</div></div>
+
+      <div style="width:100%; max-width:1080px; display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:18px; margin-top:24px;">
+        <sc-for list="{{ roles }}" as="r" hint-placeholder-count="3">
+          <div style="background:#fff; border:1px solid #ECE7E1; border-top:3px solid {{ r.accent }}; border-radius:18px; padding:22px; box-shadow:0 18px 40px -30px rgba(20,20,20,0.5);">
+            <div style="display:flex; align-items:center; gap:13px; margin-bottom:14px;">
+              <span style="width:46px; height:46px; flex:none; border-radius:13px; background:{{ r.tint }}; display:flex; align-items:center; justify-content:center;">{{ r.icon }}</span>
+              <div><div style="font-family:'Bebas Neue',sans-serif; font-size:24px; line-height:0.9; letter-spacing:0.02em;">{{ r.name }}</div><div style="font-size:11.5px; color:rgba(20,20,20,0.5); margin-top:2px;">{{ r.tag }}</div></div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <sc-for list="{{ r.links }}" as="lk" hint-placeholder-count="2">
+                <button onClick="{{ lk.open }}" style="display:flex; align-items:center; gap:11px; padding:12px 14px; border:1px solid #ECE7E1; border-radius:12px; background:#FAF7F4; cursor:pointer; font-family:'Jost',sans-serif; text-align:left; width:100%;">
+                  <span style="width:30px; height:30px; flex:none; border-radius:8px; background:#fff; border:1px solid #ECE7E1; display:flex; align-items:center; justify-content:center; color:{{ r.accent }};">{{ lk.dev }}</span>
+                  <div style="flex:1; min-width:0;"><div style="font-size:13px; font-weight:600;">{{ lk.label }}</div><div style="font-size:10.5px; color:rgba(20,20,20,0.45);">{{ lk.sub }}</div></div>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9C2B8" stroke-width="2.2"><path d="m9 18 6-6-6-6"></path></svg>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="width:100%; max-width:1080px; margin-top:30px;">
+        <div style="display:flex; align-items:center; gap:13px; margin-bottom:16px;"><span style="font-size:12px; font-weight:600; letter-spacing:0.26em; color:rgba(20,20,20,0.5); text-transform:uppercase;">System &amp; Brand</span><span style="flex:1; height:1px; background:rgba(20,20,20,0.12);"></span></div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:14px;">
+          <sc-for list="{{ pieces }}" as="p" hint-placeholder-count="4">
+            <button onClick="{{ p.open }}" style="display:block; background:#fff; border:1px solid #ECE7E1; border-radius:14px; padding:17px; cursor:pointer; text-align:left; font-family:'Jost',sans-serif; width:100%;">
+              <span style="display:flex; width:38px; height:38px; border-radius:10px; background:{{ p.tint }}; align-items:center; justify-content:center; margin-bottom:12px;">{{ p.icon }}</span>
+              <div style="font-size:13.5px; font-weight:600;">{{ p.label }}</div>
+              <div style="font-size:11px; color:rgba(20,20,20,0.5); margin-top:2px; line-height:1.4;">{{ p.sub }}</div>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="width:100%; max-width:1080px; margin-top:30px; padding-top:20px; border-top:1px solid rgba(20,20,20,0.12); display:flex; align-items:center; justify-content:space-between; font-size:11px; letter-spacing:0.12em; color:rgba(20,20,20,0.45); text-transform:uppercase; flex-wrap:wrap; gap:8px;"><span>Loop · Cricket Academy Platform</span><span>Coach · Head Coach · Admin · Brand</span></div>
+    </div>
+  </sc-if>
+
+  <!-- ===================== VIEWER ===================== -->
+  <sc-if value="{{ showViewer }}" hint-placeholder-val="{{ false }}">
+    <div style="min-height:100vh; display:flex; flex-direction:column; background:#E7E4DF;">
+      <div style="flex:none; height:56px; background:#141414; display:flex; align-items:center; justify-content:space-between; padding:0 16px; gap:12px;">
+        <button onClick="{{ backToHub }}" style="display:flex; align-items:center; gap:7px; height:36px; padding:0 13px; border:1px solid rgba(250,247,244,0.2); border-radius:9px; background:rgba(250,247,244,0.06); color:#FAF7F4; font-family:'Jost',sans-serif; font-size:12.5px; font-weight:600; cursor:pointer;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m15 18-6-6 6-6"></path></svg>All screens</button>
+        <div style="flex:1; min-width:0; text-align:center;"><div style="font-size:13px; font-weight:600; color:#FAF7F4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ viewerTitle }}</div></div>
+        <div style="display:flex; gap:6px; flex:none;">
+          <button onClick="{{ sizePhone }}" style="height:34px; width:38px; border:1px solid {{ phoneBorder }}; border-radius:8px; background:{{ phoneBg }}; cursor:pointer; display:flex; align-items:center; justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{ phoneInk }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2.6"></rect><path d="M11 18h2"></path></svg></button>
+          <button onClick="{{ sizeFull }}" style="height:34px; width:38px; border:1px solid {{ fullBorder }}; border-radius:8px; background:{{ fullBg }}; cursor:pointer; display:flex; align-items:center; justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{ fullInk }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"></rect><path d="M8 21h8"></path></svg></button>
+        </div>
+      </div>
+      <div class="lp-scroll" style="flex:1; overflow:auto; display:flex; justify-content:center; padding:{{ stagePad }};">
+        <iframe src="{{ viewerSrc }}" style="width:{{ frameW }}; height:{{ frameH }}; border:{{ frameBorder }}; border-radius:{{ frameRadius }}; background:#fff; box-shadow:0 24px 60px -30px rgba(20,20,20,0.5); flex:none;"></iframe>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { screen: 'login', src: '', title: '', size: 'full' };
+
+  svg(paths, stroke, sw) {
+    return React.createElement('svg', { width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none', stroke: stroke || '#9C1116', strokeWidth: sw || 2, strokeLinecap: 'round', strokeLinejoin: 'round' },
+      ...paths.map((d, i) => React.createElement('path', { key: i, d })));
+  }
+  dev(kind) {
+    if (kind === 'phone') return React.createElement('svg', { width: 15, height: 15, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' }, React.createElement('rect', { x: 6, y: 2, width: 12, height: 20, rx: 2.6 }), React.createElement('path', { d: 'M11 18h2' }));
+    return React.createElement('svg', { width: 15, height: 15, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' }, React.createElement('rect', { x: 2, y: 4, width: 20, height: 13, rx: 2 }), React.createElement('path', { d: 'M8 21h8M12 17v4' }));
+  }
+  openView(src, title, size) { this.setState({ screen: 'viewer', src: encodeURI(src), title, size: size || 'full' }); }
+
+  renderVals() {
+    const st = this.state;
+    const phone = this.dev('phone'), desk = this.dev('desk');
+    const roles = [
+      { name: 'Coach', tag: 'Own players · daily use', accent: '#9C1116', tint: '#F6E2E0',
+        icon: this.svg(['M12 3 4 7v5c0 4.5 3.2 8.3 8 9 4.8-.7 8-4.5 8-9V7z'], '#9C1116'),
+        links: [
+          { label: 'Coach App', sub: 'Mobile · daily driver', dev: phone, open: () => this.openView('Loop App - Coach Mobile.dc.html', 'Coach · Mobile', 'phone') },
+          { label: 'Coach App', sub: 'Desktop · full workspace', dev: desk, open: () => this.openView('Loop App - Coach Desktop.dc.html', 'Coach · Desktop', 'full') },
+        ] },
+      { name: 'Head Coach', tag: 'Development oversight', accent: '#C9A84C', tint: '#F5ECD3',
+        icon: this.svg(['M12 3 4 7v5c0 4.5 3.2 8.3 8 9 4.8-.7 8-4.5 8-9V7z', 'm9 12 2 2 4-4'], '#937328'),
+        links: [
+          { label: 'Head Coach', sub: 'Desktop · all coaches', dev: desk, open: () => this.openView('Loop App - Head Coach Desktop.dc.html', 'Head Coach · Desktop', 'full') },
+        ] },
+      { name: 'Admin', tag: 'Operations & finance', accent: '#141414', tint: '#ECEAE6',
+        icon: this.svg(['M3 9.5 12 3l9 6.5', 'M5.4 8.2V19a1 1 0 0 0 1 1h11.2a1 1 0 0 0 1-1V8.2'], '#141414'),
+        links: [
+          { label: 'Admin App', sub: 'Desktop · full console', dev: desk, open: () => this.openView('Loop App - Admin Desktop v2.dc.html', 'Admin · Desktop', 'full') },
+          { label: 'Admin App', sub: 'Mobile · on the go', dev: phone, open: () => this.openView('Loop App - Admin Mobile.dc.html', 'Admin · Mobile', 'phone') },
+        ] },
+    ];
+    const pieces = [
+      { label: 'Badge System', sub: '26 badges · 4 groups', tint: '#F5ECD3', icon: this.svg(['M12 3 4 7v5c0 4.5 3.2 8.3 8 9 4.8-.7 8-4.5 8-9V7z'], '#937328', 1.8), open: () => this.openView('Loop App - Badges.dc.html', 'Badge System', 'full') },
+      { label: 'Logo & Mark', sub: 'Wordmark, icon, lockups', tint: '#F6E2E0', icon: this.svg(['M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z'], '#9C1116', 1.8), open: () => this.openView('Loop by Zak Cricket - Logo v2.dc.html', 'Logo & Mark', 'full') },
+      { label: 'Brand Book', sub: 'Full identity manual', tint: '#ECEAE6', icon: this.svg(['M4 19.5A2.5 2.5 0 0 1 6.5 17H20', 'M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'], '#141414', 1.8), open: () => this.openView('Loop by Zak Cricket - Brand Book.dc.html', 'Brand Book', 'full') },
+      { label: 'Report Flow', sub: '4-frame + WhatsApp', tint: '#E7F4EC', icon: this.svg(['M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'], '#1F8A4C', 1.8), open: () => this.openView('Loop App - Report Flow.dc.html', 'Report Flow', 'full') },
+    ];
+
+    const isPhone = st.size === 'phone';
+    return {
+      showLogin: st.screen === 'login', showHub: st.screen === 'hub', showViewer: st.screen === 'viewer',
+      goPicker: () => this.setState({ screen: 'hub' }),
+      logout: () => this.setState({ screen: 'login' }),
+      backToHub: () => this.setState({ screen: 'hub' }),
+      roles, pieces,
+      viewerSrc: st.src, viewerTitle: st.title,
+      sizePhone: () => this.setState({ size: 'phone' }), sizeFull: () => this.setState({ size: 'full' }),
+      frameW: isPhone ? '390px' : '1320px', frameH: isPhone ? '844px' : '900px',
+      frameBorder: isPhone ? '1px solid rgba(20,20,20,0.12)' : '1px solid rgba(20,20,20,0.08)', frameRadius: isPhone ? '16px' : '12px',
+      stagePad: isPhone ? '24px 16px' : '20px',
+      phoneBg: isPhone ? '#9C1116' : 'rgba(250,247,244,0.06)', phoneInk: isPhone ? '#fff' : 'rgba(250,247,244,0.7)', phoneBorder: isPhone ? '#9C1116' : 'rgba(250,247,244,0.2)',
+      fullBg: !isPhone ? '#9C1116' : 'rgba(250,247,244,0.06)', fullInk: !isPhone ? '#fff' : 'rgba(250,247,244,0.7)', fullBorder: !isPhone ? '#9C1116' : 'rgba(250,247,244,0.2)',
+    };
+  }
+}
+</script>
+</body>
+</html>

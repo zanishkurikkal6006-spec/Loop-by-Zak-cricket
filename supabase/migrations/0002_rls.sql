@@ -6,9 +6,11 @@
 -- ============================================================================
 
 -- ── Helpers ───────────────────────────────────────────────────────────────────
--- Returns the academy_id of the currently signed-in user. SECURITY DEFINER so
--- it can read profiles regardless of that table's own RLS (avoids recursion).
-create or replace function auth.user_academy_id()
+-- These live in `public` (not `auth`): on Supabase the migration role cannot
+-- CREATE in the `auth` schema, and Supabase recommends keeping custom helpers in
+-- `public`. SECURITY DEFINER so they read profiles regardless of that table's
+-- own RLS (avoids recursion).
+create or replace function public.user_academy_id()
 returns uuid
 language sql
 stable
@@ -18,7 +20,7 @@ as $$
   select academy_id from public.profiles where id = auth.uid()
 $$;
 
-create or replace function auth.user_role()
+create or replace function public.user_role()
 returns user_role
 language sql
 stable
@@ -29,7 +31,7 @@ as $$
 $$;
 
 -- True when the signed-in user can see finance (admin only).
-create or replace function auth.can_see_finance()
+create or replace function public.can_see_finance()
 returns boolean
 language sql
 stable
@@ -68,18 +70,18 @@ alter table outbound_messages    enable row level security;
 
 -- ── Academies: a user sees only their own academy ─────────────────────────────
 create policy academy_select on academies
-  for select using (id = auth.user_academy_id());
+  for select using (id = public.user_academy_id());
 create policy academy_update on academies
-  for update using (id = auth.user_academy_id() and auth.user_role() = 'admin');
+  for update using (id = public.user_academy_id() and public.user_role() = 'admin');
 
 -- ── Profiles: read same-academy; users update their own row ───────────────────
 create policy profiles_select on profiles
-  for select using (academy_id = auth.user_academy_id());
+  for select using (academy_id = public.user_academy_id());
 create policy profiles_update_self on profiles
   for update using (id = auth.uid());
 create policy profiles_admin_write on profiles
-  for all using (academy_id = auth.user_academy_id() and auth.user_role() = 'admin')
-  with check (academy_id = auth.user_academy_id() and auth.user_role() = 'admin');
+  for all using (academy_id = public.user_academy_id() and public.user_role() = 'admin')
+  with check (academy_id = public.user_academy_id() and public.user_role() = 'admin');
 
 -- ── Generic per-academy policy for the bulk of tables ─────────────────────────
 -- Helper to apply "same academy, full access" to a list of tables.
@@ -98,8 +100,8 @@ begin
     execute format($f$
       create policy %1$s_tenant_all on %1$s
         for all
-        using (academy_id = auth.user_academy_id())
-        with check (academy_id = auth.user_academy_id());
+        using (academy_id = public.user_academy_id())
+        with check (academy_id = public.user_academy_id());
     $f$, t);
   end loop;
 end $$;
@@ -109,11 +111,11 @@ create policy batch_groups_tenant_all on batch_groups
   for all
   using (exists (
     select 1 from batches b
-    where b.id = batch_groups.batch_id and b.academy_id = auth.user_academy_id()
+    where b.id = batch_groups.batch_id and b.academy_id = public.user_academy_id()
   ))
   with check (exists (
     select 1 from batches b
-    where b.id = batch_groups.batch_id and b.academy_id = auth.user_academy_id()
+    where b.id = batch_groups.batch_id and b.academy_id = public.user_academy_id()
   ));
 
 -- badge_types also exposes global defaults (academy_id is null) read-only.
@@ -125,25 +127,25 @@ create policy badge_types_global_read on badge_types
 -- (Coaches collect match fees through a dedicated, scoped path — see note below.)
 create policy payments_admin_only on payments
   for all
-  using (academy_id = auth.user_academy_id() and auth.can_see_finance())
-  with check (academy_id = auth.user_academy_id() and auth.can_see_finance());
+  using (academy_id = public.user_academy_id() and public.can_see_finance())
+  with check (academy_id = public.user_academy_id() and public.can_see_finance());
 
 create policy ground_fees_admin_only on ground_fees
   for all
-  using (academy_id = auth.user_academy_id() and auth.can_see_finance())
-  with check (academy_id = auth.user_academy_id() and auth.can_see_finance());
+  using (academy_id = public.user_academy_id() and public.can_see_finance())
+  with check (academy_id = public.user_academy_id() and public.can_see_finance());
 
 -- match_fees: admin full access; a coach may read/update fees for matches they
 -- coordinate (they collect/confirm on the ground), but never academy-wide totals.
 create policy match_fees_admin_all on match_fees
   for all
-  using (academy_id = auth.user_academy_id() and auth.can_see_finance())
-  with check (academy_id = auth.user_academy_id() and auth.can_see_finance());
+  using (academy_id = public.user_academy_id() and public.can_see_finance())
+  with check (academy_id = public.user_academy_id() and public.can_see_finance());
 
 create policy match_fees_coach_own on match_fees
   for select
   using (
-    academy_id = auth.user_academy_id()
+    academy_id = public.user_academy_id()
     and exists (
       select 1 from matches m
       where m.id = match_fees.match_id and m.coach_id = auth.uid()
@@ -153,7 +155,7 @@ create policy match_fees_coach_own on match_fees
 create policy match_fees_coach_update on match_fees
   for update
   using (
-    academy_id = auth.user_academy_id()
+    academy_id = public.user_academy_id()
     and exists (
       select 1 from matches m
       where m.id = match_fees.match_id and m.coach_id = auth.uid()

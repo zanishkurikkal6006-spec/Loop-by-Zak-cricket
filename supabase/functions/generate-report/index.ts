@@ -102,8 +102,12 @@ Deno.serve(async (req) => {
 
     const message = await anthropic.messages.create({
       model: MODEL,
-      max_tokens: 1500,
+      // Adaptive thinking draws from max_tokens, so leave headroom above the
+      // ~300–600 tokens a report needs. Effort 'low' keeps these short writing
+      // tasks fast and avoids overthinking.
+      max_tokens: 3000,
       thinking: { type: 'adaptive' },
+      output_config: { effort: 'low' },
       system:
         "You are an expert cricket coach at Loop by Zak Cricket, a premium UAE academy. " +
         "You write warm, specific, professional messages to parents. You always address " +

@@ -6,6 +6,11 @@ import { AppShell } from './layouts/AppShell';
 import LoginPage from './pages/LoginPage';
 import Placeholder from './pages/Placeholder';
 import { LoopMark } from './components/brand/LoopMark';
+import { Toast } from './components/ui/Toast';
+import CoachHome from './features/coach/CoachHome';
+import CoachOneToOne from './features/coach/CoachOneToOne';
+import CoachAttendance from './features/attendance/CoachAttendance';
+import CoachReports from './features/reports/CoachReports';
 import type { UserRole } from './lib/types';
 
 const queryClient = new QueryClient({
@@ -44,6 +49,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <BrowserRouter>
+          <Toast />
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/" element={<RootRedirect />} />
@@ -56,12 +62,12 @@ export default function App() {
                 </RequireRole>
               }
             >
-              <Route path="/coach" element={<Placeholder eyebrow="Coach" title="Home" />} />
-              <Route path="/coach/one-to-one" element={<Placeholder eyebrow="Coach" title="1-on-1 Sessions" />} />
-              <Route path="/coach/attendance" element={<Placeholder eyebrow="Coach" title="Attendance" />} />
+              <Route path="/coach" element={<CoachHome />} />
+              <Route path="/coach/one-to-one" element={<CoachOneToOne />} />
+              <Route path="/coach/attendance" element={<CoachAttendance />} />
               <Route path="/coach/matches" element={<Placeholder eyebrow="Coach" title="Matches" />} />
               <Route path="/coach/rankings" element={<Placeholder eyebrow="Coach" title="Rankings" />} />
-              <Route path="/coach/reports" element={<Placeholder eyebrow="Coach" title="Reports" />} />
+              <Route path="/coach/reports" element={<CoachReports />} />
             </Route>
 
             {/* ── Head Coach ── */}

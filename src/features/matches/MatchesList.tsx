@@ -1,8 +1,13 @@
 import { useState } from 'react';
-import { useMatches, useMatchScorecard } from '@/lib/queries';
-import { ScreenTitle, Card, Chip } from '@/components/ui';
+import { useQueryClient } from '@tanstack/react-query';
+import { useMatches, useMatchScorecard, useMyGroups, usePlayers } from '@/lib/queries';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/lib/toast';
+import { parseCricHerosScorecard, type ParsedScorecard } from '@/lib/ai';
+import { supabase } from '@/lib/supabase';
+import { ScreenTitle, Card, Chip, Button } from '@/components/ui';
 import { Modal } from '@/components/ui/Modal';
-import { RingAvatar } from '@/components/brand/LoopRing';
+import { LoopRing, RingAvatar } from '@/components/brand/LoopRing';
 
 // Match log + per-match scorecard (the coach's accountability/evidence record).
 // `mine` scopes to the signed-in coach's matches; Head Coach passes mine=false
@@ -25,11 +30,20 @@ export default function MatchesList({
 }) {
   const { data: matches = [], isLoading } = useMatches(mine);
   const [openId, setOpenId] = useState<string | null>(null);
+  const [logOpen, setLogOpen] = useState(false);
   const open = matches.find((m) => m.id === openId) ?? null;
 
   return (
     <div className="space-y-5">
-      <ScreenTitle eyebrow={eyebrow} title="Matches" />
+      <div className="flex items-center justify-between gap-3">
+        <ScreenTitle eyebrow={eyebrow} title="Matches" />
+        {/* Coaches log/import matches; head-coach view is read-only. */}
+        {mine && (
+          <Button size="sm" variant="gold" onClick={() => setLogOpen(true)}>
+            + Log match
+          </Button>
+        )}
+      </div>
 
       {isLoading && <div className="text-[13px] text-ink/45">Loading matches…</div>}
       {!isLoading && !matches.length && (
@@ -70,6 +84,7 @@ export default function MatchesList({
       </div>
 
       <ScorecardModal match={open} onClose={() => setOpenId(null)} />
+      {mine && <LogMatchModal open={logOpen} onClose={() => setLogOpen(false)} />}
     </div>
   );
 }
@@ -119,6 +134,191 @@ function ScorecardModal({
           </div>
         ))}
       </div>
+    </Modal>
+  );
+}
+
+// Log a match — CricHeros import (AI scorecard reading, placeholder for now) or
+// manual entry. Both paths save real data to matches + match_players.
+type LogStep = 'choose' | 'reading' | 'verify' | 'manual';
+
+function LogMatchModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { profile } = useAuth();
+  const toast = useToast();
+  const qc = useQueryClient();
+  const { data: groups = [] } = useMyGroups();
+  const groupIds = groups.map((g) => g.id);
+  const { data: roster = [] } = usePlayers(groupIds.length ? groupIds : undefined);
+
+  const [step, setStep] = useState<LogStep>('choose');
+  const [parsed, setParsed] = useState<ParsedScorecard | null>(null);
+  const [opponent, setOpponent] = useState('');
+  const [matchDate, setMatchDate] = useState(new Date().toISOString().slice(0, 10));
+  const [result, setResult] = useState('Won');
+  const [teamScore, setTeamScore] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  function close() {
+    setStep('choose');
+    setParsed(null);
+    setOpponent('');
+    setResult('Won');
+    setTeamScore('');
+    onClose();
+  }
+
+  async function importFromCricHeros() {
+    setStep('reading');
+    const sc = await parseCricHerosScorecard(roster);
+    setParsed(sc);
+    setOpponent(sc.opponent);
+    setResult(sc.result);
+    setTeamScore(sc.teamScore);
+    setStep('verify');
+  }
+
+  // Insert the match, then its per-player scorecard rows (mapped back to real
+  // player ids by name), then set player-of-match.
+  async function save(withScorecard: boolean) {
+    if (!profile) return;
+    setSaving(true);
+    try {
+      const byName = new Map(roster.map((p) => [p.full_name, p]));
+      const pom = parsed?.playerOfMatchName ? byName.get(parsed.playerOfMatchName) : undefined;
+      const { data: match, error } = await supabase
+        .from('matches')
+        .insert({
+          academy_id: profile.academy_id,
+          group_id: groupIds[0] ?? null,
+          coach_id: profile.id,
+          match_date: matchDate,
+          opponent: opponent.trim() || 'Opponent',
+          team_score: teamScore.trim() || null,
+          result,
+          player_of_match: pom?.id ?? null,
+          source: withScorecard ? 'cricheros' : 'manual',
+          season: String(new Date(matchDate).getFullYear()),
+        })
+        .select()
+        .single();
+      if (error) throw error;
+
+      if (withScorecard && parsed) {
+        const rows = parsed.players
+          .map((row) => {
+            const p = byName.get(row.full_name);
+            if (!p) return null;
+            return {
+              academy_id: profile.academy_id,
+              match_id: match.id,
+              player_id: p.id,
+              batting_position: row.batting_position,
+              runs: row.runs,
+              balls: row.balls,
+              how_out: row.how_out,
+              wickets: row.wickets,
+            };
+          })
+          .filter(Boolean);
+        if (rows.length) {
+          const { error: rErr } = await supabase.from('match_players').insert(rows as object[]);
+          if (rErr) throw rErr;
+        }
+      }
+      toast.show('Match logged');
+      qc.invalidateQueries({ queryKey: ['matches'] });
+      close();
+    } catch {
+      toast.show('Could not save match');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const field =
+    'h-11 w-full rounded-pill border border-cardborder bg-white px-3 text-[14px] outline-none focus:border-gold';
+
+  return (
+    <Modal open={open} onClose={close} title="Log a Match">
+      {step === 'choose' && (
+        <div className="space-y-3">
+          <button
+            onClick={importFromCricHeros}
+            className="w-full rounded-card bg-gradient-to-b from-gold-light to-gold-dark p-4 text-left text-ink"
+          >
+            <div className="text-[15px] font-semibold">Import from CricHeros</div>
+            <div className="text-[12px] text-ink/70">AI reads the scorecard and pre-fills everything.</div>
+          </button>
+          <button
+            onClick={() => setStep('manual')}
+            className="w-full rounded-card border border-cardborder bg-white p-4 text-left"
+          >
+            <div className="text-[15px] font-semibold">Log manually</div>
+            <div className="text-[12px] text-ink/45">Enter the result and team score yourself.</div>
+          </button>
+        </div>
+      )}
+
+      {step === 'reading' && (
+        <div className="flex h-56 flex-col items-center justify-center gap-4">
+          <LoopRing size={64} className="animate-spin" />
+          <div className="text-[13px] text-ink/55">AI reading scorecard…</div>
+        </div>
+      )}
+
+      {(step === 'verify' || step === 'manual') && (
+        <div className="space-y-3">
+          {step === 'verify' && (
+            <div className="rounded-chip bg-chip-gold px-3 py-2 text-[12px] text-gold-dark">
+              Imported — please verify the details below before saving.
+            </div>
+          )}
+          <div className="grid grid-cols-2 gap-2">
+            <input value={opponent} onChange={(e) => setOpponent(e.target.value)} placeholder="Opponent" className={field} />
+            <input type="date" value={matchDate} onChange={(e) => setMatchDate(e.target.value)} className={field} />
+            <select value={result} onChange={(e) => setResult(e.target.value)} className={field}>
+              <option>Won</option>
+              <option>Lost</option>
+              <option>Tied</option>
+              <option>No result</option>
+            </select>
+            <input value={teamScore} onChange={(e) => setTeamScore(e.target.value)} placeholder="Team score e.g. 142/6" className={field} />
+          </div>
+
+          {step === 'verify' && parsed && (
+            <div className="rounded-card border border-cardborder">
+              <div className="border-b border-hairline px-3 py-2 text-[11px] font-semibold uppercase tracking-eyebrow text-ink/40">
+                Scorecard ({parsed.players.length})
+              </div>
+              <div className="max-h-48 divide-y divide-hairline overflow-auto">
+                {parsed.players.map((r) => (
+                  <div key={r.full_name} className="flex items-center justify-between px-3 py-1.5 text-[12.5px]">
+                    <span className="font-medium">{r.full_name}</span>
+                    <span className="text-ink/55">
+                      {r.runs} ({r.balls}) · {r.how_out}
+                      {r.wickets ? ` · ${r.wickets}w` : ''}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              {parsed.playerOfMatchName && (
+                <div className="border-t border-hairline px-3 py-2 text-[12px]">
+                  Player of the match: <span className="font-semibold">{parsed.playerOfMatchName}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="flex gap-2">
+            <Button variant="ghost" onClick={() => setStep('choose')}>
+              Back
+            </Button>
+            <Button className="flex-1" disabled={saving} onClick={() => save(step === 'verify')}>
+              {saving ? 'Saving…' : 'Save match'}
+            </Button>
+          </div>
+        </div>
+      )}
     </Modal>
   );
 }

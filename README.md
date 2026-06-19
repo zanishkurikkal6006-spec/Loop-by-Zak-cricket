@@ -21,6 +21,12 @@ parent reports, match evidence records, badges and finance.
 - **Supabase** — Postgres + Auth + Storage + Edge Functions.
 - **Anthropic API** for AI report writing — called **only** from a Supabase Edge
   Function (`generate-report`) so the API key is never exposed to the browser.
+  **Currently runs in free placeholder mode**: `src/lib/ai.ts` returns realistic
+  sample reports/scorecards so the whole flow is testable with no key or cost.
+  To go live, flip `USE_REAL_AI` to `true` in `src/lib/ai.ts` and set
+  `ANTHROPIC_API_KEY` as an edge-function secret — no UI or flow changes. The
+  AI features (per-session quick feedback, end-of-block development reports,
+  CricHeros scorecard reading) all route through that one swap point.
 - **WhatsApp** via **click-to-send** today (the app composes the message and opens
   WhatsApp pre-filled). Structured behind a templates module + `outbound_messages`
   log so it can upgrade to the official WhatsApp Business API without touching the UI.

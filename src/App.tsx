@@ -11,6 +11,9 @@ import CoachHome from './features/coach/CoachHome';
 import CoachOneToOne from './features/coach/CoachOneToOne';
 import CoachAttendance from './features/attendance/CoachAttendance';
 import CoachReports from './features/reports/CoachReports';
+import AdminDashboard from './features/admin/AdminDashboard';
+import AdminPlayers from './features/admin/AdminPlayers';
+import AdminAttendance from './features/admin/AdminAttendance';
 import type { UserRole } from './lib/types';
 
 const queryClient = new QueryClient({
@@ -94,10 +97,10 @@ export default function App() {
                 </RequireRole>
               }
             >
-              <Route path="/admin" element={<Placeholder eyebrow="Admin" title="Dashboard" />} />
-              <Route path="/admin/players" element={<Placeholder eyebrow="Admin" title="Players" />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/players" element={<AdminPlayers />} />
               <Route path="/admin/finance" element={<Placeholder eyebrow="Admin" title="Finance" />} />
-              <Route path="/admin/attendance" element={<Placeholder eyebrow="Admin" title="Attendance" />} />
+              <Route path="/admin/attendance" element={<AdminAttendance />} />
               <Route path="/admin/payments" element={<Placeholder eyebrow="Admin" title="Payments" />} />
               <Route path="/admin/programs" element={<Placeholder eyebrow="Admin" title="Programs" />} />
             </Route>

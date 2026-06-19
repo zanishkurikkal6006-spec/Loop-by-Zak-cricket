@@ -14,7 +14,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { ScreenTitle, Card, StatCard, Button, Chip } from '@/components/ui';
 import { aed, clsx } from '@/lib/utils';
 import { exportToExcel } from '@/lib/excel';
+import MonthEndReport from './MonthEndReport';
 import type { Payment, PaymentState } from '@/lib/types';
+
+type FinanceTab = 'overview' | 'month-end' | 'by-center';
 
 // Finance — Overview with filter bar + Excel export and a monthly revenue chart
 // (packages green + match fees gold), mirroring the design. Admin-only (RLS also
@@ -24,6 +27,7 @@ type StatusFilter = 'all' | PaymentState;
 
 export default function AdminFinance() {
   const { profile } = useAuth();
+  const [tab, setTab] = useState<FinanceTab>('overview');
   const [status, setStatus] = useState<StatusFilter>('all');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
@@ -73,6 +77,27 @@ export default function AdminFinance() {
     return [...map.values()].sort((a, b) => a.month.localeCompare(b.month));
   }, [filtered]);
 
+  const { data: centers = [] } = useQuery({
+    queryKey: ['centers', profile?.academy_id],
+    enabled: !!profile,
+    queryFn: async () => {
+      const { data } = await supabase.from('training_centers').select('id, name');
+      return (data ?? []) as { id: string; name: string }[];
+    },
+  });
+
+  // Collected revenue grouped by training center.
+  const byCenter = useMemo(() => {
+    const name = new Map(centers.map((c) => [c.id, c.name]));
+    const map = new Map<string, number>();
+    for (const p of filtered) {
+      if (p.status !== 'confirmed') continue;
+      const label = p.center_id ? (name.get(p.center_id) ?? 'Unknown') : 'Unassigned';
+      map.set(label, (map.get(label) ?? 0) + Number(p.amount));
+    }
+    return [...map.entries()].sort((a, b) => b[1] - a[1]);
+  }, [filtered, centers]);
+
   function handleExport() {
     exportToExcel(
       filtered.map((p) => ({
@@ -91,6 +116,39 @@ export default function AdminFinance() {
     <div className="space-y-5">
       <ScreenTitle eyebrow="Admin" title="Finance" />
 
+      <div className="flex gap-2">
+        {(['overview', 'month-end', 'by-center'] as FinanceTab[]).map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={clsx(
+              'rounded-chip px-3 py-1.5 text-[12px] font-semibold capitalize transition',
+              tab === t ? 'bg-brand-red text-paper' : 'border border-cardborder bg-white text-ink/60',
+            )}
+          >
+            {t === 'by-center' ? 'By Center' : t === 'month-end' ? 'Month-End' : 'Overview'}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'month-end' && <MonthEndReport />}
+
+      {tab === 'by-center' && (
+        <Card className="divide-y divide-hairline p-0">
+          {byCenter.map(([center, amount]) => (
+            <div key={center} className="flex items-center justify-between px-4 py-3 text-[14px]">
+              <span className="font-medium">{center}</span>
+              <span className="font-display text-xl text-success">{aed(amount)}</span>
+            </div>
+          ))}
+          {!byCenter.length && (
+            <div className="px-4 py-6 text-center text-[13px] text-ink/45">No confirmed revenue yet.</div>
+          )}
+        </Card>
+      )}
+
+      {tab === 'overview' && (
+      <>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatCard label="Collected" value={aed(totals.collected)} tone="green" />
         <StatCard label="Outstanding" value={aed(totals.outstanding)} tone={totals.outstanding > 0 ? 'amber' : undefined} />
@@ -166,6 +224,8 @@ export default function AdminFinance() {
           )}
         </div>
       </Card>
+      </>
+      )}
     </div>
   );
 }

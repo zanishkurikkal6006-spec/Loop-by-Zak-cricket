@@ -8,7 +8,8 @@ import { RingAvatar } from '@/components/brand/LoopRing';
 import { Button, Card, ScreenTitle, Chip } from '@/components/ui';
 import { Icon } from '@/components/ui/Icon';
 import { Modal } from '@/components/ui/Modal';
-import type { Group, PackageType } from '@/lib/types';
+import PlayerDetail from './PlayerDetail';
+import type { Group, PackageType, Player } from '@/lib/types';
 
 // Admin Players: search + group filter + Add Player. The Add modal supports
 // day-one onboarding — "already has a running package": enter package size +
@@ -17,6 +18,7 @@ export default function AdminPlayers() {
   const { profile } = useAuth();
   const [search, setSearch] = useState('');
   const [adding, setAdding] = useState(false);
+  const [selected, setSelected] = useState<Player | null>(null);
   const { data: players = [] } = usePlayers();
 
   const groups = useQuery({
@@ -55,7 +57,7 @@ export default function AdminPlayers() {
 
       <div className="grid gap-3 md:grid-cols-2">
         {filtered.map((p) => (
-          <Card key={p.id} className="flex items-center gap-3">
+          <Card key={p.id} className="flex cursor-pointer items-center gap-3" onClick={() => setSelected(p)}>
             <RingAvatar name={p.full_name} size={48} />
             <div className="flex-1">
               <div className="text-[15px] font-semibold">{p.full_name}</div>
@@ -78,6 +80,8 @@ export default function AdminPlayers() {
         onClose={() => setAdding(false)}
         groups={groups.data ?? []}
       />
+
+      <PlayerDetail player={selected} onClose={() => setSelected(null)} />
     </div>
   );
 }

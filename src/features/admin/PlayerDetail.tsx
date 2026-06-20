@@ -16,6 +16,8 @@ import type { Package, PackageType, Payment, Report, PlayerBadge, BadgeType, Pla
 
 type PackageRow = Package & { package_type: PackageType | null };
 
+const editField = 'h-11 w-full rounded-pill border border-cardborder bg-white px-3 text-[14px] outline-none focus:border-gold';
+
 export default function PlayerDetail({ player, onClose }: { player: Player | null; onClose: () => void }) {
   const { profile } = useAuth();
   const toast = useToast();
@@ -187,6 +189,63 @@ export default function PlayerDetail({ player, onClose }: { player: Player | nul
     },
   });
 
+  // Match history — the player's per-match evidence record.
+  const { data: matchHistory = [] } = useQuery({
+    queryKey: ['player-matches', player?.id],
+    enabled,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('match_players')
+        .select('*, match:matches(*)')
+        .eq('player_id', player!.id)
+        .order('created_at', { ascending: false });
+      return (data ?? []) as (import('@/lib/types').MatchPlayer & {
+        match: { opponent: string | null; match_date: string; result: string | null } | null;
+      })[];
+    },
+  });
+
+  const { data: groups = [] } = useQuery({
+    queryKey: ['groups', profile?.academy_id],
+    enabled,
+    queryFn: async () => {
+      const { data } = await supabase.from('groups').select('id, name').order('name');
+      return (data ?? []) as { id: string; name: string }[];
+    },
+  });
+
+  // ── Edit the player's core fields ──────────────────────────────────────────
+  const [editing, setEditing] = useState(false);
+  const [edit, setEdit] = useState({ full_name: '', age: '', group_id: '', parent_name: '', parent_phone: '' });
+  function startEdit() {
+    if (!player) return;
+    setEdit({
+      full_name: player.full_name,
+      age: player.age != null ? String(player.age) : '',
+      group_id: player.group_id ?? '',
+      parent_name: player.parent_name ?? '',
+      parent_phone: player.parent_phone ?? '',
+    });
+    setEditing(true);
+  }
+  async function saveEdit() {
+    if (!profile || !player || !edit.full_name.trim()) return;
+    const { error } = await supabase
+      .from('players')
+      .update({
+        full_name: edit.full_name.trim(),
+        age: edit.age ? Number(edit.age) : null,
+        group_id: edit.group_id || null,
+        parent_name: edit.parent_name.trim() || null,
+        parent_phone: edit.parent_phone.trim() || null,
+      })
+      .eq('id', player.id);
+    if (error) return toast.show('Could not save');
+    toast.show('Player updated');
+    setEditing(false);
+    qc.invalidateQueries({ queryKey: ['players'] });
+  }
+
   const { data: badges = [] } = useQuery({
     queryKey: ['player-badge-list', player?.id],
     enabled,
@@ -231,13 +290,39 @@ export default function PlayerDetail({ player, onClose }: { player: Player | nul
               {player.age ? `Age ${player.age}` : ''}
               {player.parent_name ? ` · ${player.parent_name}` : ''}
             </div>
-            {player.parent_phone && (
-              <Button size="sm" variant="whatsapp" className="mt-1" onClick={openWhatsApp}>
-                Open WhatsApp
-              </Button>
-            )}
+            <div className="mt-1 flex gap-2">
+              {player.parent_phone && (
+                <Button size="sm" variant="whatsapp" onClick={openWhatsApp}>
+                  Open WhatsApp
+                </Button>
+              )}
+              <Button size="sm" variant="ghost" onClick={startEdit}>Edit</Button>
+            </div>
           </div>
         </div>
+
+        {/* Edit player */}
+        {editing && (
+          <Card className="space-y-2">
+            <div className="eyebrow text-ink/40">Edit player</div>
+            <input value={edit.full_name} onChange={(e) => setEdit((s) => ({ ...s, full_name: e.target.value }))} placeholder="Full name" className={editField} />
+            <div className="grid grid-cols-2 gap-2">
+              <input type="number" value={edit.age} onChange={(e) => setEdit((s) => ({ ...s, age: e.target.value }))} placeholder="Age" className={editField} />
+              <select value={edit.group_id} onChange={(e) => setEdit((s) => ({ ...s, group_id: e.target.value }))} className={editField}>
+                <option value="">No group</option>
+                {groups.map((g) => (
+                  <option key={g.id} value={g.id}>{g.name}</option>
+                ))}
+              </select>
+              <input value={edit.parent_name} onChange={(e) => setEdit((s) => ({ ...s, parent_name: e.target.value }))} placeholder="Parent name" className={editField} />
+              <input value={edit.parent_phone} onChange={(e) => setEdit((s) => ({ ...s, parent_phone: e.target.value }))} placeholder="Parent WhatsApp" className={editField} />
+            </div>
+            <div className="flex gap-2">
+              <Button variant="ghost" onClick={() => setEditing(false)}>Cancel</Button>
+              <Button className="flex-1" disabled={!edit.full_name.trim()} onClick={saveEdit}>Save</Button>
+            </div>
+          </Card>
+        )}
 
         {/* Package & Sessions */}
         {pkg ? (
@@ -369,6 +454,33 @@ export default function PlayerDetail({ player, onClose }: { player: Player | nul
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Match history — evidence record */}
+        {matchHistory.length > 0 && (
+          <div>
+            <div className="eyebrow mb-2 text-ink/40">Match history</div>
+            <Card className="divide-y divide-hairline p-0">
+              {matchHistory.map((m) => (
+                <div key={m.id} className="px-3 py-2 text-[12.5px]">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">vs {m.match?.opponent ?? 'Opponent'}</span>
+                    <span className="text-ink/55">
+                      {m.runs ?? 0} ({m.balls ?? 0}){m.wickets ? ` · ${m.wickets}w` : ''}
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-ink/45">
+                    {m.match?.match_date ?? ''} · {m.how_out ?? '—'}
+                  </div>
+                  {m.coach_why_note && (
+                    <div className="mt-1 rounded-chip bg-chip-gold px-2 py-1 text-[11px] text-gold-dark">
+                      {m.coach_why_note}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </Card>
           </div>
         )}
 

@@ -85,6 +85,45 @@ function PendingCard({ session }: { session: AttendanceSession }) {
   const present = rows.filter((r) => r.state === 'present').length;
   const late = rows.filter((r) => r.state === 'late').length;
 
+  // Cross-coach double-marking detection: a player marked in another session on
+  // the SAME date by a different coach. Admin then picks 1- or 2-session
+  // deduction so a parent is never double-charged.
+  const { data: coaches = [] } = useCoaches();
+  const coachName = (id: string | null) => coaches.find((c) => c.id === id)?.full_name ?? 'another coach';
+  const dupes = useQuery({
+    queryKey: ['attendance-dupes', session.id, rows.length],
+    enabled: rows.length > 0,
+    queryFn: async (): Promise<Record<string, string>> => {
+      // Other sessions on the same date.
+      const { data: others } = await supabase
+        .from('attendance_sessions')
+        .select('id, coach_id')
+        .eq('session_date', session.session_date)
+        .neq('id', session.id);
+      const otherSessions = (others ?? []) as { id: string; coach_id: string | null }[];
+      if (!otherSessions.length) return {};
+      const { data: dupRecords } = await supabase
+        .from('attendance_records')
+        .select('player_id, session_id')
+        .in('session_id', otherSessions.map((s) => s.id))
+        .in('player_id', rows.map((r) => r.player_id));
+      const coachBySession = new Map(otherSessions.map((s) => [s.id, s.coach_id]));
+      const map: Record<string, string> = {};
+      for (const d of (dupRecords ?? []) as { player_id: string; session_id: string }[]) {
+        map[d.player_id] = coachBySession.get(d.session_id) ?? '';
+      }
+      return map;
+    },
+  });
+  const dupeMap = dupes.data ?? {};
+
+  async function setDeduct(recordId: string, n: number) {
+    const { error } = await supabase.from('attendance_records').update({ deduct_sessions: n }).eq('id', recordId);
+    if (error) return toast.show('Could not update');
+    toast.show(n === 1 ? 'Deducting 1 session' : 'Deducting 2 sessions');
+    queryClient.invalidateQueries({ queryKey: ['attendance-records', session.id] });
+  }
+
   const confirm = useMutation({
     mutationFn: async () => {
       if (!profile) throw new Error('Not signed in');
@@ -117,14 +156,40 @@ function PendingCard({ session }: { session: AttendanceSession }) {
         </Button>
       </div>
       <div className="mt-3 divide-y divide-hairline">
-        {rows.map((r) => (
-          <div key={r.id} className="flex items-center justify-between py-2">
-            <span className="text-[13px]">{r.player?.full_name}</span>
-            <Chip tone={r.state === 'present' ? 'green' : 'amber'}>
-              {r.state === 'present' ? 'Present' : 'Late'}
-            </Chip>
-          </div>
-        ))}
+        {rows.map((r) => {
+          const dupCoach = dupeMap[r.player_id];
+          return (
+            <div key={r.id} className="py-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[13px]">{r.player?.full_name}</span>
+                <Chip tone={r.state === 'present' ? 'green' : 'amber'}>
+                  {r.state === 'present' ? 'Present' : 'Late'}
+                </Chip>
+              </div>
+              {dupCoach !== undefined && (
+                <div className="mt-1 flex flex-wrap items-center gap-2 rounded-chip bg-chip-amber px-2 py-1.5">
+                  <span className="text-[11px] text-amber-text">
+                    Also marked by {coachName(dupCoach)} today
+                  </span>
+                  <div className="flex gap-1">
+                    {[1, 2].map((n) => (
+                      <button
+                        key={n}
+                        onClick={() => setDeduct(r.id, n)}
+                        className={
+                          'rounded-chip px-2 py-0.5 text-[11px] font-semibold ' +
+                          (r.deduct_sessions === n ? 'bg-brand-red text-paper' : 'border border-cardborder bg-white text-ink/60')
+                        }
+                      >
+                        {n} session{n > 1 ? 's' : ''}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </Card>
   );

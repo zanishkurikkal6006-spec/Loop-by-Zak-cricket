@@ -99,9 +99,22 @@ export default function AdminPrograms() {
               </div>
             </div>
             {p.description && <p className="mt-3 text-[12px] text-ink/55">{p.description}</p>}
-            <Button size="sm" variant="ghost" className="mt-3" onClick={() => setEnrolFor(p)}>
-              + Enrol player
-            </Button>
+            <div className="mt-3 flex items-center gap-2">
+              <Button size="sm" variant="ghost" onClick={() => setEnrolFor(p)}>
+                + Enrol player
+              </Button>
+              <button
+                onClick={async () => {
+                  const { error } = await supabase.from('programs').delete().eq('id', p.id);
+                  if (error) return toast.show('Could not delete');
+                  toast.show('Program deleted');
+                  qc.invalidateQueries({ queryKey: ['programs'] });
+                }}
+                className="text-[12px] font-semibold text-danger"
+              >
+                Delete
+              </button>
+            </div>
           </Card>
         ))}
         {!programs.length && <Card className="text-[13px] text-ink/45">No programs yet.</Card>}

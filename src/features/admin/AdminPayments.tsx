@@ -172,7 +172,17 @@ function PackageTypesTab() {
                 {t.sessions == null ? (t.kind === 'complimentary' ? 'Complimentary' : 'Unlimited') : `${t.sessions} sessions`}
               </div>
             </div>
-            <div className="font-display text-2xl">{Number(t.price) ? t.price : 'Free'}</div>
+            <div className="flex items-center gap-2">
+              <div className="font-display text-2xl">{Number(t.price) ? t.price : 'Free'}</div>
+              <DeleteX
+                onClick={async () => {
+                  const { error } = await supabase.from('package_types').delete().eq('id', t.id);
+                  if (error) return toast.show('Could not delete');
+                  toast.show('Deleted');
+                  qc.invalidateQueries({ queryKey: ['package-types'] });
+                }}
+              />
+            </div>
           </Card>
         ))}
         {!types.length && <Card className="text-[13px] text-ink/45">No package types yet.</Card>}
@@ -347,6 +357,13 @@ function SettingsTab() {
     qc.invalidateQueries({ queryKey: ['settings-academy'] });
   }
 
+  async function del(table: string, id: string, key: string) {
+    const { error } = await supabase.from(table).delete().eq('id', id);
+    if (error) return toast.show('Could not delete');
+    toast.show('Deleted');
+    qc.invalidateQueries({ queryKey: [key] });
+  }
+
   const field = 'h-11 w-full rounded-pill border border-cardborder bg-white px-3 text-[14px] outline-none focus:border-gold';
 
   return (
@@ -358,7 +375,10 @@ function SettingsTab() {
           {centers.map((c) => (
             <div key={c.id} className="flex items-center justify-between py-2 text-[13px]">
               <span className="font-medium">{c.name}</span>
-              <span className="text-ink/45">{c.address}</span>
+              <span className="flex items-center gap-2 text-ink/45">
+                {c.address}
+                <DeleteX onClick={() => del('training_centers', c.id, 'settings-centers')} />
+              </span>
             </div>
           ))}
           {!centers.length && <div className="py-2 text-[13px] text-ink/45">No centers yet.</div>}
@@ -377,9 +397,10 @@ function SettingsTab() {
           {batches.map((b) => (
             <div key={b.id} className="flex items-center justify-between py-2 text-[13px]">
               <span className="font-medium">{b.name}</span>
-              <span className="text-ink/45">
+              <span className="flex items-center gap-2 text-ink/45">
                 {b.start_time?.slice(0, 5) ?? '—'}–{b.end_time?.slice(0, 5) ?? '—'}
                 {b.center ? ` · ${b.center.name}` : ''}
+                <DeleteX onClick={() => del('batches', b.id, 'settings-batches')} />
               </span>
             </div>
           ))}
@@ -409,7 +430,10 @@ function SettingsTab() {
                 <span className="h-2.5 w-2.5 rounded-full" style={{ background: g.color }} />
                 {g.name}
               </span>
-              <span className="text-ink/45">{g.age_category}</span>
+              <span className="flex items-center gap-2 text-ink/45">
+                {g.age_category}
+                <DeleteX onClick={() => del('groups', g.id, 'settings-groups')} />
+              </span>
             </div>
           ))}
           {!groups.length && <div className="py-2 text-[13px] text-ink/45">No groups yet.</div>}
@@ -722,6 +746,19 @@ function PackageCard({ pkg }: { pkg: PackageRow }) {
         </div>
       </div>
     </Card>
+  );
+}
+
+// Small delete control used across the settings/packages lists.
+function DeleteX({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-label="Delete"
+      className="flex h-5 w-5 items-center justify-center rounded-full text-ink/40 hover:bg-chip-red hover:text-danger"
+    >
+      ✕
+    </button>
   );
 }
 

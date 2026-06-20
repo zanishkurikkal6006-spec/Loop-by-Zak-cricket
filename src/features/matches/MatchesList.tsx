@@ -156,6 +156,7 @@ function LogMatchModal({ open, onClose }: { open: boolean; onClose: () => void }
   const [matchDate, setMatchDate] = useState(new Date().toISOString().slice(0, 10));
   const [result, setResult] = useState('Won');
   const [teamScore, setTeamScore] = useState('');
+  const [matchFee, setMatchFee] = useState('');
   const [saving, setSaving] = useState(false);
 
   function close() {
@@ -164,6 +165,7 @@ function LogMatchModal({ open, onClose }: { open: boolean; onClose: () => void }
     setOpponent('');
     setResult('Won');
     setTeamScore('');
+    setMatchFee('');
     onClose();
   }
 
@@ -223,6 +225,29 @@ function LogMatchModal({ open, onClose }: { open: boolean; onClose: () => void }
         if (rows.length) {
           const { error: rErr } = await supabase.from('match_players').insert(rows as object[]);
           if (rErr) throw rErr;
+        }
+
+        // Optional: create a per-player match fee (awaiting collection). Admin
+        // (and the coach) can then Confirm bank / Collect cash on these.
+        const fee = Number(matchFee);
+        if (fee > 0) {
+          const feeRows = parsed.players
+            .map((row) => {
+              const p = byName.get(row.full_name);
+              if (!p) return null;
+              return {
+                academy_id: profile.academy_id,
+                match_id: match.id,
+                player_id: p.id,
+                fee,
+                state: 'awaiting' as const,
+              };
+            })
+            .filter(Boolean);
+          if (feeRows.length) {
+            const { error: fErr } = await supabase.from('match_fees').insert(feeRows as object[]);
+            if (fErr) throw fErr;
+          }
         }
       }
       toast.show('Match logged');
@@ -284,6 +309,16 @@ function LogMatchModal({ open, onClose }: { open: boolean; onClose: () => void }
             </select>
             <input value={teamScore} onChange={(e) => setTeamScore(e.target.value)} placeholder="Team score e.g. 142/6" className={field} />
           </div>
+
+          {step === 'verify' && (
+            <input
+              type="number"
+              value={matchFee}
+              onChange={(e) => setMatchFee(e.target.value)}
+              placeholder="Match fee per player (AED, optional)"
+              className={field}
+            />
+          )}
 
           {step === 'verify' && parsed && (
             <div className="rounded-card border border-cardborder">

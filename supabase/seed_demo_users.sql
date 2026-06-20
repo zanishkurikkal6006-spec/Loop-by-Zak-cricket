@@ -2,7 +2,7 @@
 -- Loop by Zak Cricket — demo bootstrap (for testing login)
 --
 -- Run this ONCE, in the Supabase SQL editor, AFTER you have:
---   1. Applied migrations 0001 → 0002 → 0003 to the project, AND
+--   1. Applied the three migrations (in order) to the project, AND
 --   2. Created three confirmed auth users in Authentication → Users
 --      (click "Add user", tick "Auto Confirm User"), using these emails:
 --         admin@zakcricket.ae   (password of your choice)

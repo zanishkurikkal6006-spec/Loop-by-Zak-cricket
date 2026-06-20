@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCoaches } from '@/lib/queries';
 import { ScreenTitle, Card, StatCard, Chip } from '@/components/ui';
+import { Modal } from '@/components/ui/Modal';
 import { RingAvatar } from '@/components/brand/LoopRing';
+import type { Profile, Report, Player } from '@/lib/types';
 
 // Head Coach landing — development oversight across all coaches. NO finance.
 // Per-coach card: sessions delivered, reports sent / pending, players, status.
@@ -65,6 +68,7 @@ export default function HeadCoachDashboard() {
   const totalSessions = Object.values(metrics ?? {}).reduce((s, m) => s + m.sessions, 0);
   const totalSent = Object.values(metrics ?? {}).reduce((s, m) => s + m.reportsSent, 0);
   const totalPending = Object.values(metrics ?? {}).reduce((s, m) => s + m.reportsPending, 0);
+  const [selected, setSelected] = useState<Profile | null>(null);
 
   return (
     <div className="space-y-5">
@@ -85,7 +89,7 @@ export default function HeadCoachDashboard() {
           const m = metrics?.[c.id];
           const quiet = (m?.reportsSent ?? 0) === 0 && (m?.sessions ?? 0) === 0;
           return (
-            <Card key={c.id} className="flex items-start gap-3">
+            <Card key={c.id} className="flex cursor-pointer items-start gap-3" onClick={() => setSelected(c)}>
               <RingAvatar name={c.full_name} size={48} />
               <div className="flex-1">
                 <div className="flex items-center justify-between">
@@ -104,7 +108,49 @@ export default function HeadCoachDashboard() {
         })}
         {!coaches.length && <Card className="text-[13px] text-ink/45">No coaches yet.</Card>}
       </div>
+
+      <CoachDetailModal coach={selected} onClose={() => setSelected(null)} />
     </div>
+  );
+}
+
+// A coach's report stream (sent + draft). The head coach reviews & monitors —
+// the coach still owns sending.
+function CoachDetailModal({ coach, onClose }: { coach: Profile | null; onClose: () => void }) {
+  const { data: reports = [] } = useQuery({
+    queryKey: ['coach-reports', coach?.id],
+    enabled: !!coach,
+    queryFn: async (): Promise<(Report & { player: Player | null })[]> => {
+      const { data } = await supabase
+        .from('reports')
+        .select('*, player:players(*)')
+        .eq('coach_id', coach!.id)
+        .order('created_at', { ascending: false });
+      return (data ?? []) as (Report & { player: Player | null })[];
+    },
+  });
+
+  return (
+    <Modal open={!!coach} onClose={onClose} title={coach?.full_name ?? 'Coach'}>
+      <div className="space-y-2">
+        <p className="text-[12px] text-ink/55">
+          You review &amp; monitor — the coach still owns sending.
+        </p>
+        {reports.map((r) => (
+          <div key={r.id} className="flex items-center justify-between rounded-card border border-cardborder bg-white px-3 py-2 text-[13px]">
+            <div>
+              <div className="font-medium">{r.player?.full_name ?? 'Player'}</div>
+              <div className="text-[11px] text-ink/45">
+                {r.type === 'quick' ? 'Quick feedback' : 'Development'} ·{' '}
+                {new Date(r.created_at).toLocaleDateString('en-AE', { day: 'numeric', month: 'short' })}
+              </div>
+            </div>
+            <Chip tone={r.status === 'sent' ? 'green' : 'amber'}>{r.status === 'sent' ? 'Sent' : 'Draft'}</Chip>
+          </div>
+        ))}
+        {!reports.length && <div className="py-4 text-center text-[13px] text-ink/45">No reports yet.</div>}
+      </div>
+    </Modal>
   );
 }
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMatches, useMatchScorecard, useMyGroups, usePlayers } from '@/lib/queries';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/lib/toast';
@@ -31,6 +31,7 @@ export default function MatchesList({
   const { data: matches = [], isLoading } = useMatches(mine);
   const [openId, setOpenId] = useState<string | null>(null);
   const [logOpen, setLogOpen] = useState(false);
+  const [view, setView] = useState<'log' | 'payments'>('log');
   const open = matches.find((m) => m.id === openId) ?? null;
 
   return (
@@ -38,13 +39,35 @@ export default function MatchesList({
       <div className="flex items-center justify-between gap-3">
         <ScreenTitle eyebrow={eyebrow} title="Matches" />
         {/* Coaches log/import matches; head-coach view is read-only. */}
-        {mine && (
+        {mine && view === 'log' && (
           <Button size="sm" variant="gold" onClick={() => setLogOpen(true)}>
             + Log match
           </Button>
         )}
       </div>
 
+      {/* Coaches coordinate matches, so they collect/confirm fees too. */}
+      {mine && (
+        <div className="flex gap-2">
+          {(['log', 'payments'] as const).map((v) => (
+            <button
+              key={v}
+              onClick={() => setView(v)}
+              className={
+                'rounded-chip px-3 py-1.5 text-[12px] font-semibold capitalize transition ' +
+                (view === v ? 'bg-brand-red text-paper' : 'border border-cardborder bg-white text-ink/60')
+              }
+            >
+              {v === 'log' ? 'Match Log' : 'Match Payments'}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {mine && view === 'payments' && <CoachMatchPayments />}
+
+      {!(mine && view === 'payments') && (
+      <>
       {isLoading && <div className="text-[13px] text-ink/45">Loading matches…</div>}
       {!isLoading && !matches.length && (
         <Card className="text-[13px] text-ink/45">No matches logged yet.</Card>
@@ -83,7 +106,10 @@ export default function MatchesList({
         ))}
       </div>
 
-      <ScorecardModal match={open} onClose={() => setOpenId(null)} />
+      </>
+      )}
+
+      <ScorecardModal match={open} editable={mine} onClose={() => setOpenId(null)} />
       {mine && <LogMatchModal open={logOpen} onClose={() => setLogOpen(false)} />}
     </div>
   );
@@ -91,12 +117,32 @@ export default function MatchesList({
 
 function ScorecardModal({
   match,
+  editable = false,
   onClose,
 }: {
   match: { id: string; opponent: string | null } | null;
+  editable?: boolean;
   onClose: () => void;
 }) {
+  const qc = useQueryClient();
+  const toast = useToast();
   const { data: rows = [] } = useMatchScorecard(match?.id ?? null);
+  const [notes, setNotes] = useState<Record<string, string>>({});
+  const [savingId, setSavingId] = useState<string | null>(null);
+
+  // Save the coach "why" note — the accountability/evidence record.
+  async function saveNote(rowId: string) {
+    setSavingId(rowId);
+    const { error } = await supabase
+      .from('match_players')
+      .update({ coach_why_note: notes[rowId] ?? '' })
+      .eq('id', rowId);
+    setSavingId(null);
+    if (error) return toast.show('Could not save note');
+    toast.show('Note saved');
+    qc.invalidateQueries({ queryKey: ['scorecard', match?.id] });
+  }
+
   return (
     <Modal open={!!match} onClose={onClose} title={match ? `vs ${match.opponent ?? 'Opponent'}` : ''}>
       <div className="space-y-3">
@@ -124,17 +170,98 @@ function ScorecardModal({
                 </div>
               </div>
             </div>
-            {/* The coach "why" note — the accountability/evidence record. */}
-            {r.coach_why_note && (
-              <div className="mt-2 rounded-chip bg-chip-gold px-3 py-2 text-[12px] text-gold-dark">
-                <span className="font-semibold">Coach's note: </span>
-                {r.coach_why_note}
+            {/* The coach "why" note — read-only for oversight, editable for the
+                owning coach (e.g. "moved to 4 to face spin"). */}
+            {editable ? (
+              <div className="mt-2 flex items-center gap-2">
+                <input
+                  defaultValue={r.coach_why_note ?? ''}
+                  onChange={(e) => setNotes((n) => ({ ...n, [r.id]: e.target.value }))}
+                  placeholder="Why note (e.g. moved to 4 to face spin)"
+                  className="h-9 flex-1 rounded-chip border border-cardborder bg-white px-3 text-[12px] outline-none focus:border-gold"
+                />
+                <button
+                  onClick={() => saveNote(r.id)}
+                  disabled={savingId === r.id || notes[r.id] === undefined}
+                  className="rounded-chip border border-cardborder px-2 py-1 text-[11px] font-semibold text-brand-red disabled:opacity-40"
+                >
+                  Save
+                </button>
               </div>
+            ) : (
+              r.coach_why_note && (
+                <div className="mt-2 rounded-chip bg-chip-gold px-3 py-2 text-[12px] text-gold-dark">
+                  <span className="font-semibold">Coach's note: </span>
+                  {r.coach_why_note}
+                </div>
+              )
             )}
           </div>
         ))}
       </div>
     </Modal>
+  );
+}
+
+// Coach match-payments — the coach coordinates the match, so collects/confirms
+// fees. Coaches can update their own match_fees (RLS), but not the academy-wide
+// payments ledger; admin's confirmation writes that.
+function CoachMatchPayments() {
+  const { profile } = useAuth();
+  const toast = useToast();
+  const qc = useQueryClient();
+  const { data: fees = [], isLoading } = useQuery({
+    queryKey: ['coach-match-fees', profile?.id],
+    enabled: !!profile,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('match_fees')
+        .select('*, player:players(*), match:matches(*)')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as (import('@/lib/types').MatchFee & {
+        player: { full_name: string } | null;
+        match: { opponent: string | null } | null;
+      })[];
+    },
+  });
+
+  async function collect(id: string, mode: 'bank' | 'cash') {
+    if (!profile) return;
+    const { error } = await supabase
+      .from('match_fees')
+      .update({ state: 'confirmed', mode, confirmed_by: profile.id })
+      .eq('id', id);
+    if (error) return toast.show('Could not update');
+    toast.show(mode === 'bank' ? 'Bank confirmed' : 'Cash collected');
+    qc.invalidateQueries({ queryKey: ['coach-match-fees'] });
+  }
+
+  return (
+    <Card className="divide-y divide-hairline p-0">
+      {isLoading && <div className="px-4 py-4 text-[13px] text-ink/45">Loading…</div>}
+      {fees.map((f) => (
+        <div key={f.id} className="flex items-center justify-between px-4 py-2.5 text-[13px]">
+          <div>
+            <div className="font-medium">{f.player?.full_name ?? 'Player'}</div>
+            <div className="text-[11px] text-ink/45">vs {f.match?.opponent ?? '—'}</div>
+          </div>
+          <div className="flex items-center gap-2">
+            {f.state === 'confirmed' ? (
+              <Chip tone="green">{f.mode === 'cash' ? 'Cash' : 'Bank'} ✓</Chip>
+            ) : (
+              <>
+                <button onClick={() => collect(f.id, 'bank')} className="rounded-chip border border-cardborder px-2 py-1 text-[11px] font-semibold text-info">Confirm bank</button>
+                <button onClick={() => collect(f.id, 'cash')} className="rounded-chip border border-cardborder px-2 py-1 text-[11px] font-semibold text-success">Collect cash</button>
+              </>
+            )}
+          </div>
+        </div>
+      ))}
+      {!isLoading && !fees.length && (
+        <div className="px-4 py-6 text-center text-[13px] text-ink/45">No match fees for your matches yet.</div>
+      )}
+    </Card>
   );
 }
 

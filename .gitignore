@@ -1,0 +1,41 @@
+# dependencies
+node_modules
+.pnp
+.pnp.js
+
+# build output
+dist
+dist-ssr
+*.local
+
+# typescript build artifacts (composite project emit)
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+
+# env files (keep .env.example tracked)
+.env
+.env.*
+!.env.example
+
+# editor / os
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# supabase local
+supabase/.branches
+supabase/.temp

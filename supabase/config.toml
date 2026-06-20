@@ -1,0 +1,7 @@
+# Supabase project configuration.
+# Update project_id to your linked project ref before deploying.
+project_id = "loop-by-zak-cricket"
+
+[functions.generate-report]
+# JWT verification on: only authenticated academy users can generate reports.
+verify_jwt = true

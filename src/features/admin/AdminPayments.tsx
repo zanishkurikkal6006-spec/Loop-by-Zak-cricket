@@ -7,6 +7,8 @@ import { ScreenTitle, Card, Chip, Button } from '@/components/ui';
 import { Modal } from '@/components/ui/Modal';
 import { LoopRing, RingAvatar } from '@/components/brand/LoopRing';
 import { counterState, stateColor, clsx, aed } from '@/lib/utils';
+import { createStaff } from '@/lib/staff';
+import type { UserRole } from '@/lib/types';
 import type { Package, PackageType, Player, MatchFee, Match, GroundFee, TrainingCenter, Batch, Group, Profile } from '@/lib/types';
 
 // Payments — Packages & Sessions tab. Per-player counter with 5 ring states
@@ -253,6 +255,19 @@ function SettingsTab() {
     },
   });
 
+  const { data: staff = [] } = useQuery({
+    queryKey: ['settings-staff', profile?.academy_id],
+    enabled: !!profile,
+    queryFn: async (): Promise<Profile[]> => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .in('role', ['coach', 'head_coach', 'admin'])
+        .order('role');
+      return (data ?? []) as Profile[];
+    },
+  });
+
   const { data: academy } = useQuery({
     queryKey: ['settings-academy', profile?.academy_id],
     enabled: !!profile,
@@ -364,10 +379,75 @@ function SettingsTab() {
     qc.invalidateQueries({ queryKey: [key] });
   }
 
+  // ── Add staff (coach / head coach) ─────────────────────────────────────────
+  const [staffName, setStaffName] = useState('');
+  const [staffEmail, setStaffEmail] = useState('');
+  const [staffPass, setStaffPass] = useState('');
+  const [staffRole, setStaffRole] = useState<UserRole>('coach');
+  const [addingStaff, setAddingStaff] = useState(false);
+  async function addStaff() {
+    if (!staffName.trim() || !staffEmail.trim() || staffPass.length < 6) {
+      return toast.show('Name, email, and a 6+ char password required');
+    }
+    setAddingStaff(true);
+    try {
+      await createStaff({
+        full_name: staffName.trim(),
+        email: staffEmail.trim(),
+        password: staffPass,
+        role: staffRole,
+      });
+      toast.show('Staff member created');
+      setStaffName('');
+      setStaffEmail('');
+      setStaffPass('');
+      setStaffRole('coach');
+      qc.invalidateQueries({ queryKey: ['settings-staff'] });
+      qc.invalidateQueries({ queryKey: ['settings-coaches'] });
+      qc.invalidateQueries({ queryKey: ['coaches'] });
+    } catch (e) {
+      toast.show(e instanceof Error ? e.message : 'Could not create — is the create-staff function deployed?');
+    } finally {
+      setAddingStaff(false);
+    }
+  }
+
+  const roleLabel: Record<string, string> = { coach: 'Coach', head_coach: 'Head Coach', admin: 'Admin' };
+
   const field = 'h-11 w-full rounded-pill border border-cardborder bg-white px-3 text-[14px] outline-none focus:border-gold';
 
   return (
     <div className="space-y-5">
+      {/* Coaches & staff */}
+      <Card>
+        <div className="eyebrow mb-3 text-ink/40">Coaches &amp; Staff</div>
+        <div className="divide-y divide-hairline">
+          {staff.map((s) => (
+            <div key={s.id} className="flex items-center justify-between py-2 text-[13px]">
+              <span className="font-medium">{s.full_name}</span>
+              <span className="text-ink/45">{roleLabel[s.role] ?? s.role}</span>
+            </div>
+          ))}
+          {!staff.length && <div className="py-2 text-[13px] text-ink/45">No staff yet.</div>}
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <input value={staffName} onChange={(e) => setStaffName(e.target.value)} placeholder="Full name" className={field} />
+          <input value={staffEmail} onChange={(e) => setStaffEmail(e.target.value)} placeholder="Email" className={field} />
+          <input type="password" value={staffPass} onChange={(e) => setStaffPass(e.target.value)} placeholder="Temp password (6+)" className={field} />
+          <select value={staffRole} onChange={(e) => setStaffRole(e.target.value as UserRole)} className={field}>
+            <option value="coach">Coach</option>
+            <option value="head_coach">Head Coach</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <Button size="sm" className="mt-2" disabled={addingStaff} onClick={addStaff}>
+          {addingStaff ? 'Creating…' : '+ Add staff member'}
+        </Button>
+        <p className="mt-2 text-[11px] text-ink/45">
+          Creates a login. Share the email + temp password; they can sign in right away.
+        </p>
+      </Card>
+
       {/* Training centers */}
       <Card>
         <div className="eyebrow mb-3 text-ink/40">Training Centers</div>

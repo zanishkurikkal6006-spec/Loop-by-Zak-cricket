@@ -34,16 +34,6 @@ export default function AdminPayments() {
     },
   });
 
-  const { data: types = [] } = useQuery({
-    queryKey: ['package-types', profile?.academy_id],
-    enabled: !!profile,
-    queryFn: async (): Promise<PackageType[]> => {
-      const { data, error } = await supabase.from('package_types').select('*').order('price');
-      if (error) throw error;
-      return (data ?? []) as PackageType[];
-    },
-  });
-
   const renewals = packages.filter(
     (p) => p.sessions_remaining != null && p.sessions_remaining <= 2 && p.sessions_remaining >= 0,
   );
@@ -108,25 +98,103 @@ export default function AdminPayments() {
         </Card>
       )}
 
-      {tab === 'types' && (
-        <div className="grid gap-3 md:grid-cols-3">
-          {types.map((t) => (
-            <Card key={t.id} className="flex items-center justify-between">
-              <div>
-                <div className="text-[15px] font-semibold">{t.name}</div>
-                <div className="text-[11px] text-ink/45">
-                  {t.sessions == null ? 'Unlimited' : `${t.sessions} sessions`}
-                </div>
-              </div>
-              <div className="font-display text-2xl">{Number(t.price) ? t.price : 'Free'}</div>
-            </Card>
-          ))}
-        </div>
-      )}
+      {tab === 'types' && <PackageTypesTab />}
 
       {tab === 'matchfees' && <MatchFeesTab />}
       {tab === 'groundfees' && <GroundFeesTab />}
       {tab === 'settings' && <SettingsTab />}
+    </div>
+  );
+}
+
+function PackageTypesTab() {
+  const { profile } = useAuth();
+  const qc = useQueryClient();
+  const toast = useToast();
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState('');
+  const [sessions, setSessions] = useState('');
+  const [price, setPrice] = useState('');
+  const [kind, setKind] = useState<'standard' | 'unlimited' | 'complimentary'>('standard');
+  const [saving, setSaving] = useState(false);
+
+  const { data: types = [] } = useQuery({
+    queryKey: ['package-types', profile?.academy_id],
+    enabled: !!profile,
+    queryFn: async (): Promise<PackageType[]> => {
+      const { data, error } = await supabase.from('package_types').select('*').order('price');
+      if (error) throw error;
+      return (data ?? []) as PackageType[];
+    },
+  });
+
+  async function create() {
+    if (!profile || !name.trim()) return;
+    setSaving(true);
+    try {
+      const { error } = await supabase.from('package_types').insert({
+        academy_id: profile.academy_id,
+        name: name.trim(),
+        // Unlimited / complimentary have no fixed session count.
+        sessions: kind === 'standard' ? Number(sessions) || 0 : null,
+        price: Number(price) || 0,
+        kind,
+      });
+      if (error) throw error;
+      toast.show('Package type created');
+      setOpen(false);
+      setName('');
+      setSessions('');
+      setPrice('');
+      setKind('standard');
+      qc.invalidateQueries({ queryKey: ['package-types'] });
+    } catch {
+      toast.show('Could not create package type');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const field = 'h-11 w-full rounded-pill border border-cardborder bg-white px-3 text-[14px] outline-none focus:border-gold';
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <Chip tone="neutral">{types.length} package types</Chip>
+        <Button size="sm" onClick={() => setOpen(true)}>+ Add custom package</Button>
+      </div>
+      <div className="grid gap-3 md:grid-cols-3">
+        {types.map((t) => (
+          <Card key={t.id} className="flex items-center justify-between">
+            <div>
+              <div className="text-[15px] font-semibold">{t.name}</div>
+              <div className="text-[11px] text-ink/45">
+                {t.sessions == null ? (t.kind === 'complimentary' ? 'Complimentary' : 'Unlimited') : `${t.sessions} sessions`}
+              </div>
+            </div>
+            <div className="font-display text-2xl">{Number(t.price) ? t.price : 'Free'}</div>
+          </Card>
+        ))}
+        {!types.length && <Card className="text-[13px] text-ink/45">No package types yet.</Card>}
+      </div>
+
+      <Modal open={open} onClose={() => setOpen(false)} title="New Package Type">
+        <div className="space-y-3">
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name (e.g. 16 Sessions)" className={field} />
+          <select value={kind} onChange={(e) => setKind(e.target.value as typeof kind)} className={field}>
+            <option value="standard">Standard (fixed sessions)</option>
+            <option value="unlimited">Unlimited</option>
+            <option value="complimentary">Complimentary (free)</option>
+          </select>
+          {kind === 'standard' && (
+            <input type="number" value={sessions} onChange={(e) => setSessions(e.target.value)} placeholder="Number of sessions" className={field} />
+          )}
+          <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Price (AED)" className={field} />
+          <Button className="w-full" disabled={saving || !name.trim()} onClick={create}>
+            {saving ? 'Creating…' : 'Create Package Type'}
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { Modal } from '@/components/ui/Modal';
@@ -18,7 +19,64 @@ type PackageRow = Package & { package_type: PackageType | null };
 export default function PlayerDetail({ player, onClose }: { player: Player | null; onClose: () => void }) {
   const { profile } = useAuth();
   const toast = useToast();
+  const qc = useQueryClient();
   const enabled = !!profile && !!player;
+  const [assigning, setAssigning] = useState(false);
+  const [typeId, setTypeId] = useState('');
+  const [payStatus, setPayStatus] = useState<'paid' | 'pending'>('paid');
+  const [savingPkg, setSavingPkg] = useState(false);
+
+  const { data: packageTypes = [] } = useQuery({
+    queryKey: ['package-types', profile?.academy_id],
+    enabled,
+    queryFn: async (): Promise<PackageType[]> => {
+      const { data } = await supabase.from('package_types').select('*').order('price');
+      return (data ?? []) as PackageType[];
+    },
+  });
+
+  async function assignPackage() {
+    if (!profile || !player || !typeId) return;
+    const t = packageTypes.find((x) => x.id === typeId);
+    if (!t) return;
+    setSavingPkg(true);
+    try {
+      const { error } = await supabase.from('packages').insert({
+        academy_id: profile.academy_id,
+        player_id: player.id,
+        package_type_id: t.id,
+        sessions_total: t.sessions,
+        sessions_used: 0,
+        source: 'admin_assigned',
+        payment_status: payStatus,
+        assigned_by: profile.id,
+      });
+      if (error) throw error;
+      // Record the payment if marked paid and the package has a price.
+      if (payStatus === 'paid' && Number(t.price) > 0) {
+        await supabase.from('payments').insert({
+          academy_id: profile.academy_id,
+          player_id: player.id,
+          category: 'package',
+          amount: t.price,
+          mode: 'cash',
+          status: 'confirmed',
+          paid_at: new Date().toISOString().slice(0, 10),
+          confirmed_by: profile.id,
+        });
+      }
+      toast.show('Package assigned');
+      setAssigning(false);
+      setTypeId('');
+      qc.invalidateQueries({ queryKey: ['player-package', player.id] });
+      qc.invalidateQueries({ queryKey: ['player-payments', player.id] });
+      qc.invalidateQueries({ queryKey: ['admin-packages'] });
+    } catch {
+      toast.show('Could not assign package');
+    } finally {
+      setSavingPkg(false);
+    }
+  }
 
   const { data: pkg } = useQuery({
     queryKey: ['player-package', player?.id],
@@ -140,6 +198,49 @@ export default function PlayerDetail({ player, onClose }: { player: Player | nul
           </Card>
         ) : (
           <Card className="text-[13px] text-ink/45">No active package.</Card>
+        )}
+
+        {/* Assign / change package */}
+        {!assigning ? (
+          <Button variant="ghost" onClick={() => setAssigning(true)}>
+            {pkg ? 'Assign new package' : 'Assign package'}
+          </Button>
+        ) : (
+          <Card className="space-y-2">
+            <div className="eyebrow text-ink/40">Assign package</div>
+            <select
+              value={typeId}
+              onChange={(e) => setTypeId(e.target.value)}
+              className="h-11 w-full rounded-pill border border-cardborder bg-white px-3 text-[14px]"
+            >
+              <option value="">Select a package…</option>
+              {packageTypes.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name} {Number(t.price) ? `· AED ${t.price}` : ''}
+                </option>
+              ))}
+            </select>
+            <div className="flex gap-2">
+              {(['paid', 'pending'] as const).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setPayStatus(s)}
+                  className={
+                    'flex-1 rounded-chip px-3 py-2 text-[12px] font-semibold capitalize ' +
+                    (payStatus === s ? 'bg-brand-red text-paper' : 'border border-cardborder bg-white text-ink/60')
+                  }
+                >
+                  {s === 'paid' ? 'Paid' : 'Payment pending'}
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Button variant="ghost" onClick={() => setAssigning(false)}>Cancel</Button>
+              <Button className="flex-1" disabled={savingPkg || !typeId} onClick={assignPackage}>
+                {savingPkg ? 'Assigning…' : 'Assign'}
+              </Button>
+            </div>
+          </Card>
         )}
 
         {/* Badges */}

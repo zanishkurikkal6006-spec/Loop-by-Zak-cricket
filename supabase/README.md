@@ -65,6 +65,15 @@ supabase functions deploy generate-report
 ```
 Then flip `USE_REAL_AI` to `true` in `src/lib/ai.ts`. Nothing else changes.
 
+### Handy npm shortcuts
+Once the CLI is installed and you're logged in:
+```bash
+npm run db:link          # supabase link --project-ref qdsymhyfknagjpnggetk
+npm run db:push          # apply migrations
+npm run db:diff          # show schema drift vs the migrations
+npm run functions:deploy # deploy the generate-report edge function
+```
+
 ---
 
 ## Option B — Dashboard only (no install)

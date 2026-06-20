@@ -7,7 +7,7 @@ import { ScreenTitle, Card, Chip, Button } from '@/components/ui';
 import { Modal } from '@/components/ui/Modal';
 import { LoopRing, RingAvatar } from '@/components/brand/LoopRing';
 import { counterState, stateColor, clsx, aed } from '@/lib/utils';
-import type { Package, PackageType, Player, MatchFee, Match, GroundFee, TrainingCenter, Batch } from '@/lib/types';
+import type { Package, PackageType, Player, MatchFee, Match, GroundFee, TrainingCenter, Batch, Group, Profile } from '@/lib/types';
 
 // Payments — Packages & Sessions tab. Per-player counter with 5 ring states
 // (healthy / low / exhausted / unlimited / comp) plus the renewal chase list
@@ -225,6 +225,24 @@ function SettingsTab() {
     },
   });
 
+  const { data: groups = [] } = useQuery({
+    queryKey: ['settings-groups', profile?.academy_id],
+    enabled: !!profile,
+    queryFn: async (): Promise<Group[]> => {
+      const { data } = await supabase.from('groups').select('*').order('name');
+      return (data ?? []) as Group[];
+    },
+  });
+
+  const { data: coaches = [] } = useQuery({
+    queryKey: ['settings-coaches', profile?.academy_id],
+    enabled: !!profile,
+    queryFn: async (): Promise<Profile[]> => {
+      const { data } = await supabase.from('profiles').select('*').eq('role', 'coach').order('full_name');
+      return (data ?? []) as Profile[];
+    },
+  });
+
   const { data: academy } = useQuery({
     queryKey: ['settings-academy', profile?.academy_id],
     enabled: !!profile,
@@ -275,6 +293,41 @@ function SettingsTab() {
     setBatchStart('');
     setBatchEnd('');
     qc.invalidateQueries({ queryKey: ['settings-batches'] });
+  }
+
+  // ── Groups ───────────────────────────────────────────────────────────────--
+  const [groupName, setGroupName] = useState('');
+  const [groupAge, setGroupAge] = useState('');
+  const [groupCenter, setGroupCenter] = useState('');
+  async function addGroup() {
+    if (!profile || !groupName.trim()) return;
+    const { error } = await supabase.from('groups').insert({
+      academy_id: profile.academy_id,
+      name: groupName.trim(),
+      age_category: groupAge.trim() || null,
+      default_center_id: groupCenter || null,
+    });
+    if (error) return toast.show('Could not add group');
+    toast.show('Group added');
+    setGroupName('');
+    setGroupAge('');
+    qc.invalidateQueries({ queryKey: ['settings-groups'] });
+  }
+
+  // ── Assign coach to group ─────────────────────────────────────────────────--
+  const [assignCoach, setAssignCoach] = useState('');
+  const [assignGroup, setAssignGroup] = useState('');
+  async function assignCoachToGroup() {
+    if (!profile || !assignCoach || !assignGroup) return;
+    const { error } = await supabase.from('coach_groups').insert({
+      academy_id: profile.academy_id,
+      coach_id: assignCoach,
+      group_id: assignGroup,
+    });
+    if (error) return toast.show('Already assigned, or failed');
+    toast.show('Coach assigned to group');
+    setAssignCoach('');
+    setAssignGroup('');
   }
 
   // ── Bank details ─────────────────────────────────────────────────────────--
@@ -346,6 +399,56 @@ function SettingsTab() {
         <Button size="sm" className="mt-2" onClick={addBatch}>+ Add batch</Button>
       </Card>
 
+      {/* Groups */}
+      <Card>
+        <div className="eyebrow mb-3 text-ink/40">Groups</div>
+        <div className="divide-y divide-hairline">
+          {groups.map((g) => (
+            <div key={g.id} className="flex items-center justify-between py-2 text-[13px]">
+              <span className="flex items-center gap-2 font-medium">
+                <span className="h-2.5 w-2.5 rounded-full" style={{ background: g.color }} />
+                {g.name}
+              </span>
+              <span className="text-ink/45">{g.age_category}</span>
+            </div>
+          ))}
+          {!groups.length && <div className="py-2 text-[13px] text-ink/45">No groups yet.</div>}
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <input value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="Group name (e.g. Elite)" className={field} />
+          <input value={groupAge} onChange={(e) => setGroupAge(e.target.value)} placeholder="Age (e.g. Under 16)" className={field} />
+          <select value={groupCenter} onChange={(e) => setGroupCenter(e.target.value)} className={field}>
+            <option value="">Default center…</option>
+            {centers.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+        </div>
+        <Button size="sm" className="mt-2" onClick={addGroup}>+ Add group</Button>
+      </Card>
+
+      {/* Assign coach to group */}
+      <Card>
+        <div className="eyebrow mb-3 text-ink/40">Assign Coach to Group</div>
+        <div className="grid grid-cols-2 gap-2">
+          <select value={assignCoach} onChange={(e) => setAssignCoach(e.target.value)} className={field}>
+            <option value="">Coach…</option>
+            {coaches.map((c) => (
+              <option key={c.id} value={c.id}>{c.full_name}</option>
+            ))}
+          </select>
+          <select value={assignGroup} onChange={(e) => setAssignGroup(e.target.value)} className={field}>
+            <option value="">Group…</option>
+            {groups.map((g) => (
+              <option key={g.id} value={g.id}>{g.name}</option>
+            ))}
+          </select>
+        </div>
+        <Button size="sm" className="mt-2" disabled={!assignCoach || !assignGroup} onClick={assignCoachToGroup}>
+          Assign
+        </Button>
+      </Card>
+
       {/* Academy bank details */}
       <Card>
         <div className="eyebrow mb-3 text-ink/40">Academy Bank Details</div>
@@ -374,6 +477,8 @@ function SettingsTab() {
 
 function MatchFeesTab() {
   const { profile } = useAuth();
+  const qc = useQueryClient();
+  const toast = useToast();
   const { data: fees = [], isLoading } = useQuery({
     queryKey: ['admin-match-fees', profile?.academy_id],
     enabled: !!profile,
@@ -386,6 +491,29 @@ function MatchFeesTab() {
       return (data ?? []) as (MatchFee & { player: Player | null; match: Match | null })[];
     },
   });
+
+  // Confirm a fee as collected (bank or cash) — also records it in payments.
+  async function collect(fee: MatchFee, mode: 'bank' | 'cash') {
+    if (!profile) return;
+    const { error } = await supabase
+      .from('match_fees')
+      .update({ state: 'confirmed', mode, confirmed_by: profile.id })
+      .eq('id', fee.id);
+    if (error) return toast.show('Could not update');
+    await supabase.from('payments').insert({
+      academy_id: profile.academy_id,
+      player_id: fee.player_id,
+      category: 'match_fee',
+      ref_id: fee.match_id,
+      amount: fee.fee,
+      mode,
+      status: 'confirmed',
+      paid_at: new Date().toISOString().slice(0, 10),
+      confirmed_by: profile.id,
+    });
+    toast.show(mode === 'bank' ? 'Bank transfer confirmed' : 'Cash collected');
+    qc.invalidateQueries({ queryKey: ['admin-match-fees'] });
+  }
 
   const collected = fees.filter((f) => f.state === 'confirmed').reduce((s, f) => s + Number(f.fee), 0);
   const pending = fees.filter((f) => f.state !== 'confirmed').reduce((s, f) => s + Number(f.fee), 0);
@@ -413,9 +541,18 @@ function MatchFeesTab() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Chip tone={f.state === 'confirmed' ? 'green' : f.state === 'pending' ? 'amber' : 'neutral'}>
-                {f.state}
-              </Chip>
+              {f.state === 'confirmed' ? (
+                <Chip tone="green">{f.mode === 'cash' ? 'Cash' : 'Bank'} ✓</Chip>
+              ) : (
+                <>
+                  <button onClick={() => collect(f, 'bank')} className="rounded-chip border border-cardborder px-2 py-1 text-[11px] font-semibold text-info">
+                    Confirm bank
+                  </button>
+                  <button onClick={() => collect(f, 'cash')} className="rounded-chip border border-cardborder px-2 py-1 text-[11px] font-semibold text-success">
+                    Collect cash
+                  </button>
+                </>
+              )}
               <span className="w-16 text-right font-semibold">{aed(Number(f.fee))}</span>
             </div>
           </div>

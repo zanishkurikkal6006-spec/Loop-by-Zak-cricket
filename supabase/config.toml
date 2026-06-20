@@ -5,3 +5,7 @@ project_id = "loop-by-zak-cricket"
 [functions.generate-report]
 # JWT verification on: only authenticated academy users can generate reports.
 verify_jwt = true
+
+[functions.create-staff]
+# JWT verification on; the function additionally checks the caller is an admin.
+verify_jwt = true

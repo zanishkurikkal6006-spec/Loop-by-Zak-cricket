@@ -1,6 +1,6 @@
 -- ============================================================================
 -- Loop by Zak Cricket — schema
--- Multi-tenant: every table carries academy_id. RLS (in 20260619000002_rls.sql) enforces
+-- Multi-tenant: every table carries academy_id. RLS (in 0002_rls.sql) enforces
 -- per-academy isolation. This file defines tables, enums, and helpers only.
 -- ============================================================================
 

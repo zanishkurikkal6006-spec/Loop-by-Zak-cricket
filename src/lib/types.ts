@@ -1,4 +1,4 @@
-// Domain types mirroring the Supabase schema (supabase/migrations/20260619000001_schema.sql).
+// Domain types mirroring the Supabase schema (supabase/migrations/0001_schema.sql).
 // Hand-written for clarity; can be replaced with `supabase gen types` output later.
 
 export type UserRole = 'admin' | 'head_coach' | 'coach';

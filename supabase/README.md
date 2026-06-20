@@ -6,10 +6,10 @@ roles, and (later) enable real AI. Two paths: the **CLI** (recommended) or the
 
 ```
 supabase/
-  migrations/          schema → RLS → seed  (timestamp-ordered)
-    20260619000001_schema.sql
-    20260619000002_rls.sql
-    20260619000003_seed.sql
+  migrations/          schema → RLS → seed  (apply in this order)
+    0001_schema.sql
+    0002_rls.sql
+    0003_seed.sql
   seed_demo_users.sql  one-off bootstrap: academy + role users + demo data
   functions/
     generate-report/   AI edge function (only needed when you go live with AI)
@@ -37,8 +37,11 @@ Database → Database password; reset it there if you don't have it).
 ```bash
 supabase db push
 ```
-This applies the three migrations in order. The files use 14-digit timestamp
-prefixes, so `supabase db push` tracks them cleanly.
+This applies `0001 → 0002 → 0003` in order.
+> If the CLI complains about migration version format, it wants 14-digit
+> timestamp prefixes. Easiest fix: skip the CLI for migrations and paste the
+> three files into the SQL editor (Option B, step 1). Everything else here
+> still works via the CLI.
 
 ### 4. Create the three test users
 Dashboard → **Authentication → Users → Add user** (do this 3×), ticking
@@ -67,8 +70,8 @@ Then flip `USE_REAL_AI` to `true` in `src/lib/ai.ts`. Nothing else changes.
 ## Option B — Dashboard only (no install)
 
 1. **Migrations** — SQL Editor → New query → paste the **entire** contents of
-   `20260619000001_schema.sql`, Run. Repeat for `20260619000002_rls.sql`, then
-   `20260619000003_seed.sql`. (Order matters.)
+   `0001_schema.sql`, Run. Repeat for `0002_rls.sql`, then `0003_seed.sql`.
+   (Order matters.)
 2. **Users** — same as Option A step 4.
 3. **Bootstrap** — same as Option A step 5.
 
@@ -107,4 +110,4 @@ AI features run in **free placeholder mode** — no Anthropic key required.
 | Logs in but redirects back to login / blank | No `profiles` row → run `seed_demo_users.sql`. Confirm the user's email matches one in the script. |
 | Screens empty | Demo data didn't load → re-run `seed_demo_users.sql` (it's idempotent). |
 | `relation "..." does not exist` on bootstrap | Migrations not applied yet → do the migrations step first. |
-| RLS "permission denied" errors | Make sure `20260619000002_rls.sql` ran (it defines the `public.user_academy_id()` helper the policies depend on). |
+| RLS "permission denied" errors | Make sure `0002_rls.sql` ran (it defines the `public.user_academy_id()` helper the policies depend on). |

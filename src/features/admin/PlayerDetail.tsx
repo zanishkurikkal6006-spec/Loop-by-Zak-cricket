@@ -35,6 +35,73 @@ export default function PlayerDetail({ player, onClose }: { player: Player | nul
     },
   });
 
+  const { data: coaches = [] } = useQuery({
+    queryKey: ['coaches', profile?.academy_id],
+    enabled,
+    queryFn: async () => {
+      const { data } = await supabase.from('profiles').select('id, full_name').eq('role', 'coach').order('full_name');
+      return (data ?? []) as { id: string; full_name: string }[];
+    },
+  });
+
+  // ── Assign a 1-on-1 block to a coach (admin-assigned) ──────────────────────
+  const [assign1, setAssign1] = useState(false);
+  const [oCoach, setOCoach] = useState('');
+  const [oFocus, setOFocus] = useState('');
+  const [oTotal, setOTotal] = useState('8');
+  const [savingO, setSavingO] = useState(false);
+  async function assignOneToOne() {
+    if (!profile || !player || !oCoach || !Number(oTotal)) return;
+    setSavingO(true);
+    try {
+      const { error } = await supabase.from('one_to_one_blocks').insert({
+        academy_id: profile.academy_id,
+        player_id: player.id,
+        coach_id: oCoach,
+        focus_note: oFocus.trim() || null,
+        sessions_total: Number(oTotal),
+        sessions_used: 0,
+        source: 'admin_assigned',
+        payment_status: 'paid',
+        assigned_by: profile.id,
+      });
+      if (error) throw error;
+      toast.show('1-on-1 block assigned');
+      setAssign1(false);
+      setOCoach('');
+      setOFocus('');
+      setOTotal('8');
+      qc.invalidateQueries({ queryKey: ['one-to-one'] });
+    } catch {
+      toast.show('Could not assign 1-on-1');
+    } finally {
+      setSavingO(false);
+    }
+  }
+
+  // Flip a pending package to paid and record the payment.
+  async function markPackagePaid(p: PackageRow) {
+    if (!profile || !player) return;
+    const { error } = await supabase.from('packages').update({ payment_status: 'paid' }).eq('id', p.id);
+    if (error) return toast.show('Could not update');
+    if (Number(p.package_type?.price) > 0) {
+      await supabase.from('payments').insert({
+        academy_id: profile.academy_id,
+        player_id: player.id,
+        category: 'package',
+        ref_id: p.id,
+        amount: p.package_type?.price ?? 0,
+        mode: 'cash',
+        status: 'confirmed',
+        paid_at: new Date().toISOString().slice(0, 10),
+        confirmed_by: profile.id,
+      });
+    }
+    toast.show('Marked paid');
+    qc.invalidateQueries({ queryKey: ['player-package', player.id] });
+    qc.invalidateQueries({ queryKey: ['player-payments', player.id] });
+  }
+
   async function assignPackage() {
     if (!profile || !player || !typeId) return;
     const t = packageTypes.find((x) => x.id === typeId);
@@ -188,11 +255,21 @@ export default function PlayerDetail({ player, onClose }: { player: Player | nul
               <div className="text-[11px] text-ink/45">
                 {pkg.sessions_used}/{total || '∞'} used
               </div>
-              <div className="mt-1 flex gap-1.5">
+              <div className="mt-1 flex flex-wrap items-center gap-1.5">
                 <Chip tone={state === 'healthy' ? 'green' : state === 'low' ? 'amber' : state === 'exhausted' ? 'red' : 'blue'}>
                   {state}
                 </Chip>
-                {pkg.payment_status === 'pending' && <Chip tone="amber">Payment pending</Chip>}
+                {pkg.payment_status === 'pending' && (
+                  <>
+                    <Chip tone="amber">Payment pending</Chip>
+                    <button
+                      onClick={() => markPackagePaid(pkg)}
+                      className="rounded-chip border border-cardborder px-2 py-0.5 text-[11px] font-semibold text-success"
+                    >
+                      Mark paid
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </Card>
@@ -238,6 +315,29 @@ export default function PlayerDetail({ player, onClose }: { player: Player | nul
               <Button variant="ghost" onClick={() => setAssigning(false)}>Cancel</Button>
               <Button className="flex-1" disabled={savingPkg || !typeId} onClick={assignPackage}>
                 {savingPkg ? 'Assigning…' : 'Assign'}
+              </Button>
+            </div>
+          </Card>
+        )}
+
+        {/* Assign a 1-on-1 block to a coach */}
+        {!assign1 ? (
+          <Button variant="ghost" onClick={() => setAssign1(true)}>🎯 Assign 1-on-1 to a coach</Button>
+        ) : (
+          <Card className="space-y-2">
+            <div className="eyebrow text-ink/40">Assign 1-on-1</div>
+            <select value={oCoach} onChange={(e) => setOCoach(e.target.value)} className="h-11 w-full rounded-pill border border-cardborder bg-white px-3 text-[14px]">
+              <option value="">Select coach…</option>
+              {coaches.map((c) => (
+                <option key={c.id} value={c.id}>{c.full_name}</option>
+              ))}
+            </select>
+            <input value={oFocus} onChange={(e) => setOFocus(e.target.value)} placeholder="Focus (optional)" className="h-11 w-full rounded-pill border border-cardborder bg-white px-3 text-[14px]" />
+            <input type="number" value={oTotal} onChange={(e) => setOTotal(e.target.value)} placeholder="Total sessions" className="h-11 w-full rounded-pill border border-cardborder bg-white px-3 text-[14px]" />
+            <div className="flex gap-2">
+              <Button variant="ghost" onClick={() => setAssign1(false)}>Cancel</Button>
+              <Button className="flex-1" disabled={savingO || !oCoach || !Number(oTotal)} onClick={assignOneToOne}>
+                {savingO ? 'Assigning…' : 'Assign'}
               </Button>
             </div>
           </Card>

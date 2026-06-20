@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { usePrograms } from '@/lib/queries';
+import { usePrograms, usePlayers } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/lib/toast';
 import { ScreenTitle, Card, Chip, Button } from '@/components/ui';
 import { Modal } from '@/components/ui/Modal';
+import type { Program } from '@/lib/types';
 
 // Programs — program cards + a Create Program modal (emoji, accent, description).
 
@@ -16,12 +17,38 @@ export default function AdminPrograms() {
   const qc = useQueryClient();
   const toast = useToast();
   const { data: programs = [] } = usePrograms();
+  const { data: players = [] } = usePlayers();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [emoji, setEmoji] = useState('🏏');
   const [accent, setAccent] = useState(ACCENTS[0]);
   const [description, setDescription] = useState('');
   const [saving, setSaving] = useState(false);
+
+  // Enrolment
+  const [enrolFor, setEnrolFor] = useState<Program | null>(null);
+  const [enrolPlayer, setEnrolPlayer] = useState('');
+  const [enrolling, setEnrolling] = useState(false);
+  async function enrol() {
+    if (!profile || !enrolFor || !enrolPlayer) return;
+    setEnrolling(true);
+    try {
+      const { error } = await supabase.from('program_enrollments').insert({
+        academy_id: profile.academy_id,
+        program_id: enrolFor.id,
+        player_id: enrolPlayer,
+      });
+      if (error) throw error;
+      toast.show('Player enrolled');
+      setEnrolFor(null);
+      setEnrolPlayer('');
+      qc.invalidateQueries({ queryKey: ['programs'] });
+    } catch {
+      toast.show('Could not enrol (already enrolled?)');
+    } finally {
+      setEnrolling(false);
+    }
+  }
 
   async function create() {
     if (!profile || !name.trim()) return;
@@ -72,10 +99,31 @@ export default function AdminPrograms() {
               </div>
             </div>
             {p.description && <p className="mt-3 text-[12px] text-ink/55">{p.description}</p>}
+            <Button size="sm" variant="ghost" className="mt-3" onClick={() => setEnrolFor(p)}>
+              + Enrol player
+            </Button>
           </Card>
         ))}
         {!programs.length && <Card className="text-[13px] text-ink/45">No programs yet.</Card>}
       </div>
+
+      <Modal open={!!enrolFor} onClose={() => setEnrolFor(null)} title={`Enrol in ${enrolFor?.name ?? ''}`}>
+        <div className="space-y-3">
+          <select
+            value={enrolPlayer}
+            onChange={(e) => setEnrolPlayer(e.target.value)}
+            className="h-11 w-full rounded-pill border border-cardborder bg-white px-3 text-[14px]"
+          >
+            <option value="">Select player…</option>
+            {players.map((pl) => (
+              <option key={pl.id} value={pl.id}>{pl.full_name}</option>
+            ))}
+          </select>
+          <Button className="w-full" disabled={enrolling || !enrolPlayer} onClick={enrol}>
+            {enrolling ? 'Enrolling…' : 'Enrol'}
+          </Button>
+        </div>
+      </Modal>
 
       <Modal open={open} onClose={() => setOpen(false)} title="Create Program">
         <div className="space-y-3">

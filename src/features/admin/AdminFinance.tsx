@@ -15,7 +15,7 @@ import { ScreenTitle, Card, StatCard, Button, Chip } from '@/components/ui';
 import { aed, clsx } from '@/lib/utils';
 import { exportToExcel } from '@/lib/excel';
 import MonthEndReport from './MonthEndReport';
-import type { Payment, PaymentState } from '@/lib/types';
+import type { Payment, PaymentState, MatchFee, GroundFee } from '@/lib/types';
 
 type FinanceTab = 'overview' | 'month-end' | 'by-center';
 
@@ -76,6 +76,36 @@ export default function AdminFinance() {
     }
     return [...map.values()].sort((a, b) => a.month.localeCompare(b.month));
   }, [filtered]);
+
+  // Match fees (revenue from players) and ground fees (cost of booking grounds)
+  // — surfaced together so the academy can see the profit made on matches.
+  const { data: matchFees = [] } = useQuery({
+    queryKey: ['finance-match-fees', profile?.academy_id],
+    enabled: !!profile,
+    queryFn: async (): Promise<MatchFee[]> => {
+      const { data, error } = await supabase.from('match_fees').select('*');
+      if (error) throw error;
+      return (data ?? []) as MatchFee[];
+    },
+  });
+
+  const { data: groundFees = [] } = useQuery({
+    queryKey: ['finance-ground-fees', profile?.academy_id],
+    enabled: !!profile,
+    queryFn: async (): Promise<GroundFee[]> => {
+      const { data, error } = await supabase.from('ground_fees').select('*');
+      if (error) throw error;
+      return (data ?? []) as GroundFee[];
+    },
+  });
+
+  const matchPL = useMemo(() => {
+    const collected = matchFees.filter((f) => f.state === 'confirmed').reduce((s, f) => s + Number(f.fee), 0);
+    const pending = matchFees.filter((f) => f.state !== 'confirmed').reduce((s, f) => s + Number(f.fee), 0);
+    const groundCost = groundFees.reduce((s, f) => s + Number(f.amount), 0);
+    const groundPaid = groundFees.filter((f) => f.status === 'confirmed').reduce((s, f) => s + Number(f.amount), 0);
+    return { collected, pending, groundCost, groundPaid, profit: collected - groundCost };
+  }, [matchFees, groundFees]);
 
   const { data: centers = [] } = useQuery({
     queryKey: ['centers', profile?.academy_id],
@@ -155,6 +185,34 @@ export default function AdminFinance() {
         <StatCard label="Cash" value={aed(totals.cash)} />
         <StatCard label="Bank" value={aed(totals.bank)} />
       </div>
+
+      {/* Match & ground P/L — match fees collected vs ground booking cost */}
+      <Card>
+        <div className="eyebrow text-ink/40">Match &amp; Ground</div>
+        <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
+          <div>
+            <div className="text-[11px] text-ink/45">Match fees collected</div>
+            <div className="font-display text-2xl text-success">{aed(matchPL.collected)}</div>
+          </div>
+          <div>
+            <div className="text-[11px] text-ink/45">Match fees pending</div>
+            <div className="font-display text-2xl text-amber-text">{aed(matchPL.pending)}</div>
+          </div>
+          <div>
+            <div className="text-[11px] text-ink/45">Ground booking cost</div>
+            <div className="font-display text-2xl text-ink/70">{aed(matchPL.groundCost)}</div>
+          </div>
+          <div>
+            <div className="text-[11px] text-ink/45">Net profit</div>
+            <div className={clsx('font-display text-2xl', matchPL.profit >= 0 ? 'text-success' : 'text-danger')}>
+              {aed(matchPL.profit)}
+            </div>
+          </div>
+        </div>
+        <p className="mt-2 text-[11px] text-ink/45">
+          Net profit = match fees collected − ground booking cost. Ground paid so far: {aed(matchPL.groundPaid)}.
+        </p>
+      </Card>
 
       {/* Filter bar */}
       <Card className="flex flex-wrap items-end gap-3">

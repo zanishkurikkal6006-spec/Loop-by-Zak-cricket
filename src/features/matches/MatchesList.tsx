@@ -6,6 +6,7 @@ import { useToast } from '@/lib/toast';
 import { parseCricHerosScorecard, type ParsedScorecard } from '@/lib/ai';
 import { supabase } from '@/lib/supabase';
 import { ScreenTitle, Card, Chip, Button } from '@/components/ui';
+import { Icon } from '@/components/ui/Icon';
 import { Modal } from '@/components/ui/Modal';
 import { LoopRing, RingAvatar } from '@/components/brand/LoopRing';
 import AddMatchModal from './AddMatchModal';
@@ -291,6 +292,14 @@ function LogMatchModal({ open, onClose }: { open: boolean; onClose: () => void }
   const { data: groups = [] } = useMyGroups();
   const groupIds = groups.map((g) => g.id);
   const { data: roster = [] } = usePlayers(groupIds.length ? groupIds : undefined);
+  const { data: venues = [] } = useQuery({
+    queryKey: ['venues', profile?.academy_id],
+    enabled: !!profile && open,
+    queryFn: async (): Promise<{ id: string; name: string }[]> => {
+      const { data } = await supabase.from('training_centers').select('id, name').order('name');
+      return (data ?? []) as { id: string; name: string }[];
+    },
+  });
 
   const [step, setStep] = useState<LogStep>('choose');
   const [parsed, setParsed] = useState<ParsedScorecard | null>(null);
@@ -299,7 +308,29 @@ function LogMatchModal({ open, onClose }: { open: boolean; onClose: () => void }
   const [result, setResult] = useState('Won');
   const [teamScore, setTeamScore] = useState('');
   const [matchFee, setMatchFee] = useState('');
+  const [venueId, setVenueId] = useState(''); // ground the match was played at
+  const [groundFee, setGroundFee] = useState(''); // ground booking cost (AED)
   const [saving, setSaving] = useState(false);
+  // Manual entry: which group, who played (the squad), and a name search so a
+  // coach with a big roster can find players fast.
+  const [manualGroup, setManualGroup] = useState('');
+  const [picked, setPicked] = useState<Set<string>>(new Set());
+  const [squadSearch, setSquadSearch] = useState('');
+
+  const manualGroupId = manualGroup || groups[0]?.id || '';
+  const squad = roster.filter(
+    (p) =>
+      (!manualGroupId || p.group_id === manualGroupId) &&
+      p.full_name.toLowerCase().includes(squadSearch.toLowerCase()),
+  );
+  function togglePicked(id: string) {
+    setPicked((s) => {
+      const next = new Set(s);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
 
   function close() {
     setStep('choose');
@@ -308,6 +339,11 @@ function LogMatchModal({ open, onClose }: { open: boolean; onClose: () => void }
     setResult('Won');
     setTeamScore('');
     setMatchFee('');
+    setVenueId('');
+    setGroundFee('');
+    setManualGroup('');
+    setPicked(new Set());
+    setSquadSearch('');
     onClose();
   }
 
@@ -333,8 +369,9 @@ function LogMatchModal({ open, onClose }: { open: boolean; onClose: () => void }
         .from('matches')
         .insert({
           academy_id: profile.academy_id,
-          group_id: groupIds[0] ?? null,
+          group_id: (withScorecard ? groupIds[0] : manualGroupId) || null,
           coach_id: profile.id,
+          center_id: venueId || null,
           match_date: matchDate,
           opponent: opponent.trim() || 'Opponent',
           team_score: teamScore.trim() || null,
@@ -346,6 +383,49 @@ function LogMatchModal({ open, onClose }: { open: boolean; onClose: () => void }
         .select()
         .single();
       if (error) throw error;
+
+      // Venue + ground fee → auto-create a ground booking against that centre so
+      // its payment can be tracked (Payments → Ground Fees / Finance).
+      const ground = Number(groundFee);
+      if (venueId && ground > 0) {
+        const { error: gErr } = await supabase.from('ground_fees').insert({
+          academy_id: profile.academy_id,
+          center_id: venueId,
+          booking_date: matchDate,
+          amount: ground,
+          status: 'pending',
+        });
+        if (gErr) throw gErr;
+      }
+
+      // Manual entry: record the squad who played, and (if a fee was entered)
+      // create a match fee per player so they show up in Match Payments for the
+      // coach to mark Bank / Cash.
+      if (!withScorecard) {
+        const ids = [...picked];
+        if (ids.length) {
+          const mpRows = ids.map((player_id) => ({
+            academy_id: profile.academy_id,
+            match_id: match.id,
+            player_id,
+          }));
+          const { error: mpErr } = await supabase.from('match_players').insert(mpRows);
+          if (mpErr) throw mpErr;
+
+          const fee = Number(matchFee);
+          if (fee > 0) {
+            const feeRows = ids.map((player_id) => ({
+              academy_id: profile.academy_id,
+              match_id: match.id,
+              player_id,
+              fee,
+              state: 'awaiting' as const,
+            }));
+            const { error: fErr } = await supabase.from('match_fees').insert(feeRows);
+            if (fErr) throw fErr;
+          }
+        }
+      }
 
       if (withScorecard && parsed) {
         const rows = parsed.players
@@ -394,6 +474,9 @@ function LogMatchModal({ open, onClose }: { open: boolean; onClose: () => void }
       }
       toast.show('Match logged');
       qc.invalidateQueries({ queryKey: ['matches'] });
+      qc.invalidateQueries({ queryKey: ['coach-match-fees'] });
+      qc.invalidateQueries({ queryKey: ['admin-match-fees'] });
+      qc.invalidateQueries({ queryKey: ['ground-fees'] });
       close();
     } catch {
       toast.show('Could not save match');
@@ -421,7 +504,7 @@ function LogMatchModal({ open, onClose }: { open: boolean; onClose: () => void }
             className="w-full rounded-card border border-cardborder bg-white p-4 text-left"
           >
             <div className="text-[15px] font-semibold">Log manually</div>
-            <div className="text-[12px] text-ink/45">Enter the result and team score yourself.</div>
+            <div className="text-[12px] text-ink/45">Enter the result, pick who played, and set the match fee.</div>
           </button>
         </div>
       )}
@@ -452,14 +535,85 @@ function LogMatchModal({ open, onClose }: { open: boolean; onClose: () => void }
             <input value={teamScore} onChange={(e) => setTeamScore(e.target.value)} placeholder="Team score e.g. 142/6" className={field} />
           </div>
 
-          {step === 'verify' && (
+          {/* Venue + ground booking cost (auto-creates a ground booking) */}
+          <div className="grid grid-cols-2 gap-2">
+            <select value={venueId} onChange={(e) => setVenueId(e.target.value)} className={field}>
+              <option value="">Venue / ground…</option>
+              {venues.map((v) => (
+                <option key={v.id} value={v.id}>{v.name}</option>
+              ))}
+            </select>
             <input
               type="number"
-              value={matchFee}
-              onChange={(e) => setMatchFee(e.target.value)}
-              placeholder="Match fee per player (AED, optional)"
+              value={groundFee}
+              onChange={(e) => setGroundFee(e.target.value)}
+              placeholder="Ground fee (AED)"
               className={field}
             />
+          </div>
+
+          <input
+            type="number"
+            value={matchFee}
+            onChange={(e) => setMatchFee(e.target.value)}
+            placeholder="Match fee per player (AED, optional)"
+            className={field}
+          />
+
+          {/* Manual: choose the group + search and tick who played. Each picked
+              player gets a fee row in Match Payments. */}
+          {step === 'manual' && (
+            <div className="space-y-2">
+              {groups.length > 1 && (
+                <select
+                  value={manualGroupId}
+                  onChange={(e) => { setManualGroup(e.target.value); setPicked(new Set()); }}
+                  className={field}
+                >
+                  {groups.map((g) => (
+                    <option key={g.id} value={g.id}>{g.name}</option>
+                  ))}
+                </select>
+              )}
+              <div className="flex items-center gap-2 rounded-pill border border-cardborder bg-white px-3">
+                <Icon name="search" size={16} stroke="#9A938A" />
+                <input
+                  value={squadSearch}
+                  onChange={(e) => setSquadSearch(e.target.value)}
+                  placeholder="Search players…"
+                  className="h-10 w-full bg-transparent text-[14px] outline-none"
+                />
+              </div>
+              <div className="rounded-card border border-cardborder">
+                <div className="flex items-center justify-between border-b border-hairline px-3 py-2">
+                  <span className="text-[11px] font-semibold uppercase tracking-eyebrow text-ink/40">
+                    Who played ({picked.size} selected)
+                  </span>
+                  <button
+                    onClick={() => setPicked(new Set(squad.map((p) => p.id)))}
+                    className="text-[12px] font-semibold text-brand-red"
+                  >
+                    Select all
+                  </button>
+                </div>
+                <div className="max-h-52 divide-y divide-hairline overflow-auto">
+                  {squad.map((p) => (
+                    <label key={p.id} className="flex cursor-pointer items-center justify-between px-3 py-2 text-[13px]">
+                      <span>{p.full_name}</span>
+                      <input type="checkbox" checked={picked.has(p.id)} onChange={() => togglePicked(p.id)} />
+                    </label>
+                  ))}
+                  {!squad.length && (
+                    <div className="px-3 py-4 text-center text-[12px] text-ink/45">
+                      {roster.length ? 'No players match.' : 'No players in your groups.'}
+                    </div>
+                  )}
+                </div>
+              </div>
+              {Number(matchFee) > 0 && picked.size > 0 && (
+                <Chip tone="green">Total fees: AED {Number(matchFee) * picked.size}</Chip>
+              )}
+            </div>
           )}
 
           {step === 'verify' && parsed && (

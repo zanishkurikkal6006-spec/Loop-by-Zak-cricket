@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useGroups, useMyGroups, usePlayers } from '@/lib/queries';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/lib/toast';
@@ -25,6 +26,7 @@ export default function AddMatchModal({
 }) {
   const { profile } = useAuth();
   const toast = useToast();
+  const qc = useQueryClient();
   const adminGroups = useGroups();
   const coachGroups = useMyGroups();
   const groups = (coachScoped ? coachGroups.data : adminGroups.data) ?? [];
@@ -35,10 +37,20 @@ export default function AddMatchModal({
   const [result, setResult] = useState('Won');
   const [teamScore, setTeamScore] = useState('');
   const [fee, setFee] = useState('');
+  const [venueId, setVenueId] = useState('');
+  const [groundFee, setGroundFee] = useState('');
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
 
   const { data: players = [] } = usePlayers(groupId ? [groupId] : undefined);
+  const { data: venues = [] } = useQuery({
+    queryKey: ['venues', profile?.academy_id],
+    enabled: !!profile && open,
+    queryFn: async (): Promise<{ id: string; name: string }[]> => {
+      const { data } = await supabase.from('training_centers').select('id, name').order('name');
+      return (data ?? []) as { id: string; name: string }[];
+    },
+  });
 
   function toggle(id: string) {
     setPicked((s) => {
@@ -55,6 +67,8 @@ export default function AddMatchModal({
     setResult('Won');
     setTeamScore('');
     setFee('');
+    setVenueId('');
+    setGroundFee('');
     setPicked(new Set());
   }
 
@@ -75,6 +89,7 @@ export default function AddMatchModal({
           academy_id: profile.academy_id,
           group_id: groupId,
           coach_id: coachScoped ? profile.id : null,
+          center_id: venueId || null,
           match_date: matchDate,
           opponent: opponent.trim() || 'Opponent',
           team_score: teamScore.trim() || null,
@@ -85,6 +100,19 @@ export default function AddMatchModal({
         .select()
         .single();
       if (error) throw error;
+
+      // Venue + ground fee → auto-create a ground booking to track its payment.
+      const ground = Number(groundFee);
+      if (venueId && ground > 0) {
+        const { error: gErr } = await supabase.from('ground_fees').insert({
+          academy_id: profile.academy_id,
+          center_id: venueId,
+          booking_date: matchDate,
+          amount: ground,
+          status: 'pending',
+        });
+        if (gErr) throw gErr;
+      }
 
       const feeNum = Number(fee);
       if (feeNum > 0) {
@@ -99,6 +127,8 @@ export default function AddMatchModal({
         if (fErr) throw fErr;
       }
       toast.show(feeNum > 0 ? `Match added · ${picked.size} fee${picked.size === 1 ? '' : 's'} created` : 'Match added');
+      qc.invalidateQueries({ queryKey: ['ground-fees'] });
+      qc.invalidateQueries({ queryKey: ['matches'] });
       onSaved?.();
       close();
     } catch {
@@ -130,6 +160,21 @@ export default function AddMatchModal({
             <option>No result</option>
           </select>
           <input value={teamScore} onChange={(e) => setTeamScore(e.target.value)} placeholder="Team score e.g. 142/6" className={field} />
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <select value={venueId} onChange={(e) => setVenueId(e.target.value)} className={field}>
+            <option value="">Venue / ground…</option>
+            {venues.map((v) => (
+              <option key={v.id} value={v.id}>{v.name}</option>
+            ))}
+          </select>
+          <input
+            type="number"
+            value={groundFee}
+            onChange={(e) => setGroundFee(e.target.value)}
+            placeholder="Ground fee (AED)"
+            className={field}
+          />
         </div>
         <input
           type="number"

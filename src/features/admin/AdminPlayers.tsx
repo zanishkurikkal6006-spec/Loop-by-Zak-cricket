@@ -220,8 +220,9 @@ function AddPlayerModal({
         if (pErr) throw pErr;
       }
 
-      // Extra sessions taken on top of any package (e.g. ad-hoc / paid extras) —
-      // recorded as their own package line so the base package stays intact.
+      // Extra sessions the player already TOOK but hasn't paid for — recorded as
+      // their own package line (used = total, payment pending) so the unpaid
+      // extras surface for collection and the base package stays intact.
       const extra = Number(extraSessions);
       if (extra > 0) {
         const { error: eErr } = await supabase.from('packages').insert({
@@ -229,9 +230,9 @@ function AddPlayerModal({
           player_id: player.id,
           package_type_id: null,
           sessions_total: extra,
-          sessions_used: 0,
+          sessions_used: extra,
           source: 'admin_assigned',
-          payment_status: 'paid',
+          payment_status: 'pending',
           assigned_by: profile.id,
         });
         if (eErr) throw eErr;
@@ -506,8 +507,8 @@ function AddPlayerModal({
           </div>
         )}
 
-        {/* Extra sessions taken on top of any package (ad-hoc / paid extras) */}
-        <Field label="Extra sessions (optional)">
+        {/* Extra sessions already taken but unpaid (logged for collection) */}
+        <Field label="Extra sessions already taken — unpaid (optional)">
           <input
             type="number"
             value={extraSessions}
@@ -516,7 +517,8 @@ function AddPlayerModal({
             className={inputCls}
           />
           <p className="mt-1 text-[11px] text-ink/45">
-            Adds extra sessions on top of any package — recorded as a separate line.
+            Sessions the player already took without paying — recorded as a separate
+            line marked Payment pending so you can collect later.
           </p>
         </Field>
 

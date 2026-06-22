@@ -6,7 +6,8 @@ import { useToast } from '@/lib/toast';
 import { ScreenTitle, Card, Chip, Button } from '@/components/ui';
 import { Modal } from '@/components/ui/Modal';
 import { LoopRing, RingAvatar } from '@/components/brand/LoopRing';
-import { counterState, stateColor, clsx, aed } from '@/lib/utils';
+import { counterState, stateColor, clsx, aed, firstName } from '@/lib/utils';
+import { sendWhatsApp, templates } from '@/lib/whatsapp';
 import { createStaff } from '@/lib/staff';
 import AddMatchModal from '@/features/matches/AddMatchModal';
 import type { UserRole } from '@/lib/types';
@@ -22,7 +23,9 @@ type PackageRow = Package & { player: Player | null; package_type: PackageType |
 
 export default function AdminPayments() {
   const { profile } = useAuth();
+  const toast = useToast();
   const [tab, setTab] = useState<Tab>('packages');
+  const [assignOpen, setAssignOpen] = useState(false);
 
   const { data: packages = [], isLoading } = useQuery({
     queryKey: ['admin-packages', profile?.academy_id],
@@ -69,36 +72,84 @@ export default function AdminPayments() {
       {isLoading && <div className="text-[13px] text-ink/45">Loading…</div>}
 
       {tab === 'packages' && (
-        <div className="grid gap-3 md:grid-cols-2">
-          {packages.map((p) => (
-            <PackageCard key={p.id} pkg={p} />
-          ))}
-          {!packages.length && !isLoading && (
-            <Card className="text-[13px] text-ink/45">No packages assigned yet.</Card>
-          )}
+        <div className="space-y-3">
+          <div className="flex justify-end">
+            <Button size="sm" onClick={() => setAssignOpen(true)}>+ Assign package</Button>
+          </div>
+          <AssignPackageModal open={assignOpen} onClose={() => setAssignOpen(false)} />
+          <div className="grid gap-3 md:grid-cols-2">
+            {packages.map((p) => (
+              <PackageCard key={p.id} pkg={p} />
+            ))}
+            {!packages.length && !isLoading && (
+              <Card className="text-[13px] text-ink/45">No packages assigned yet.</Card>
+            )}
+          </div>
         </div>
       )}
 
       {tab === 'renewals' && (
-        <Card className="divide-y divide-hairline p-0">
-          {renewals.map((p) => (
-            <div key={p.id} className="flex items-center gap-3 px-4 py-3">
-              <RingAvatar name={p.player?.full_name ?? '?'} size={36} color="#C9A84C" />
-              <div className="flex-1">
-                <div className="text-[14px] font-medium">{p.player?.full_name}</div>
-                <div className="text-[11px] text-ink/45">
-                  {p.sessions_remaining} session{p.sessions_remaining === 1 ? '' : 's'} left
-                </div>
-              </div>
-              <Chip tone="amber">Chase renewal</Chip>
-            </div>
-          ))}
-          {!renewals.length && (
-            <div className="px-4 py-6 text-center text-[13px] text-ink/45">
-              No renewals due — everyone's topped up.
+        <div className="space-y-3">
+          {renewals.length > 0 && (
+            <div className="flex justify-end">
+              <Button
+                size="sm"
+                variant="whatsapp"
+                onClick={async () => {
+                  if (!profile) return;
+                  let sent = 0;
+                  for (const p of renewals) {
+                    if (!p.player?.parent_phone) continue;
+                    await sendWhatsApp(
+                      p.player.parent_phone,
+                      templates.renewalNudge(firstName(p.player.full_name), p.sessions_remaining ?? 0),
+                      { academyId: profile.academy_id, playerId: p.player.id, templateKey: 'renewalNudge', refType: 'package', refId: p.id },
+                    );
+                    sent += 1;
+                  }
+                  toast.show(sent ? `Opening ${sent} reminder${sent === 1 ? '' : 's'}…` : 'No parent numbers on file');
+                }}
+              >
+                Remind all
+              </Button>
             </div>
           )}
-        </Card>
+          <Card className="divide-y divide-hairline p-0">
+            {renewals.map((p) => (
+              <div key={p.id} className="flex items-center gap-3 px-4 py-3">
+                <RingAvatar name={p.player?.full_name ?? '?'} size={36} color="#C9A84C" />
+                <div className="flex-1">
+                  <div className="text-[14px] font-medium">{p.player?.full_name}</div>
+                  <div className="text-[11px] text-ink/45">
+                    {p.sessions_remaining} session{p.sessions_remaining === 1 ? '' : 's'} left
+                  </div>
+                </div>
+                {p.player?.parent_phone ? (
+                  <button
+                    onClick={async () => {
+                      if (!profile || !p.player?.parent_phone) return;
+                      await sendWhatsApp(
+                        p.player.parent_phone,
+                        templates.renewalNudge(firstName(p.player.full_name), p.sessions_remaining ?? 0),
+                        { academyId: profile.academy_id, playerId: p.player.id, templateKey: 'renewalNudge', refType: 'package', refId: p.id },
+                      );
+                    }}
+                    className="rounded-chip bg-[#25D366]/15 px-2.5 py-1 text-[11px] font-semibold text-[#1c8c47]"
+                  >
+                    Send reminder
+                  </button>
+                ) : (
+                  <Chip tone="amber">No WhatsApp</Chip>
+                )}
+              </div>
+            ))}
+            {!renewals.length && (
+              <div className="px-4 py-6 text-center text-[13px] text-ink/45">
+                No renewals due — everyone's topped up.
+              </div>
+            )}
+          </Card>
+        </div>
       )}
 
       {tab === 'types' && <PackageTypesTab />}
@@ -792,6 +843,97 @@ function GroundFeesTab() {
         </div>
       </Modal>
     </div>
+  );
+}
+
+// Assign a package straight from the Packages & Sessions tab — pick a player and
+// a package type and it's created (paid, admin-assigned). Mirrors the per-player
+// flow in PlayerDetail but lets admins work from the payments screen.
+function AssignPackageModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { profile } = useAuth();
+  const qc = useQueryClient();
+  const toast = useToast();
+  const [playerId, setPlayerId] = useState('');
+  const [typeId, setTypeId] = useState('');
+  const [paid, setPaid] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const { data: players = [] } = useQuery({
+    queryKey: ['assign-players', profile?.academy_id],
+    enabled: !!profile && open,
+    queryFn: async (): Promise<Player[]> => {
+      const { data, error } = await supabase.from('players').select('*').eq('status', 'active').order('full_name');
+      if (error) throw error;
+      return (data ?? []) as Player[];
+    },
+  });
+  const { data: types = [] } = useQuery({
+    queryKey: ['package-types', profile?.academy_id],
+    enabled: !!profile && open,
+    queryFn: async (): Promise<PackageType[]> => {
+      const { data, error } = await supabase.from('package_types').select('*').order('price');
+      if (error) throw error;
+      return (data ?? []) as PackageType[];
+    },
+  });
+
+  async function assign() {
+    if (!profile || !playerId || !typeId) return toast.show('Pick a player and a package');
+    const type = types.find((t) => t.id === typeId);
+    if (!type) return;
+    setSaving(true);
+    try {
+      const { error } = await supabase.from('packages').insert({
+        academy_id: profile.academy_id,
+        player_id: playerId,
+        package_type_id: type.id,
+        sessions_total: type.sessions,
+        sessions_used: 0,
+        source: 'admin_assigned',
+        payment_status: paid ? 'paid' : 'pending',
+        assigned_by: profile.id,
+      });
+      if (error) throw error;
+      toast.show('Package assigned');
+      setPlayerId('');
+      setTypeId('');
+      qc.invalidateQueries({ queryKey: ['admin-packages'] });
+      onClose();
+    } catch {
+      toast.show('Could not assign package');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const field = 'h-11 w-full rounded-pill border border-cardborder bg-white px-3 text-[14px] outline-none focus:border-gold';
+
+  return (
+    <Modal open={open} onClose={onClose} title="Assign Package">
+      <div className="space-y-3">
+        <select value={playerId} onChange={(e) => setPlayerId(e.target.value)} className={field}>
+          <option value="">Select player…</option>
+          {players.map((p) => (
+            <option key={p.id} value={p.id}>{p.full_name}</option>
+          ))}
+        </select>
+        <select value={typeId} onChange={(e) => setTypeId(e.target.value)} className={field}>
+          <option value="">Select package…</option>
+          {types.map((t) => (
+            <option key={t.id} value={t.id}>
+              {t.name} {Number(t.price) ? `· AED ${t.price}` : ''}
+            </option>
+          ))}
+        </select>
+        <label className="flex items-center gap-2 rounded-pill border border-cardborder bg-white px-3 py-2.5 text-[13px]">
+          <input type="checkbox" checked={paid} onChange={(e) => setPaid(e.target.checked)} />
+          Marked as paid
+        </label>
+        <Button className="w-full" disabled={saving || !playerId || !typeId} onClick={assign}>
+          {saving ? 'Assigning…' : 'Assign package'}
+        </Button>
+      </div>
+    </Modal>
   );
 }
 

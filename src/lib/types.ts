@@ -236,6 +236,7 @@ export interface GroundFee {
   center_id: string | null;
   booking_date: string;
   amount: number;
+  paid_amount: number;
   mode: PaymentMode | null;
   status: PaymentState;
   created_at: string;

@@ -17,6 +17,8 @@ const paths: Record<string, string[]> = {
   search: ['M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z', 'm21 21-4.3-4.3'],
   chevronRight: ['m9 18 6-6-6-6'],
   chevronLeft: ['m15 18-6-6 6-6'],
+  'chevron-down': ['m6 9 6 6 6-6'],
+  'chevron-up': ['m18 15-6-6-6 6'],
   download: ['M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4', 'M7 10l5 5 5-5', 'M12 15V3'],
   whatsapp: ['M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-4-1L3 21l2-5.5a8.5 8.5 0 1 1 16-4z'],
 };

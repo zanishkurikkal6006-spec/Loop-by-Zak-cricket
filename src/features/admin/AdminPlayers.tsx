@@ -19,6 +19,8 @@ export default function AdminPlayers() {
   const [search, setSearch] = useState('');
   const [adding, setAdding] = useState(false);
   const [selected, setSelected] = useState<Player | null>(null);
+  // Filter tab: 'all', a group id, or 'one_to_one' (players with a 1-on-1 block).
+  const [filter, setFilter] = useState<string>('all');
   const { data: players = [] } = usePlayers();
 
   const groups = useQuery({
@@ -31,9 +33,27 @@ export default function AdminPlayers() {
     },
   });
 
+  // Set of player ids that have at least one 1-on-1 block (for the 1-on-1 tab).
+  const oneToOneIds = useQuery({
+    queryKey: ['one-to-one-player-ids', profile?.academy_id],
+    enabled: !!profile,
+    queryFn: async (): Promise<Set<string>> => {
+      const { data, error } = await supabase.from('one_to_one_blocks').select('player_id');
+      if (error) throw error;
+      return new Set((data ?? []).map((r) => (r as { player_id: string }).player_id));
+    },
+  });
+  const oneToOne = oneToOneIds.data ?? new Set<string>();
+
   const filtered = useMemo(
-    () => players.filter((p) => p.full_name.toLowerCase().includes(search.toLowerCase())),
-    [players, search],
+    () =>
+      players.filter((p) => {
+        if (!p.full_name.toLowerCase().includes(search.toLowerCase())) return false;
+        if (filter === 'all') return true;
+        if (filter === 'one_to_one') return oneToOne.has(p.id);
+        return p.group_id === filter;
+      }),
+    [players, search, filter, oneToOne],
   );
 
   return (
@@ -53,6 +73,21 @@ export default function AdminPlayers() {
           placeholder="Search players…"
           className="h-10 w-full bg-transparent text-[14px] outline-none"
         />
+      </div>
+
+      {/* Filter tabs: All · each group (Elite / Level Up / Launch Pad) · 1-on-1 */}
+      <div className="-mx-1 flex flex-wrap gap-2 px-1">
+        <FilterChip active={filter === 'all'} onClick={() => setFilter('all')}>
+          All players
+        </FilterChip>
+        {(groups.data ?? []).map((g) => (
+          <FilterChip key={g.id} active={filter === g.id} onClick={() => setFilter(g.id)}>
+            {g.name}
+          </FilterChip>
+        ))}
+        <FilterChip active={filter === 'one_to_one'} onClick={() => setFilter('one_to_one')}>
+          1-on-1
+        </FilterChip>
       </div>
 
       <div className="grid gap-3 md:grid-cols-2">
@@ -453,6 +488,28 @@ function emptyRow(): BulkRow {
 
 const inputCls =
   'h-11 w-full rounded-pill border border-cardborder bg-white px-3 text-[14px] outline-none focus:border-gold';
+
+function FilterChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={
+        'rounded-pill px-3 py-1.5 text-[12px] font-semibold transition ' +
+        (active ? 'bg-brand-red text-paper' : 'border border-cardborder bg-white text-ink/60')
+      }
+    >
+      {children}
+    </button>
+  );
+}
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (

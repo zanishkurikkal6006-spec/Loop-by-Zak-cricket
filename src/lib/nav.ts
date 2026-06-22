@@ -13,7 +13,7 @@ export const navByRole: Record<UserRole, NavItem[]> = {
   coach: [
     { to: '/coach', label: 'Home', icon: 'home' },
     { to: '/coach/one-to-one', label: '1-on-1', icon: 'target' },
-    { to: '/coach/attendance', label: 'Attend', icon: 'check' },
+    { to: '/coach/attendance', label: 'Attendance', icon: 'check' },
     { to: '/coach/matches', label: 'Matches', icon: 'trophy' },
     { to: '/coach/rankings', label: 'Ranking', icon: 'chart' },
     { to: '/coach/reports', label: 'Reports', icon: 'message' },

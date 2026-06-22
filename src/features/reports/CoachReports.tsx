@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useMyGroups, usePlayers } from '@/lib/queries';
+import { useMyGroups, usePlayers, useMyOneToOneBlocks } from '@/lib/queries';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/lib/toast';
@@ -30,6 +30,9 @@ export default function CoachReports() {
   const { data: groups = [] } = useMyGroups();
   const groupIds = groups.map((g) => g.id);
   const { data: players = [] } = usePlayers(groupIds.length ? groupIds : undefined);
+  // 1-on-1 players — may not be in any group (e.g. adults / kids who only do
+  // one-on-one), so include them so they can get development reports too.
+  const { data: blocks = [] } = useMyOneToOneBlocks();
 
   const [mode, setMode] = useState<Mode>('quick');
   const [step, setStep] = useState<Step>('pick');
@@ -40,10 +43,29 @@ export default function CoachReports() {
   const [groupFilter, setGroupFilter] = useState<string>('all'); // pick-step batch filter
   const [playerSearch, setPlayerSearch] = useState('');
 
-  // Narrow the picker by group/batch + name so a coach with many players isn't
-  // scrolling a huge flat list to find one child.
-  const visiblePlayers = players.filter((p) => {
-    if (groupFilter !== 'all' && p.group_id !== groupFilter) return false;
+  // Distinct 1-on-1 players from this coach's blocks.
+  const oneToOnePlayers: Player[] = [];
+  const oneToOneIds = new Set<string>();
+  for (const b of blocks) {
+    if (b.player && !oneToOneIds.has(b.player.id)) {
+      oneToOneIds.add(b.player.id);
+      oneToOnePlayers.push(b.player);
+    }
+  }
+  // Combined, de-duplicated pool: group players + 1-on-1 players.
+  const poolMap = new Map<string, Player>();
+  for (const p of players) poolMap.set(p.id, p);
+  for (const p of oneToOnePlayers) poolMap.set(p.id, p);
+  const pool = [...poolMap.values()].sort((a, b) => a.full_name.localeCompare(b.full_name));
+
+  // Narrow the picker by group/batch (or 1-on-1) + name so a coach with many
+  // players isn't scrolling a huge flat list to find one.
+  const visiblePlayers = pool.filter((p) => {
+    if (groupFilter === 'one_to_one') {
+      if (!oneToOneIds.has(p.id)) return false;
+    } else if (groupFilter !== 'all') {
+      if (p.group_id !== groupFilter) return false;
+    }
     return p.full_name.toLowerCase().includes(playerSearch.toLowerCase());
   });
 
@@ -152,8 +174,8 @@ export default function CoachReports() {
               ? 'Pick a player who finished a block to create a full development report.'
               : "Pick a player, jot 2–3 words, and we'll expand it into a warm message addressed to them by name."}
           </div>
-          {/* Group/batch filter chips */}
-          {groups.length > 1 && (
+          {/* Group/batch (+ 1-on-1) filter chips */}
+          {(groups.length > 1 || oneToOnePlayers.length > 0) && (
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setGroupFilter('all')}
@@ -176,6 +198,17 @@ export default function CoachReports() {
                   {g.name}
                 </button>
               ))}
+              {oneToOnePlayers.length > 0 && (
+                <button
+                  onClick={() => setGroupFilter('one_to_one')}
+                  className={clsx(
+                    'rounded-pill px-3 py-1.5 text-[12px] font-semibold transition',
+                    groupFilter === 'one_to_one' ? 'bg-brand-red text-paper' : 'border border-cardborder bg-white text-ink/60',
+                  )}
+                >
+                  1-on-1
+                </button>
+              )}
             </div>
           )}
           <div className="flex items-center gap-2 rounded-pill border border-cardborder bg-white px-3">

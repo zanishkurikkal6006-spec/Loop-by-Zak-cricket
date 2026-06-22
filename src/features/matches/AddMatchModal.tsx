@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useGroups, useMyGroups, usePlayers } from '@/lib/queries';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/lib/toast';
 import { supabase } from '@/lib/supabase';
 import { Button, Chip } from '@/components/ui';
 import { Modal } from '@/components/ui/Modal';
+import VenuePicker from './VenuePicker';
 
 // Create a match and (optionally) per-player match fees in one step. Shared by
 // the coach Match Payments view and the admin Match Fees tab — both need a way
@@ -43,14 +44,6 @@ export default function AddMatchModal({
   const [saving, setSaving] = useState(false);
 
   const { data: players = [] } = usePlayers(groupId ? [groupId] : undefined);
-  const { data: venues = [] } = useQuery({
-    queryKey: ['venues', profile?.academy_id],
-    enabled: !!profile && open,
-    queryFn: async (): Promise<{ id: string; name: string }[]> => {
-      const { data } = await supabase.from('training_centers').select('id, name').order('name');
-      return (data ?? []) as { id: string; name: string }[];
-    },
-  });
 
   function toggle(id: string) {
     setPicked((s) => {
@@ -161,21 +154,14 @@ export default function AddMatchModal({
           </select>
           <input value={teamScore} onChange={(e) => setTeamScore(e.target.value)} placeholder="Team score e.g. 142/6" className={field} />
         </div>
-        <div className="grid grid-cols-2 gap-2">
-          <select value={venueId} onChange={(e) => setVenueId(e.target.value)} className={field}>
-            <option value="">Venue / ground…</option>
-            {venues.map((v) => (
-              <option key={v.id} value={v.id}>{v.name}</option>
-            ))}
-          </select>
-          <input
-            type="number"
-            value={groundFee}
-            onChange={(e) => setGroundFee(e.target.value)}
-            placeholder="Ground fee (AED)"
-            className={field}
-          />
-        </div>
+        <VenuePicker value={venueId} onChange={setVenueId} enabled={open} />
+        <input
+          type="number"
+          value={groundFee}
+          onChange={(e) => setGroundFee(e.target.value)}
+          placeholder="Ground fee (AED)"
+          className={field}
+        />
         <input
           type="number"
           value={fee}

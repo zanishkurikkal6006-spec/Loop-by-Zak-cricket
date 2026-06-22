@@ -177,6 +177,7 @@ export interface Match {
   academy_id: string;
   group_id: string | null;
   coach_id: string | null;
+  center_id: string | null;
   match_date: string;
   opponent: string | null;
   team_score: string | null;

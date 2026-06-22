@@ -33,6 +33,8 @@ export const navByRole: Record<UserRole, NavItem[]> = {
     { to: '/admin/attendance', label: 'Attendance', icon: 'check', badgeKey: 'attendancePending' },
     { to: '/admin/payments', label: 'Payments', icon: 'card' },
     { to: '/admin/programs', label: 'Programs', icon: 'grid' },
+    { to: '/admin/badges', label: 'Badges', icon: 'badge' },
+    { to: '/admin/settings', label: 'Settings', icon: 'settings' },
   ],
 };
 

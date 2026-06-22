@@ -10,6 +10,7 @@ import { Icon } from '@/components/ui/Icon';
 import { Modal } from '@/components/ui/Modal';
 import { LoopRing, RingAvatar } from '@/components/brand/LoopRing';
 import AddMatchModal from './AddMatchModal';
+import VenuePicker from './VenuePicker';
 
 // Match log + per-match scorecard (the coach's accountability/evidence record).
 // `mine` scopes to the signed-in coach's matches; Head Coach passes mine=false
@@ -292,14 +293,6 @@ function LogMatchModal({ open, onClose }: { open: boolean; onClose: () => void }
   const { data: groups = [] } = useMyGroups();
   const groupIds = groups.map((g) => g.id);
   const { data: roster = [] } = usePlayers(groupIds.length ? groupIds : undefined);
-  const { data: venues = [] } = useQuery({
-    queryKey: ['venues', profile?.academy_id],
-    enabled: !!profile && open,
-    queryFn: async (): Promise<{ id: string; name: string }[]> => {
-      const { data } = await supabase.from('training_centers').select('id, name').order('name');
-      return (data ?? []) as { id: string; name: string }[];
-    },
-  });
 
   const [step, setStep] = useState<LogStep>('choose');
   const [parsed, setParsed] = useState<ParsedScorecard | null>(null);
@@ -536,21 +529,14 @@ function LogMatchModal({ open, onClose }: { open: boolean; onClose: () => void }
           </div>
 
           {/* Venue + ground booking cost (auto-creates a ground booking) */}
-          <div className="grid grid-cols-2 gap-2">
-            <select value={venueId} onChange={(e) => setVenueId(e.target.value)} className={field}>
-              <option value="">Venue / ground…</option>
-              {venues.map((v) => (
-                <option key={v.id} value={v.id}>{v.name}</option>
-              ))}
-            </select>
-            <input
-              type="number"
-              value={groundFee}
-              onChange={(e) => setGroundFee(e.target.value)}
-              placeholder="Ground fee (AED)"
-              className={field}
-            />
-          </div>
+          <VenuePicker value={venueId} onChange={setVenueId} enabled={open} />
+          <input
+            type="number"
+            value={groundFee}
+            onChange={(e) => setGroundFee(e.target.value)}
+            placeholder="Ground fee (AED)"
+            className={field}
+          />
 
           <input
             type="number"

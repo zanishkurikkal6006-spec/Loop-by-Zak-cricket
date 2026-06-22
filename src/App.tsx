@@ -21,6 +21,7 @@ const AdminAttendance = lazy(() => import('./features/admin/AdminAttendance'));
 const AdminFinance = lazy(() => import('./features/admin/AdminFinance'));
 const AdminPayments = lazy(() => import('./features/admin/AdminPayments'));
 const AdminPrograms = lazy(() => import('./features/admin/AdminPrograms'));
+const AdminSettings = lazy(() => import('./features/admin/AdminSettings'));
 const MatchesList = lazy(() => import('./features/matches/MatchesList'));
 const Rankings = lazy(() => import('./features/rankings/Rankings'));
 const Badges = lazy(() => import('./features/badges/Badges'));
@@ -117,6 +118,7 @@ export default function App() {
               <Route path="/admin/payments" element={<AdminPayments />} />
               <Route path="/admin/programs" element={<AdminPrograms />} />
               <Route path="/admin/badges" element={<Badges eyebrow="Admin" canApprove />} />
+              <Route path="/admin/settings" element={<AdminSettings />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />

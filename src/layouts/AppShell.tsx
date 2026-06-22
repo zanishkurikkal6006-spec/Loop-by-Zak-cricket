@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { navByRole, roleLabel } from '@/lib/nav';
@@ -13,6 +14,12 @@ import type { UserRole } from '@/lib/types';
 export function AppShell({ role }: { role: UserRole }) {
   const { profile, signOut } = useAuth();
   const items = navByRole[role];
+  const [moreOpen, setMoreOpen] = useState(false);
+  // Mobile bottom nav fits 5 slots. If there are more items, show the first 4
+  // plus a "More" button that opens the rest in a sheet.
+  const hasOverflow = items.length > 5;
+  const primary = hasOverflow ? items.slice(0, 4) : items.slice(0, 5);
+  const overflow = hasOverflow ? items.slice(4) : [];
 
   return (
     <div className="min-h-screen bg-canvas">
@@ -81,13 +88,41 @@ export function AppShell({ role }: { role: UserRole }) {
         </div>
       </main>
 
+      {/* ── Mobile "More" sheet ── */}
+      {moreOpen && hasOverflow && (
+        <>
+          <div className="fixed inset-0 z-20 bg-ink/30 md:hidden" onClick={() => setMoreOpen(false)} />
+          <div className="fixed inset-x-0 bottom-[58px] z-30 rounded-t-card border-t border-cardborder bg-paper p-3 md:hidden">
+            <div className="grid grid-cols-4 gap-2">
+              {overflow.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  onClick={() => setMoreOpen(false)}
+                  className={({ isActive }) =>
+                    clsx(
+                      'flex flex-col items-center gap-1 rounded-card py-3 text-[10px] font-semibold',
+                      isActive ? 'bg-chip-red text-brand-red' : 'text-ink/55',
+                    )
+                  }
+                >
+                  <Icon name={item.icon} size={20} />
+                  {item.label}
+                </NavLink>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
       {/* ── Mobile bottom nav ── */}
       <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t border-cardborder bg-paper md:hidden">
-        {items.slice(0, 5).map((item) => (
+        {primary.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.to === `/${role.replace('_', '-')}`}
+            onClick={() => setMoreOpen(false)}
             className={({ isActive }) =>
               clsx(
                 'flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold',
@@ -99,6 +134,18 @@ export function AppShell({ role }: { role: UserRole }) {
             {item.label}
           </NavLink>
         ))}
+        {hasOverflow && (
+          <button
+            onClick={() => setMoreOpen((o) => !o)}
+            className={clsx(
+              'flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold',
+              moreOpen ? 'text-brand-red' : 'text-ink/45',
+            )}
+          >
+            <Icon name="grid" size={20} />
+            More
+          </button>
+        )}
       </nav>
     </div>
   );

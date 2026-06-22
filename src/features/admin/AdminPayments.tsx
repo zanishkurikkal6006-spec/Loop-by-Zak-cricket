@@ -386,6 +386,7 @@ function SettingsTab() {
   const [staffRole, setStaffRole] = useState<UserRole>('coach');
   const [addingStaff, setAddingStaff] = useState(false);
   async function addStaff() {
+    if (!profile) return;
     if (!staffName.trim() || !staffEmail.trim() || staffPass.length < 6) {
       return toast.show('Name, email, and a 6+ char password required');
     }
@@ -396,6 +397,7 @@ function SettingsTab() {
         email: staffEmail.trim(),
         password: staffPass,
         role: staffRole,
+        academyId: profile.academy_id,
       });
       toast.show('Staff member created');
       setStaffName('');
@@ -406,7 +408,7 @@ function SettingsTab() {
       qc.invalidateQueries({ queryKey: ['settings-coaches'] });
       qc.invalidateQueries({ queryKey: ['coaches'] });
     } catch (e) {
-      toast.show(e instanceof Error ? e.message : 'Could not create — is the create-staff function deployed?');
+      toast.show(e instanceof Error ? e.message : 'Could not create staff member');
     } finally {
       setAddingStaff(false);
     }

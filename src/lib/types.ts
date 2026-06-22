@@ -136,6 +136,8 @@ export interface AttendanceSession {
   batch_id: string | null;
   group_id: string | null;
   session_date: string;
+  start_time: string | null;
+  end_time: string | null;
   coach_id: string | null;
   credited_coach_id: string | null;
   status: AttendanceStatus;

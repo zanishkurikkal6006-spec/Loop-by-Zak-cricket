@@ -7,6 +7,7 @@ import { useToast } from '@/lib/toast';
 import { Button, Card, Chip, ScreenTitle } from '@/components/ui';
 import { Icon } from '@/components/ui/Icon';
 import { clsx } from '@/lib/utils';
+import BatchPicker, { type BatchSelection } from '@/features/attendance/BatchPicker';
 import type { AttendanceRecord, AttendanceSession, AttendanceState, Player } from '@/lib/types';
 
 // Admin Attendance — three tabs:
@@ -293,6 +294,7 @@ function TakeAttendanceTab() {
   const [marks, setMarks] = useState<Record<string, 'present' | 'late'>>({});
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState('');
+  const [batch, setBatch] = useState<BatchSelection>({ batchId: null, startTime: null, endTime: null });
 
   const { data: players = [] } = usePlayers(groupId ? [groupId] : undefined);
   // Search within the group — academies can have hundreds of students, so
@@ -321,7 +323,10 @@ function TakeAttendanceTab() {
         .insert({
           academy_id: profile.academy_id,
           group_id: groupId,
+          batch_id: batch.batchId,
           session_date: date,
+          start_time: batch.startTime || null,
+          end_time: batch.endTime || null,
           coach_id: coachId || profile.id,
           credited_coach_id: coachId || null,
           status: 'confirmed', // admin take-attendance auto-confirms
@@ -376,6 +381,8 @@ function TakeAttendanceTab() {
 
       {groupId && (
         <>
+          {/* Batch / time-slot picker */}
+          <BatchPicker groupId={groupId} value={batch} onChange={setBatch} />
           <div className="flex items-center gap-2 rounded-pill border border-cardborder bg-white px-3">
             <Icon name="search" size={16} stroke="#9A938A" />
             <input

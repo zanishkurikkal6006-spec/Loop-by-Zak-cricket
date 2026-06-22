@@ -20,6 +20,10 @@ import type { Package, PackageType, Player, MatchFee, Match, GroundFee, Training
 type Tab = 'packages' | 'renewals' | 'types' | 'matchfees' | 'groundfees' | 'settings';
 
 type PackageRow = Package & { player: Player | null; package_type: PackageType | null };
+type BatchRow = Batch & {
+  center: TrainingCenter | null;
+  batch_groups: { group: { name: string } | null }[];
+};
 
 export default function AdminPayments() {
   const { profile } = useAuth();
@@ -280,12 +284,12 @@ function SettingsTab() {
   const { data: batches = [] } = useQuery({
     queryKey: ['settings-batches', profile?.academy_id],
     enabled: !!profile,
-    queryFn: async (): Promise<(Batch & { center: TrainingCenter | null })[]> => {
+    queryFn: async (): Promise<BatchRow[]> => {
       const { data } = await supabase
         .from('batches')
-        .select('*, center:training_centers(*)')
+        .select('*, center:training_centers(*), batch_groups(group:groups(name))')
         .order('start_time');
-      return (data ?? []) as (Batch & { center: TrainingCenter | null })[];
+      return (data ?? []) as BatchRow[];
     },
   });
 
@@ -355,20 +359,31 @@ function SettingsTab() {
   const [batchStart, setBatchStart] = useState('');
   const [batchEnd, setBatchEnd] = useState('');
   const [batchCenter, setBatchCenter] = useState('');
+  const [batchGroup, setBatchGroup] = useState('');
   async function addBatch() {
     if (!profile || !batchName.trim()) return;
-    const { error } = await supabase.from('batches').insert({
-      academy_id: profile.academy_id,
-      name: batchName.trim(),
-      center_id: batchCenter || null,
-      start_time: batchStart || null,
-      end_time: batchEnd || null,
-    });
+    const { data: created, error } = await supabase
+      .from('batches')
+      .insert({
+        academy_id: profile.academy_id,
+        name: batchName.trim(),
+        center_id: batchCenter || null,
+        start_time: batchStart || null,
+        end_time: batchEnd || null,
+      })
+      .select()
+      .single();
     if (error) return toast.show('Could not add batch');
+    // Link the batch to a group so it shows up as a time slot when marking
+    // attendance for that group (Elite, Level Up, Launch Pad…).
+    if (batchGroup) {
+      await supabase.from('batch_groups').insert({ batch_id: created.id, group_id: batchGroup });
+    }
     toast.show('Batch added');
     setBatchName('');
     setBatchStart('');
     setBatchEnd('');
+    setBatchGroup('');
     qc.invalidateQueries({ queryKey: ['settings-batches'] });
   }
 
@@ -528,29 +543,45 @@ function SettingsTab() {
       <Card>
         <div className="eyebrow mb-3 text-ink/40">Batches &amp; Time Slots</div>
         <div className="divide-y divide-hairline">
-          {batches.map((b) => (
-            <div key={b.id} className="flex items-center justify-between py-2 text-[13px]">
-              <span className="font-medium">{b.name}</span>
-              <span className="flex items-center gap-2 text-ink/45">
-                {b.start_time?.slice(0, 5) ?? '—'}–{b.end_time?.slice(0, 5) ?? '—'}
-                {b.center ? ` · ${b.center.name}` : ''}
-                <DeleteX onClick={() => del('batches', b.id, 'settings-batches')} />
-              </span>
-            </div>
-          ))}
+          {batches.map((b) => {
+            const grp = b.batch_groups?.map((bg) => bg.group?.name).filter(Boolean).join(', ');
+            return (
+              <div key={b.id} className="flex items-center justify-between py-2 text-[13px]">
+                <span className="font-medium">
+                  {b.name}
+                  {grp ? <span className="ml-2 text-[11px] font-normal text-ink/45">· {grp}</span> : null}
+                </span>
+                <span className="flex items-center gap-2 text-ink/45">
+                  {b.start_time?.slice(0, 5) ?? '—'}–{b.end_time?.slice(0, 5) ?? '—'}
+                  {b.center ? ` · ${b.center.name}` : ''}
+                  <DeleteX onClick={() => del('batches', b.id, 'settings-batches')} />
+                </span>
+              </div>
+            );
+          })}
           {!batches.length && <div className="py-2 text-[13px] text-ink/45">No batches yet.</div>}
         </div>
         <div className="mt-3 grid grid-cols-2 gap-2">
           <input value={batchName} onChange={(e) => setBatchName(e.target.value)} placeholder="Batch name (e.g. Elite Evening)" className={field} />
+          <select value={batchGroup} onChange={(e) => setBatchGroup(e.target.value)} className={field}>
+            <option value="">Group (for attendance)…</option>
+            {groups.map((g) => (
+              <option key={g.id} value={g.id}>{g.name}</option>
+            ))}
+          </select>
           <select value={batchCenter} onChange={(e) => setBatchCenter(e.target.value)} className={field}>
             <option value="">Center…</option>
             {centers.map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
+          <div />
           <input type="time" value={batchStart} onChange={(e) => setBatchStart(e.target.value)} className={field} />
           <input type="time" value={batchEnd} onChange={(e) => setBatchEnd(e.target.value)} className={field} />
         </div>
+        <p className="mt-1.5 text-[11px] text-ink/45">
+          Tip: give Elite two batches (e.g. morning + evening), Level Up and Launch Pad one each.
+        </p>
         <Button size="sm" className="mt-2" onClick={addBatch}>+ Add batch</Button>
       </Card>
 

@@ -8,6 +8,7 @@ import { Button, Card, Chip, ScreenTitle } from '@/components/ui';
 import { Icon } from '@/components/ui/Icon';
 import { clsx } from '@/lib/utils';
 import BatchPicker, { type BatchSelection } from '@/features/attendance/BatchPicker';
+import { accrueExtraSessions } from '@/lib/packages';
 import type { AttendanceRecord, AttendanceSession, AttendanceState, Player } from '@/lib/types';
 
 // Admin Attendance — three tabs:
@@ -134,6 +135,8 @@ function PendingCard({ session }: { session: AttendanceSession }) {
         .update({ status: 'confirmed', confirmed_by: profile.id })
         .eq('id', session.id);
       if (error) throw error;
+      // Count extra (no-package) sessions for players without a usable package.
+      await accrueExtraSessions(session.id);
       // Production: enqueue parent WhatsApp messages here (outbound_messages).
     },
     onSuccess: () => {
@@ -346,10 +349,12 @@ function TakeAttendanceTab() {
       if (records.length) {
         const { error: rErr } = await supabase.from('attendance_records').insert(records);
         if (rErr) throw rErr;
+        await accrueExtraSessions(session.id);
       }
       toast.show(`Attendance saved · ${records.length} marked`);
       setMarks({});
       qc.invalidateQueries({ queryKey: ['attendance-history'] });
+      qc.invalidateQueries({ queryKey: ['players'] });
     } catch {
       toast.show('Could not save attendance');
     } finally {
@@ -404,7 +409,10 @@ function TakeAttendanceTab() {
           <Card className="divide-y divide-hairline p-0">
             {visiblePlayers.map((p) => (
               <div key={p.id} className="flex items-center justify-between px-4 py-2.5">
-                <span className="text-[14px] font-medium">{p.full_name}</span>
+                <span className="flex items-center gap-2 text-[14px] font-medium">
+                  {p.full_name}
+                  {p.extra_sessions > 0 && <Chip tone="amber">{p.extra_sessions} extra</Chip>}
+                </span>
                 <div className="flex gap-1.5">
                   <MarkBtn active={marks[p.id] === 'present'} tone="green" onClick={() => setMark(p.id, 'present')}>
                     Present

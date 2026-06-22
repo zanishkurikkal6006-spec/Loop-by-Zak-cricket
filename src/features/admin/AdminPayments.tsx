@@ -459,13 +459,16 @@ function AssignPackageModal({
     },
   });
 
+  const selectedPlayer = players.find((p) => p.id === playerId);
+  const extra = selectedPlayer?.extra_sessions ?? 0;
+
   async function assign() {
     if (!profile || !playerId || !typeId) return toast.show('Pick a player and a package');
     const type = types.find((t) => t.id === typeId);
     if (!type) return;
     setSaving(true);
     try {
-      await assignPackage({
+      const applied = await assignPackage({
         academyId: profile.academy_id,
         playerId,
         packageTypeId: type.id,
@@ -474,12 +477,19 @@ function AssignPackageModal({
         paid,
         mode,
         assignedBy: profile.id,
+        netExtra: true,
       });
-      toast.show(paid ? 'Package assigned · payment recorded' : 'Package assigned · payment pending');
+      toast.show(
+        applied > 0
+          ? `Package assigned · ${applied} extra session${applied === 1 ? '' : 's'} deducted`
+          : paid ? 'Package assigned · payment recorded' : 'Package assigned · payment pending',
+      );
       setPlayerId('');
       setTypeId('');
       qc.invalidateQueries({ queryKey: ['admin-packages'] });
       qc.invalidateQueries({ queryKey: ['unassigned-players'] });
+      qc.invalidateQueries({ queryKey: ['assign-players'] });
+      qc.invalidateQueries({ queryKey: ['players'] });
       qc.invalidateQueries({ queryKey: ['finance-payments'] });
       qc.invalidateQueries({ queryKey: ['admin-stats'] });
       onClose();
@@ -528,6 +538,12 @@ function AssignPackageModal({
                 {m}
               </button>
             ))}
+          </div>
+        )}
+        {extra > 0 && (
+          <div className="rounded-chip bg-chip-amber px-3 py-2 text-[12px] text-amber-text">
+            {selectedPlayer?.full_name} has {extra} extra session{extra === 1 ? '' : 's'} already taken — these
+            will be deducted from this package.
           </div>
         )}
         <Button className="w-full" disabled={saving || !playerId || !typeId} onClick={assign}>

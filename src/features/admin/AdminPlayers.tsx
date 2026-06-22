@@ -9,7 +9,7 @@ import { Button, Card, ScreenTitle, Chip } from '@/components/ui';
 import { Icon } from '@/components/ui/Icon';
 import { Modal } from '@/components/ui/Modal';
 import PlayerDetail from './PlayerDetail';
-import type { Group, PackageType, Player } from '@/lib/types';
+import type { Group, PackageType, Player, Program } from '@/lib/types';
 
 // Admin Players: search + group filter + Add Player. The Add modal supports
 // day-one onboarding — "already has a running package": enter package size +
@@ -156,6 +156,32 @@ function AddPlayerModal({
     },
   });
 
+  // Programs linked to a group — used to auto-enrol a new player by category.
+  const programs = useQuery({
+    queryKey: ['programs-by-group', profile?.academy_id],
+    enabled: !!profile && open,
+    queryFn: async (): Promise<Program[]> => {
+      const { data, error } = await supabase.from('programs').select('*');
+      if (error) throw error;
+      return (data ?? []) as Program[];
+    },
+  });
+
+  // Insert enrolments into every program tied to the player's group. Best-effort:
+  // a failure here never blocks player creation.
+  async function autoEnrol(playerId: string, groupId: string | null) {
+    if (!profile || !groupId) return;
+    const linked = (programs.data ?? []).filter((p) => p.group_id === groupId);
+    if (!linked.length) return;
+    await supabase.from('program_enrollments').insert(
+      linked.map((p) => ({
+        academy_id: profile.academy_id,
+        program_id: p.id,
+        player_id: playerId,
+      })),
+    );
+  }
+
   const selectedType = packageTypes.data?.find((t) => t.id === packageTypeId);
   const total = selectedType?.sessions ?? null;
   // remaining auto-calculates from total − used (the day-one migration rule)
@@ -192,10 +218,13 @@ function AddPlayerModal({
         });
         if (pErr) throw pErr;
       }
+
+      await autoEnrol(player.id, groupId || null);
     },
     onSuccess: () => {
       toast.show('Player added');
       queryClient.invalidateQueries({ queryKey: ['players'] });
+      queryClient.invalidateQueries({ queryKey: ['programs'] });
       onClose();
       setName('');
       setAge('');
@@ -247,12 +276,15 @@ function AddPlayerModal({
           });
           if (pErr) throw pErr;
         }
+
+        await autoEnrol(player.id, row.groupId || null);
       }
       return valid.length;
     },
     onSuccess: (count) => {
       toast.show(`${count} player${count === 1 ? '' : 's'} imported`);
       queryClient.invalidateQueries({ queryKey: ['players'] });
+      queryClient.invalidateQueries({ queryKey: ['programs'] });
       onClose();
       setBulkRows([emptyRow()]);
     },

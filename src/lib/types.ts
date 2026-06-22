@@ -267,4 +267,6 @@ export interface Program {
   emoji: string | null;
   accent: string;
   description: string | null;
+  /** Optional group/category link — players added to this group auto-enrol. */
+  group_id: string | null;
 }

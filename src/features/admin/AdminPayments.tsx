@@ -8,6 +8,7 @@ import { Modal } from '@/components/ui/Modal';
 import { LoopRing, RingAvatar } from '@/components/brand/LoopRing';
 import { counterState, stateColor, clsx, aed } from '@/lib/utils';
 import { createStaff } from '@/lib/staff';
+import AddMatchModal from '@/features/matches/AddMatchModal';
 import type { UserRole } from '@/lib/types';
 import type { Package, PackageType, Player, MatchFee, Match, GroundFee, TrainingCenter, Batch, Group, Profile } from '@/lib/types';
 
@@ -585,6 +586,7 @@ function MatchFeesTab() {
   const { profile } = useAuth();
   const qc = useQueryClient();
   const toast = useToast();
+  const [addOpen, setAddOpen] = useState(false);
   const { data: fees = [], isLoading } = useQuery({
     queryKey: ['admin-match-fees', profile?.academy_id],
     enabled: !!profile,
@@ -626,6 +628,16 @@ function MatchFeesTab() {
 
   return (
     <div className="space-y-3">
+      <div className="flex justify-end">
+        <Button size="sm" variant="gold" onClick={() => setAddOpen(true)}>
+          + Add match
+        </Button>
+      </div>
+      <AddMatchModal
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        onSaved={() => qc.invalidateQueries({ queryKey: ['admin-match-fees'] })}
+      />
       <div className="grid grid-cols-2 gap-3">
         <Card className="flex flex-col gap-1">
           <div className="eyebrow text-ink/40">Collected</div>

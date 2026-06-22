@@ -142,6 +142,7 @@ function AddPlayerModal({
   const [hasRunningPackage, setHasRunningPackage] = useState(false);
   const [packageTypeId, setPackageTypeId] = useState('');
   const [sessionsUsed, setSessionsUsed] = useState('0');
+  const [extraSessions, setExtraSessions] = useState(''); // ad-hoc sessions on top of any package
 
   const [mode, setMode] = useState<'single' | 'bulk'>('single');
   const [bulkRows, setBulkRows] = useState<BulkRow[]>([emptyRow()]);
@@ -219,12 +220,30 @@ function AddPlayerModal({
         if (pErr) throw pErr;
       }
 
+      // Extra sessions taken on top of any package (e.g. ad-hoc / paid extras) —
+      // recorded as their own package line so the base package stays intact.
+      const extra = Number(extraSessions);
+      if (extra > 0) {
+        const { error: eErr } = await supabase.from('packages').insert({
+          academy_id: profile.academy_id,
+          player_id: player.id,
+          package_type_id: null,
+          sessions_total: extra,
+          sessions_used: 0,
+          source: 'admin_assigned',
+          payment_status: 'paid',
+          assigned_by: profile.id,
+        });
+        if (eErr) throw eErr;
+      }
+
       await autoEnrol(player.id, groupId || null);
     },
     onSuccess: () => {
       toast.show('Player added');
       queryClient.invalidateQueries({ queryKey: ['players'] });
       queryClient.invalidateQueries({ queryKey: ['programs'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-packages'] });
       onClose();
       setName('');
       setAge('');
@@ -232,6 +251,7 @@ function AddPlayerModal({
       setParentPhone('');
       setHasRunningPackage(false);
       setSessionsUsed('0');
+      setExtraSessions('');
     },
     onError: (e) => toast.show(e instanceof Error ? e.message : 'Could not add'),
   });
@@ -485,6 +505,20 @@ function AddPlayerModal({
             )}
           </div>
         )}
+
+        {/* Extra sessions taken on top of any package (ad-hoc / paid extras) */}
+        <Field label="Extra sessions (optional)">
+          <input
+            type="number"
+            value={extraSessions}
+            onChange={(e) => setExtraSessions(e.target.value)}
+            placeholder="e.g. 5"
+            className={inputCls}
+          />
+          <p className="mt-1 text-[11px] text-ink/45">
+            Adds extra sessions on top of any package — recorded as a separate line.
+          </p>
+        </Field>
 
         <Button className="w-full" disabled={create.isPending} onClick={() => create.mutate()}>
           {create.isPending ? 'Saving…' : 'Add Player'}

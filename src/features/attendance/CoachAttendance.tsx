@@ -8,6 +8,7 @@ import { RingAvatar } from '@/components/brand/LoopRing';
 import { Icon } from '@/components/ui/Icon';
 import { Button, Chip, ScreenTitle } from '@/components/ui';
 import { clsx } from '@/lib/utils';
+import BatchPicker, { type BatchSelection } from './BatchPicker';
 import type { AttendanceState, Player } from '@/lib/types';
 
 // The USP — the fastest screen. Two states only: Present / Late. There is NO
@@ -43,6 +44,7 @@ export default function CoachAttendance() {
   const [search, setSearch] = useState('');
   const [marks, setMarks] = useState<Marks>({});
   const [confirming, setConfirming] = useState(false);
+  const [batch, setBatch] = useState<BatchSelection>({ batchId: null, startTime: null, endTime: null });
 
   const activeGroup = groupId ?? groups[0]?.id ?? null;
   const { data: players = [] } = usePlayers(activeGroup ? [activeGroup] : undefined);
@@ -78,7 +80,10 @@ export default function CoachAttendance() {
         .insert({
           academy_id: profile.academy_id,
           group_id: activeGroup,
+          batch_id: batch.batchId,
           session_date: isoDate(dayOffset),
+          start_time: batch.startTime || null,
+          end_time: batch.endTime || null,
           coach_id: profile.id,
           status: 'pending',
         })
@@ -158,6 +163,9 @@ export default function CoachAttendance() {
           <div className="text-[13px] text-ink/45">No groups assigned to you yet.</div>
         )}
       </div>
+
+      {/* Batch / time-slot picker (Elite has 2 slots, others 1) */}
+      <BatchPicker groupId={activeGroup} value={batch} onChange={setBatch} />
 
       {/* Live counts */}
       <div className="flex gap-2">

@@ -136,6 +136,8 @@ export interface AttendanceSession {
   batch_id: string | null;
   group_id: string | null;
   session_date: string;
+  start_time: string | null;
+  end_time: string | null;
   coach_id: string | null;
   credited_coach_id: string | null;
   status: AttendanceStatus;
@@ -267,4 +269,6 @@ export interface Program {
   emoji: string | null;
   accent: string;
   description: string | null;
+  /** Optional group/category link — players added to this group auto-enrol. */
+  group_id: string | null;
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { usePrograms, usePlayers } from '@/lib/queries';
+import { usePrograms, usePlayers, useGroups } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/lib/toast';
@@ -18,12 +18,15 @@ export default function AdminPrograms() {
   const toast = useToast();
   const { data: programs = [] } = usePrograms();
   const { data: players = [] } = usePlayers();
+  const { data: groups = [] } = useGroups();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [emoji, setEmoji] = useState('🏏');
   const [accent, setAccent] = useState(ACCENTS[0]);
   const [description, setDescription] = useState('');
+  const [groupId, setGroupId] = useState('');
   const [saving, setSaving] = useState(false);
+  const groupName = (id: string | null) => groups.find((g) => g.id === id)?.name ?? null;
 
   // Enrolment
   const [enrolFor, setEnrolFor] = useState<Program | null>(null);
@@ -60,12 +63,14 @@ export default function AdminPrograms() {
         emoji,
         accent,
         description: description.trim() || null,
+        group_id: groupId || null,
       });
       if (error) throw error;
       toast.show('Program created');
       setOpen(false);
       setName('');
       setDescription('');
+      setGroupId('');
       qc.invalidateQueries({ queryKey: ['programs'] });
     } catch {
       toast.show('Could not create program');
@@ -95,7 +100,14 @@ export default function AdminPrograms() {
               </span>
               <div>
                 <div className="text-[15px] font-semibold">{p.name}</div>
-                <Chip tone="neutral">{p.enrolled} enrolled</Chip>
+                <div className="mt-0.5 flex flex-wrap gap-1.5">
+                  <Chip tone="neutral">{p.enrolled} enrolled</Chip>
+                  {groupName(p.group_id) ? (
+                    <Chip tone="green">Auto · {groupName(p.group_id)}</Chip>
+                  ) : (
+                    <Chip tone="amber">Manual</Chip>
+                  )}
+                </div>
               </div>
             </div>
             {p.description && <p className="mt-3 text-[12px] text-ink/55">{p.description}</p>}
@@ -170,6 +182,21 @@ export default function AdminPrograms() {
               </div>
             </Field>
           </div>
+          <Field label="Auto-enrol group (optional)">
+            <select
+              value={groupId}
+              onChange={(e) => setGroupId(e.target.value)}
+              className="w-full rounded-pill border border-cardborder bg-white px-4 py-2.5 text-[14px]"
+            >
+              <option value="">No auto-enrol (special program)</option>
+              {groups.map((g) => (
+                <option key={g.id} value={g.id}>{g.name}</option>
+              ))}
+            </select>
+            <p className="mt-1 text-[11px] text-ink/45">
+              New players added to this group are enrolled automatically. Leave blank to enrol by hand.
+            </p>
+          </Field>
           <Field label="Description">
             <textarea
               value={description}

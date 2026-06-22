@@ -5,8 +5,10 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/lib/toast';
 import { Button, Card, Chip, ScreenTitle } from '@/components/ui';
+import { Icon } from '@/components/ui/Icon';
 import { clsx } from '@/lib/utils';
-import type { AttendanceRecord, AttendanceSession, Player } from '@/lib/types';
+import BatchPicker, { type BatchSelection } from '@/features/attendance/BatchPicker';
+import type { AttendanceRecord, AttendanceSession, AttendanceState, Player } from '@/lib/types';
 
 // Admin Attendance — three tabs:
 //  • Pending      review & confirm a coach's submission
@@ -195,32 +197,80 @@ function PendingCard({ session }: { session: AttendanceSession }) {
   );
 }
 
+// History — confirmed sessions, each expandable to show WHO attended (names),
+// the group, and present/late counts so admins can audit a date at a glance.
+type HistorySession = AttendanceSession & {
+  group: { name: string } | null;
+  attendance_records: { state: AttendanceState; player: { full_name: string } | null }[];
+};
+
 function HistoryTab() {
   const { profile } = useAuth();
+  const [openId, setOpenId] = useState<string | null>(null);
   const { data: sessions = [], isLoading } = useQuery({
     queryKey: ['attendance-history', profile?.academy_id],
     enabled: !!profile,
-    queryFn: async (): Promise<AttendanceSession[]> => {
+    queryFn: async (): Promise<HistorySession[]> => {
       const { data, error } = await supabase
         .from('attendance_sessions')
-        .select('*')
+        .select('*, group:groups(name), attendance_records(state, player:players(full_name))')
         .eq('status', 'confirmed')
         .order('session_date', { ascending: false })
         .limit(50);
       if (error) throw error;
-      return (data ?? []) as AttendanceSession[];
+      return (data ?? []) as HistorySession[];
     },
   });
+
+  function dateLabel(d: string) {
+    return new Date(d).toLocaleDateString('en-AE', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
 
   return (
     <Card className="divide-y divide-hairline p-0">
       {isLoading && <div className="px-4 py-4 text-[13px] text-ink/45">Loading…</div>}
-      {sessions.map((s) => (
-        <div key={s.id} className="flex items-center justify-between px-4 py-3 text-[13px]">
-          <span>{s.session_date}</span>
-          <Chip tone="green">Confirmed</Chip>
-        </div>
-      ))}
+      {sessions.map((s) => {
+        const recs = s.attendance_records ?? [];
+        const present = recs.filter((r) => r.state === 'present').length;
+        const late = recs.filter((r) => r.state === 'late').length;
+        const isOpen = openId === s.id;
+        return (
+          <div key={s.id} className="px-4 py-3 text-[13px]">
+            <button
+              onClick={() => setOpenId(isOpen ? null : s.id)}
+              className="flex w-full items-center justify-between text-left"
+            >
+              <div>
+                <div className="font-semibold">{dateLabel(s.session_date)}</div>
+                <div className="text-[11px] text-ink/45">
+                  {s.group?.name ?? 'Group'} · {recs.length} attended
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Chip tone="green">{present} P</Chip>
+                {late > 0 && <Chip tone="amber">{late} L</Chip>}
+                <Icon name={isOpen ? 'chevron-up' : 'chevron-down'} size={14} stroke="#9A938A" />
+              </div>
+            </button>
+            {isOpen && (
+              <div className="mt-2 space-y-1 border-t border-hairline pt-2">
+                {recs.length ? (
+                  recs.map((r, i) => (
+                    <div key={i} className="flex items-center justify-between">
+                      <span>{r.player?.full_name ?? 'Player'}</span>
+                      <Chip tone={r.state === 'present' ? 'green' : 'amber'}>
+                        {r.state === 'present' ? 'Present' : 'Late'}
+                      </Chip>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-ink/45">No players recorded.</div>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
       {!isLoading && !sessions.length && (
         <div className="px-4 py-6 text-center text-[13px] text-ink/45">No confirmed sessions yet.</div>
       )}
@@ -243,8 +293,15 @@ function TakeAttendanceTab() {
   const [coachId, setCoachId] = useState('');
   const [marks, setMarks] = useState<Record<string, 'present' | 'late'>>({});
   const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState('');
+  const [batch, setBatch] = useState<BatchSelection>({ batchId: null, startTime: null, endTime: null });
 
   const { data: players = [] } = usePlayers(groupId ? [groupId] : undefined);
+  // Search within the group — academies can have hundreds of students, so
+  // scrolling a long list is impractical when marking attendance.
+  const visiblePlayers = players.filter((p) =>
+    p.full_name.toLowerCase().includes(search.toLowerCase()),
+  );
 
   function setMark(id: string, state: 'present' | 'late') {
     setMarks((m) => {
@@ -266,7 +323,10 @@ function TakeAttendanceTab() {
         .insert({
           academy_id: profile.academy_id,
           group_id: groupId,
+          batch_id: batch.batchId,
           session_date: date,
+          start_time: batch.startTime || null,
+          end_time: batch.endTime || null,
           coach_id: coachId || profile.id,
           credited_coach_id: coachId || null,
           status: 'confirmed', // admin take-attendance auto-confirms
@@ -321,6 +381,17 @@ function TakeAttendanceTab() {
 
       {groupId && (
         <>
+          {/* Batch / time-slot picker */}
+          <BatchPicker groupId={groupId} value={batch} onChange={setBatch} />
+          <div className="flex items-center gap-2 rounded-pill border border-cardborder bg-white px-3">
+            <Icon name="search" size={16} stroke="#9A938A" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search players in this group…"
+              className="h-10 w-full bg-transparent text-[14px] outline-none"
+            />
+          </div>
           <div className="flex items-center justify-between">
             <Chip tone="green">{markedCount} marked</Chip>
             <button
@@ -331,7 +402,7 @@ function TakeAttendanceTab() {
             </button>
           </div>
           <Card className="divide-y divide-hairline p-0">
-            {players.map((p) => (
+            {visiblePlayers.map((p) => (
               <div key={p.id} className="flex items-center justify-between px-4 py-2.5">
                 <span className="text-[14px] font-medium">{p.full_name}</span>
                 <div className="flex gap-1.5">
@@ -344,8 +415,10 @@ function TakeAttendanceTab() {
                 </div>
               </div>
             ))}
-            {!players.length && (
-              <div className="px-4 py-6 text-center text-[13px] text-ink/45">No players in this group.</div>
+            {!visiblePlayers.length && (
+              <div className="px-4 py-6 text-center text-[13px] text-ink/45">
+                {players.length ? 'No players match your search.' : 'No players in this group.'}
+              </div>
             )}
           </Card>
           <Button className="w-full" disabled={saving || !markedCount} onClick={submit}>

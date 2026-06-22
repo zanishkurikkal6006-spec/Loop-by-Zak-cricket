@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/lib/toast';
 import { generateReport } from '@/lib/ai';
+import { downloadReportPdf } from '@/lib/reportPdf';
 import { sendWhatsApp, templates } from '@/lib/whatsapp';
 import { firstName, clsx } from '@/lib/utils';
 import { LoopRing } from '@/components/brand/LoopRing';
@@ -36,6 +37,15 @@ export default function CoachReports() {
   const [notes, setNotes] = useState('');
   const [draft, setDraft] = useState('');
   const [regens, setRegens] = useState(0); // rewrites used after the first generation
+  const [groupFilter, setGroupFilter] = useState<string>('all'); // pick-step batch filter
+  const [playerSearch, setPlayerSearch] = useState('');
+
+  // Narrow the picker by group/batch + name so a coach with many players isn't
+  // scrolling a huge flat list to find one child.
+  const visiblePlayers = players.filter((p) => {
+    if (groupFilter !== 'all' && p.group_id !== groupFilter) return false;
+    return p.full_name.toLowerCase().includes(playerSearch.toLowerCase());
+  });
 
   const groupName = (p: Player | null) =>
     groups.find((g) => g.id === p?.group_id)?.name ?? undefined;
@@ -106,6 +116,7 @@ export default function CoachReports() {
     setNotes('');
     setDraft('');
     setRegens(0);
+    setPlayerSearch('');
   }
 
   const isDev = mode === 'development';
@@ -141,8 +152,43 @@ export default function CoachReports() {
               ? 'Pick a player who finished a block to create a full development report.'
               : "Pick a player, jot 2–3 words, and we'll expand it into a warm message addressed to them by name."}
           </div>
+          {/* Group/batch filter chips */}
+          {groups.length > 1 && (
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setGroupFilter('all')}
+                className={clsx(
+                  'rounded-pill px-3 py-1.5 text-[12px] font-semibold transition',
+                  groupFilter === 'all' ? 'bg-brand-red text-paper' : 'border border-cardborder bg-white text-ink/60',
+                )}
+              >
+                All
+              </button>
+              {groups.map((g) => (
+                <button
+                  key={g.id}
+                  onClick={() => setGroupFilter(g.id)}
+                  className={clsx(
+                    'rounded-pill px-3 py-1.5 text-[12px] font-semibold transition',
+                    groupFilter === g.id ? 'bg-brand-red text-paper' : 'border border-cardborder bg-white text-ink/60',
+                  )}
+                >
+                  {g.name}
+                </button>
+              ))}
+            </div>
+          )}
+          <div className="flex items-center gap-2 rounded-pill border border-cardborder bg-white px-3">
+            <Icon name="search" size={16} stroke="#9A938A" />
+            <input
+              value={playerSearch}
+              onChange={(e) => setPlayerSearch(e.target.value)}
+              placeholder="Search players…"
+              className="h-10 w-full bg-transparent text-[14px] outline-none"
+            />
+          </div>
           <div className="flex flex-wrap gap-2">
-            {players.map((p) => (
+            {visiblePlayers.map((p) => (
               <button
                 key={p.id}
                 onClick={() => {
@@ -154,8 +200,10 @@ export default function CoachReports() {
                 {p.full_name}
               </button>
             ))}
-            {!players.length && (
-              <div className="text-[13px] text-ink/45">No players in your groups yet.</div>
+            {!visiblePlayers.length && (
+              <div className="text-[13px] text-ink/45">
+                {players.length ? 'No players match.' : 'No players in your groups yet.'}
+              </div>
             )}
           </div>
         </>
@@ -218,7 +266,25 @@ export default function CoachReports() {
               isDev ? 'h-72 font-mono text-[13px]' : 'h-40',
             )}
           />
-          <div className="text-[11px] text-ink/45">Edit freely above — your changes are kept.</div>
+          <div className="flex items-center justify-between">
+            <div className="text-[11px] text-ink/45">Edit freely above — your changes are kept.</div>
+            <button
+              onClick={() =>
+                downloadReportPdf({
+                  kind: mode,
+                  childName: player.full_name,
+                  groupName: groupName(player),
+                  coachName: profile?.full_name,
+                  academyName: 'Loop by Zak Cricket',
+                  date: new Date().toISOString().slice(0, 10),
+                  body: draft,
+                })
+              }
+              className="inline-flex items-center gap-1.5 rounded-pill border border-cardborder bg-white px-3 py-1.5 text-[12px] font-semibold text-brand-red hover:border-gold"
+            >
+              <Icon name="download" size={14} stroke="#9C1116" /> Download PDF
+            </button>
+          </div>
           {/* WhatsApp preview bubble */}
           <div className="rounded-card bg-[#075E54] p-4">
             <div className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold text-white/70">

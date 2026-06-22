@@ -6,8 +6,10 @@ import { useToast } from '@/lib/toast';
 import { ScreenTitle, Card, Chip, Button } from '@/components/ui';
 import { Modal } from '@/components/ui/Modal';
 import { LoopRing, RingAvatar } from '@/components/brand/LoopRing';
-import { counterState, stateColor, clsx, aed } from '@/lib/utils';
+import { counterState, stateColor, clsx, aed, firstName } from '@/lib/utils';
+import { sendWhatsApp, templates } from '@/lib/whatsapp';
 import { createStaff } from '@/lib/staff';
+import AddMatchModal from '@/features/matches/AddMatchModal';
 import type { UserRole } from '@/lib/types';
 import type { Package, PackageType, Player, MatchFee, Match, GroundFee, TrainingCenter, Batch, Group, Profile } from '@/lib/types';
 
@@ -18,10 +20,16 @@ import type { Package, PackageType, Player, MatchFee, Match, GroundFee, Training
 type Tab = 'packages' | 'renewals' | 'types' | 'matchfees' | 'groundfees' | 'settings';
 
 type PackageRow = Package & { player: Player | null; package_type: PackageType | null };
+type BatchRow = Batch & {
+  center: TrainingCenter | null;
+  batch_groups: { group: { name: string } | null }[];
+};
 
 export default function AdminPayments() {
   const { profile } = useAuth();
+  const toast = useToast();
   const [tab, setTab] = useState<Tab>('packages');
+  const [assignOpen, setAssignOpen] = useState(false);
 
   const { data: packages = [], isLoading } = useQuery({
     queryKey: ['admin-packages', profile?.academy_id],
@@ -68,36 +76,84 @@ export default function AdminPayments() {
       {isLoading && <div className="text-[13px] text-ink/45">Loading…</div>}
 
       {tab === 'packages' && (
-        <div className="grid gap-3 md:grid-cols-2">
-          {packages.map((p) => (
-            <PackageCard key={p.id} pkg={p} />
-          ))}
-          {!packages.length && !isLoading && (
-            <Card className="text-[13px] text-ink/45">No packages assigned yet.</Card>
-          )}
+        <div className="space-y-3">
+          <div className="flex justify-end">
+            <Button size="sm" onClick={() => setAssignOpen(true)}>+ Assign package</Button>
+          </div>
+          <AssignPackageModal open={assignOpen} onClose={() => setAssignOpen(false)} />
+          <div className="grid gap-3 md:grid-cols-2">
+            {packages.map((p) => (
+              <PackageCard key={p.id} pkg={p} />
+            ))}
+            {!packages.length && !isLoading && (
+              <Card className="text-[13px] text-ink/45">No packages assigned yet.</Card>
+            )}
+          </div>
         </div>
       )}
 
       {tab === 'renewals' && (
-        <Card className="divide-y divide-hairline p-0">
-          {renewals.map((p) => (
-            <div key={p.id} className="flex items-center gap-3 px-4 py-3">
-              <RingAvatar name={p.player?.full_name ?? '?'} size={36} color="#C9A84C" />
-              <div className="flex-1">
-                <div className="text-[14px] font-medium">{p.player?.full_name}</div>
-                <div className="text-[11px] text-ink/45">
-                  {p.sessions_remaining} session{p.sessions_remaining === 1 ? '' : 's'} left
-                </div>
-              </div>
-              <Chip tone="amber">Chase renewal</Chip>
-            </div>
-          ))}
-          {!renewals.length && (
-            <div className="px-4 py-6 text-center text-[13px] text-ink/45">
-              No renewals due — everyone's topped up.
+        <div className="space-y-3">
+          {renewals.length > 0 && (
+            <div className="flex justify-end">
+              <Button
+                size="sm"
+                variant="whatsapp"
+                onClick={async () => {
+                  if (!profile) return;
+                  let sent = 0;
+                  for (const p of renewals) {
+                    if (!p.player?.parent_phone) continue;
+                    await sendWhatsApp(
+                      p.player.parent_phone,
+                      templates.renewalNudge(firstName(p.player.full_name), p.sessions_remaining ?? 0),
+                      { academyId: profile.academy_id, playerId: p.player.id, templateKey: 'renewalNudge', refType: 'package', refId: p.id },
+                    );
+                    sent += 1;
+                  }
+                  toast.show(sent ? `Opening ${sent} reminder${sent === 1 ? '' : 's'}…` : 'No parent numbers on file');
+                }}
+              >
+                Remind all
+              </Button>
             </div>
           )}
-        </Card>
+          <Card className="divide-y divide-hairline p-0">
+            {renewals.map((p) => (
+              <div key={p.id} className="flex items-center gap-3 px-4 py-3">
+                <RingAvatar name={p.player?.full_name ?? '?'} size={36} color="#C9A84C" />
+                <div className="flex-1">
+                  <div className="text-[14px] font-medium">{p.player?.full_name}</div>
+                  <div className="text-[11px] text-ink/45">
+                    {p.sessions_remaining} session{p.sessions_remaining === 1 ? '' : 's'} left
+                  </div>
+                </div>
+                {p.player?.parent_phone ? (
+                  <button
+                    onClick={async () => {
+                      if (!profile || !p.player?.parent_phone) return;
+                      await sendWhatsApp(
+                        p.player.parent_phone,
+                        templates.renewalNudge(firstName(p.player.full_name), p.sessions_remaining ?? 0),
+                        { academyId: profile.academy_id, playerId: p.player.id, templateKey: 'renewalNudge', refType: 'package', refId: p.id },
+                      );
+                    }}
+                    className="rounded-chip bg-[#25D366]/15 px-2.5 py-1 text-[11px] font-semibold text-[#1c8c47]"
+                  >
+                    Send reminder
+                  </button>
+                ) : (
+                  <Chip tone="amber">No WhatsApp</Chip>
+                )}
+              </div>
+            ))}
+            {!renewals.length && (
+              <div className="px-4 py-6 text-center text-[13px] text-ink/45">
+                No renewals due — everyone's topped up.
+              </div>
+            )}
+          </Card>
+        </div>
       )}
 
       {tab === 'types' && <PackageTypesTab />}
@@ -228,12 +284,12 @@ function SettingsTab() {
   const { data: batches = [] } = useQuery({
     queryKey: ['settings-batches', profile?.academy_id],
     enabled: !!profile,
-    queryFn: async (): Promise<(Batch & { center: TrainingCenter | null })[]> => {
+    queryFn: async (): Promise<BatchRow[]> => {
       const { data } = await supabase
         .from('batches')
-        .select('*, center:training_centers(*)')
+        .select('*, center:training_centers(*), batch_groups(group:groups(name))')
         .order('start_time');
-      return (data ?? []) as (Batch & { center: TrainingCenter | null })[];
+      return (data ?? []) as BatchRow[];
     },
   });
 
@@ -303,20 +359,31 @@ function SettingsTab() {
   const [batchStart, setBatchStart] = useState('');
   const [batchEnd, setBatchEnd] = useState('');
   const [batchCenter, setBatchCenter] = useState('');
+  const [batchGroup, setBatchGroup] = useState('');
   async function addBatch() {
     if (!profile || !batchName.trim()) return;
-    const { error } = await supabase.from('batches').insert({
-      academy_id: profile.academy_id,
-      name: batchName.trim(),
-      center_id: batchCenter || null,
-      start_time: batchStart || null,
-      end_time: batchEnd || null,
-    });
+    const { data: created, error } = await supabase
+      .from('batches')
+      .insert({
+        academy_id: profile.academy_id,
+        name: batchName.trim(),
+        center_id: batchCenter || null,
+        start_time: batchStart || null,
+        end_time: batchEnd || null,
+      })
+      .select()
+      .single();
     if (error) return toast.show('Could not add batch');
+    // Link the batch to a group so it shows up as a time slot when marking
+    // attendance for that group (Elite, Level Up, Launch Pad…).
+    if (batchGroup) {
+      await supabase.from('batch_groups').insert({ batch_id: created.id, group_id: batchGroup });
+    }
     toast.show('Batch added');
     setBatchName('');
     setBatchStart('');
     setBatchEnd('');
+    setBatchGroup('');
     qc.invalidateQueries({ queryKey: ['settings-batches'] });
   }
 
@@ -386,6 +453,7 @@ function SettingsTab() {
   const [staffRole, setStaffRole] = useState<UserRole>('coach');
   const [addingStaff, setAddingStaff] = useState(false);
   async function addStaff() {
+    if (!profile) return;
     if (!staffName.trim() || !staffEmail.trim() || staffPass.length < 6) {
       return toast.show('Name, email, and a 6+ char password required');
     }
@@ -396,6 +464,7 @@ function SettingsTab() {
         email: staffEmail.trim(),
         password: staffPass,
         role: staffRole,
+        academyId: profile.academy_id,
       });
       toast.show('Staff member created');
       setStaffName('');
@@ -406,7 +475,7 @@ function SettingsTab() {
       qc.invalidateQueries({ queryKey: ['settings-coaches'] });
       qc.invalidateQueries({ queryKey: ['coaches'] });
     } catch (e) {
-      toast.show(e instanceof Error ? e.message : 'Could not create — is the create-staff function deployed?');
+      toast.show(e instanceof Error ? e.message : 'Could not create staff member');
     } finally {
       setAddingStaff(false);
     }
@@ -474,29 +543,45 @@ function SettingsTab() {
       <Card>
         <div className="eyebrow mb-3 text-ink/40">Batches &amp; Time Slots</div>
         <div className="divide-y divide-hairline">
-          {batches.map((b) => (
-            <div key={b.id} className="flex items-center justify-between py-2 text-[13px]">
-              <span className="font-medium">{b.name}</span>
-              <span className="flex items-center gap-2 text-ink/45">
-                {b.start_time?.slice(0, 5) ?? '—'}–{b.end_time?.slice(0, 5) ?? '—'}
-                {b.center ? ` · ${b.center.name}` : ''}
-                <DeleteX onClick={() => del('batches', b.id, 'settings-batches')} />
-              </span>
-            </div>
-          ))}
+          {batches.map((b) => {
+            const grp = b.batch_groups?.map((bg) => bg.group?.name).filter(Boolean).join(', ');
+            return (
+              <div key={b.id} className="flex items-center justify-between py-2 text-[13px]">
+                <span className="font-medium">
+                  {b.name}
+                  {grp ? <span className="ml-2 text-[11px] font-normal text-ink/45">· {grp}</span> : null}
+                </span>
+                <span className="flex items-center gap-2 text-ink/45">
+                  {b.start_time?.slice(0, 5) ?? '—'}–{b.end_time?.slice(0, 5) ?? '—'}
+                  {b.center ? ` · ${b.center.name}` : ''}
+                  <DeleteX onClick={() => del('batches', b.id, 'settings-batches')} />
+                </span>
+              </div>
+            );
+          })}
           {!batches.length && <div className="py-2 text-[13px] text-ink/45">No batches yet.</div>}
         </div>
         <div className="mt-3 grid grid-cols-2 gap-2">
           <input value={batchName} onChange={(e) => setBatchName(e.target.value)} placeholder="Batch name (e.g. Elite Evening)" className={field} />
+          <select value={batchGroup} onChange={(e) => setBatchGroup(e.target.value)} className={field}>
+            <option value="">Group (for attendance)…</option>
+            {groups.map((g) => (
+              <option key={g.id} value={g.id}>{g.name}</option>
+            ))}
+          </select>
           <select value={batchCenter} onChange={(e) => setBatchCenter(e.target.value)} className={field}>
             <option value="">Center…</option>
             {centers.map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
+          <div />
           <input type="time" value={batchStart} onChange={(e) => setBatchStart(e.target.value)} className={field} />
           <input type="time" value={batchEnd} onChange={(e) => setBatchEnd(e.target.value)} className={field} />
         </div>
+        <p className="mt-1.5 text-[11px] text-ink/45">
+          Tip: give Elite two batches (e.g. morning + evening), Level Up and Launch Pad one each.
+        </p>
         <Button size="sm" className="mt-2" onClick={addBatch}>+ Add batch</Button>
       </Card>
 
@@ -583,6 +668,7 @@ function MatchFeesTab() {
   const { profile } = useAuth();
   const qc = useQueryClient();
   const toast = useToast();
+  const [addOpen, setAddOpen] = useState(false);
   const { data: fees = [], isLoading } = useQuery({
     queryKey: ['admin-match-fees', profile?.academy_id],
     enabled: !!profile,
@@ -624,6 +710,16 @@ function MatchFeesTab() {
 
   return (
     <div className="space-y-3">
+      <div className="flex justify-end">
+        <Button size="sm" variant="gold" onClick={() => setAddOpen(true)}>
+          + Add match
+        </Button>
+      </div>
+      <AddMatchModal
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        onSaved={() => qc.invalidateQueries({ queryKey: ['admin-match-fees'] })}
+      />
       <div className="grid grid-cols-2 gap-3">
         <Card className="flex flex-col gap-1">
           <div className="eyebrow text-ink/40">Collected</div>
@@ -778,6 +874,97 @@ function GroundFeesTab() {
         </div>
       </Modal>
     </div>
+  );
+}
+
+// Assign a package straight from the Packages & Sessions tab — pick a player and
+// a package type and it's created (paid, admin-assigned). Mirrors the per-player
+// flow in PlayerDetail but lets admins work from the payments screen.
+function AssignPackageModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { profile } = useAuth();
+  const qc = useQueryClient();
+  const toast = useToast();
+  const [playerId, setPlayerId] = useState('');
+  const [typeId, setTypeId] = useState('');
+  const [paid, setPaid] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const { data: players = [] } = useQuery({
+    queryKey: ['assign-players', profile?.academy_id],
+    enabled: !!profile && open,
+    queryFn: async (): Promise<Player[]> => {
+      const { data, error } = await supabase.from('players').select('*').eq('status', 'active').order('full_name');
+      if (error) throw error;
+      return (data ?? []) as Player[];
+    },
+  });
+  const { data: types = [] } = useQuery({
+    queryKey: ['package-types', profile?.academy_id],
+    enabled: !!profile && open,
+    queryFn: async (): Promise<PackageType[]> => {
+      const { data, error } = await supabase.from('package_types').select('*').order('price');
+      if (error) throw error;
+      return (data ?? []) as PackageType[];
+    },
+  });
+
+  async function assign() {
+    if (!profile || !playerId || !typeId) return toast.show('Pick a player and a package');
+    const type = types.find((t) => t.id === typeId);
+    if (!type) return;
+    setSaving(true);
+    try {
+      const { error } = await supabase.from('packages').insert({
+        academy_id: profile.academy_id,
+        player_id: playerId,
+        package_type_id: type.id,
+        sessions_total: type.sessions,
+        sessions_used: 0,
+        source: 'admin_assigned',
+        payment_status: paid ? 'paid' : 'pending',
+        assigned_by: profile.id,
+      });
+      if (error) throw error;
+      toast.show('Package assigned');
+      setPlayerId('');
+      setTypeId('');
+      qc.invalidateQueries({ queryKey: ['admin-packages'] });
+      onClose();
+    } catch {
+      toast.show('Could not assign package');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const field = 'h-11 w-full rounded-pill border border-cardborder bg-white px-3 text-[14px] outline-none focus:border-gold';
+
+  return (
+    <Modal open={open} onClose={onClose} title="Assign Package">
+      <div className="space-y-3">
+        <select value={playerId} onChange={(e) => setPlayerId(e.target.value)} className={field}>
+          <option value="">Select player…</option>
+          {players.map((p) => (
+            <option key={p.id} value={p.id}>{p.full_name}</option>
+          ))}
+        </select>
+        <select value={typeId} onChange={(e) => setTypeId(e.target.value)} className={field}>
+          <option value="">Select package…</option>
+          {types.map((t) => (
+            <option key={t.id} value={t.id}>
+              {t.name} {Number(t.price) ? `· AED ${t.price}` : ''}
+            </option>
+          ))}
+        </select>
+        <label className="flex items-center gap-2 rounded-pill border border-cardborder bg-white px-3 py-2.5 text-[13px]">
+          <input type="checkbox" checked={paid} onChange={(e) => setPaid(e.target.checked)} />
+          Marked as paid
+        </label>
+        <Button className="w-full" disabled={saving || !playerId || !typeId} onClick={assign}>
+          {saving ? 'Assigning…' : 'Assign package'}
+        </Button>
+      </div>
+    </Modal>
   );
 }
 

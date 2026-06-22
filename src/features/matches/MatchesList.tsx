@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase';
 import { ScreenTitle, Card, Chip, Button } from '@/components/ui';
 import { Modal } from '@/components/ui/Modal';
 import { LoopRing, RingAvatar } from '@/components/brand/LoopRing';
+import AddMatchModal from './AddMatchModal';
 
 // Match log + per-match scorecard (the coach's accountability/evidence record).
 // `mine` scopes to the signed-in coach's matches; Head Coach passes mine=false
@@ -210,6 +211,7 @@ function CoachMatchPayments() {
   const { profile } = useAuth();
   const toast = useToast();
   const qc = useQueryClient();
+  const [addOpen, setAddOpen] = useState(false);
   const { data: fees = [], isLoading } = useQuery({
     queryKey: ['coach-match-fees', profile?.id],
     enabled: !!profile,
@@ -238,6 +240,18 @@ function CoachMatchPayments() {
   }
 
   return (
+    <div className="space-y-3">
+      <div className="flex justify-end">
+        <Button size="sm" variant="gold" onClick={() => setAddOpen(true)}>
+          + Add match
+        </Button>
+      </div>
+      <AddMatchModal
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        coachScoped
+        onSaved={() => qc.invalidateQueries({ queryKey: ['coach-match-fees'] })}
+      />
     <Card className="divide-y divide-hairline p-0">
       {isLoading && <div className="px-4 py-4 text-[13px] text-ink/45">Loading…</div>}
       {fees.map((f) => (
@@ -262,6 +276,7 @@ function CoachMatchPayments() {
         <div className="px-4 py-6 text-center text-[13px] text-ink/45">No match fees for your matches yet.</div>
       )}
     </Card>
+    </div>
   );
 }
 

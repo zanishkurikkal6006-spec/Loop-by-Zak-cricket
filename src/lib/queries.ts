@@ -6,6 +6,7 @@ import type {
   Player,
   OneToOneBlock,
   AttendanceSession,
+  Batch,
   Report,
   Profile,
   Match,
@@ -237,6 +238,26 @@ export function useRankings(stat: RankingStat, groupId?: string) {
         sr: (r) => r.sr,
       };
       return out.sort((a, b) => key[stat](b) - key[stat](a));
+    },
+  });
+}
+
+/** Batches (time slots) that run a given group, ordered by start time. */
+export function useBatchesForGroup(groupId: string | null) {
+  const { profile } = useAuth();
+  return useQuery({
+    queryKey: ['batches-for-group', profile?.academy_id, groupId],
+    enabled: !!profile && !!groupId,
+    queryFn: async (): Promise<Batch[]> => {
+      const { data, error } = await supabase
+        .from('batch_groups')
+        .select('batch:batches(*)')
+        .eq('group_id', groupId!);
+      if (error) throw error;
+      return (data ?? [])
+        .map((r) => (r as unknown as { batch: Batch }).batch)
+        .filter(Boolean)
+        .sort((a, b) => (a.start_time ?? '').localeCompare(b.start_time ?? ''));
     },
   });
 }

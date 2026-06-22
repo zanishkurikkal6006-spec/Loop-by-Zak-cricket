@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,6 +8,7 @@ import { Modal } from '@/components/ui/Modal';
 import { LoopRing, RingAvatar } from '@/components/brand/LoopRing';
 import { counterState, stateColor, clsx, aed, firstName } from '@/lib/utils';
 import { sendWhatsApp, templates } from '@/lib/whatsapp';
+import { assignPackage } from '@/lib/packages';
 import AddMatchModal from '@/features/matches/AddMatchModal';
 import type { Package, PackageType, Player, MatchFee, Match, GroundFee, TrainingCenter } from '@/lib/types';
 
@@ -24,6 +25,7 @@ export default function AdminPayments() {
   const toast = useToast();
   const [tab, setTab] = useState<Tab>('packages');
   const [assignOpen, setAssignOpen] = useState(false);
+  const [presetPlayer, setPresetPlayer] = useState<string>('');
 
   const { data: packages = [], isLoading } = useQuery({
     queryKey: ['admin-packages', profile?.academy_id],
@@ -38,9 +40,32 @@ export default function AdminPayments() {
     },
   });
 
+  // Active players, used to surface anyone WITHOUT a package for quick-assign.
+  const { data: allPlayers = [] } = useQuery({
+    queryKey: ['unassigned-players', profile?.academy_id],
+    enabled: !!profile,
+    queryFn: async (): Promise<Player[]> => {
+      const { data, error } = await supabase
+        .from('players')
+        .select('*')
+        .eq('status', 'active')
+        .order('full_name');
+      if (error) throw error;
+      return (data ?? []) as Player[];
+    },
+  });
+
   const renewals = packages.filter(
     (p) => p.sessions_remaining != null && p.sessions_remaining <= 2 && p.sessions_remaining >= 0,
   );
+
+  const assignedIds = new Set(packages.map((p) => p.player_id));
+  const unassigned = allPlayers.filter((p) => !assignedIds.has(p.id));
+
+  function openAssign(playerId = '') {
+    setPresetPlayer(playerId);
+    setAssignOpen(true);
+  }
 
   return (
     <div className="space-y-5">
@@ -68,10 +93,36 @@ export default function AdminPayments() {
 
       {tab === 'packages' && (
         <div className="space-y-3">
-          <div className="flex justify-end">
-            <Button size="sm" onClick={() => setAssignOpen(true)}>+ Assign package</Button>
+          <div className="flex items-center justify-between">
+            <Chip tone={unassigned.length ? 'amber' : 'green'}>
+              {unassigned.length ? `${unassigned.length} without a package` : 'Everyone has a package'}
+            </Chip>
+            <Button size="sm" onClick={() => openAssign()}>+ Assign package</Button>
           </div>
-          <AssignPackageModal open={assignOpen} onClose={() => setAssignOpen(false)} />
+          <AssignPackageModal open={assignOpen} onClose={() => setAssignOpen(false)} presetPlayerId={presetPlayer} />
+
+          {/* Players without a package — quick assign without hunting per-player */}
+          {unassigned.length > 0 && (
+            <Card className="p-0">
+              <div className="border-b border-hairline px-4 py-2 text-[11px] font-semibold uppercase tracking-eyebrow text-ink/40">
+                Players without a package ({unassigned.length})
+              </div>
+              <div className="max-h-64 divide-y divide-hairline overflow-auto">
+                {unassigned.map((p) => (
+                  <div key={p.id} className="flex items-center justify-between px-4 py-2.5 text-[13px]">
+                    <span className="font-medium">{p.full_name}</span>
+                    <button
+                      onClick={() => openAssign(p.id)}
+                      className="rounded-chip bg-brand-red px-3 py-1 text-[11px] font-semibold text-paper"
+                    >
+                      Assign
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+
           <div className="grid gap-3 md:grid-cols-2">
             {packages.map((p) => (
               <PackageCard key={p.id} pkg={p} />
@@ -416,12 +467,32 @@ function GroundFeesTab() {
     }
   }
 
-  const total = fees.reduce((s, f) => s + Number(f.amount), 0);
+  // Mark a ground booking as paid (we paid the ground owner) — bank or cash.
+  async function markPaid(id: string, m: 'cash' | 'bank') {
+    if (!profile) return;
+    const { error } = await supabase.from('ground_fees').update({ status: 'confirmed', mode: m }).eq('id', id);
+    if (error) return toast.show('Could not update');
+    toast.show(m === 'bank' ? 'Bank payment confirmed' : 'Cash paid');
+    qc.invalidateQueries({ queryKey: ['ground-fees'] });
+    qc.invalidateQueries({ queryKey: ['admin-stats'] });
+  }
+
+  const paid = fees.filter((f) => f.status === 'confirmed').reduce((s, f) => s + Number(f.amount), 0);
+  const outstanding = fees.filter((f) => f.status !== 'confirmed').reduce((s, f) => s + Number(f.amount), 0);
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <Chip tone="neutral">Total bookings: {aed(total)}</Chip>
+      <div className="grid grid-cols-2 gap-3">
+        <Card className="flex flex-col gap-1">
+          <div className="eyebrow text-ink/40">Paid</div>
+          <div className="font-display text-3xl text-success">{aed(paid)}</div>
+        </Card>
+        <Card className="flex flex-col gap-1">
+          <div className="eyebrow text-ink/40">To pay</div>
+          <div className="font-display text-3xl text-amber-text">{aed(outstanding)}</div>
+        </Card>
+      </div>
+      <div className="flex justify-end">
         <Button size="sm" onClick={() => setAdding(true)}>
           + Add booking
         </Button>
@@ -436,7 +507,18 @@ function GroundFeesTab() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Chip tone={f.status === 'confirmed' ? 'green' : 'amber'}>{f.status}</Chip>
+              {f.status === 'confirmed' ? (
+                <Chip tone="green">{f.mode === 'cash' ? 'Cash' : 'Bank'} ✓</Chip>
+              ) : (
+                <>
+                  <button onClick={() => markPaid(f.id, 'bank')} className="rounded-chip border border-cardborder px-2 py-1 text-[11px] font-semibold text-info">
+                    Paid by bank
+                  </button>
+                  <button onClick={() => markPaid(f.id, 'cash')} className="rounded-chip border border-cardborder px-2 py-1 text-[11px] font-semibold text-success">
+                    Paid cash
+                  </button>
+                </>
+              )}
               <span className="w-16 text-right font-semibold">{aed(Number(f.amount))}</span>
             </div>
           </div>
@@ -473,14 +555,28 @@ function GroundFeesTab() {
 // Assign a package straight from the Packages & Sessions tab — pick a player and
 // a package type and it's created (paid, admin-assigned). Mirrors the per-player
 // flow in PlayerDetail but lets admins work from the payments screen.
-function AssignPackageModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+function AssignPackageModal({
+  open,
+  onClose,
+  presetPlayerId,
+}: {
+  open: boolean;
+  onClose: () => void;
+  presetPlayerId?: string;
+}) {
   const { profile } = useAuth();
   const qc = useQueryClient();
   const toast = useToast();
   const [playerId, setPlayerId] = useState('');
   const [typeId, setTypeId] = useState('');
   const [paid, setPaid] = useState(true);
+  const [mode, setMode] = useState<'cash' | 'bank'>('cash');
   const [saving, setSaving] = useState(false);
+
+  // Preselect a player when opened from the "unassigned players" quick-assign.
+  useEffect(() => {
+    if (open && presetPlayerId) setPlayerId(presetPlayerId);
+  }, [open, presetPlayerId]);
 
   const { data: players = [] } = useQuery({
     queryKey: ['assign-players', profile?.academy_id],
@@ -507,21 +603,23 @@ function AssignPackageModal({ open, onClose }: { open: boolean; onClose: () => v
     if (!type) return;
     setSaving(true);
     try {
-      const { error } = await supabase.from('packages').insert({
-        academy_id: profile.academy_id,
-        player_id: playerId,
-        package_type_id: type.id,
-        sessions_total: type.sessions,
-        sessions_used: 0,
-        source: 'admin_assigned',
-        payment_status: paid ? 'paid' : 'pending',
-        assigned_by: profile.id,
+      await assignPackage({
+        academyId: profile.academy_id,
+        playerId,
+        packageTypeId: type.id,
+        sessionsTotal: type.sessions,
+        price: Number(type.price) || 0,
+        paid,
+        mode,
+        assignedBy: profile.id,
       });
-      if (error) throw error;
-      toast.show('Package assigned');
+      toast.show(paid ? 'Package assigned · payment recorded' : 'Package assigned · payment pending');
       setPlayerId('');
       setTypeId('');
       qc.invalidateQueries({ queryKey: ['admin-packages'] });
+      qc.invalidateQueries({ queryKey: ['unassigned-players'] });
+      qc.invalidateQueries({ queryKey: ['finance-payments'] });
+      qc.invalidateQueries({ queryKey: ['admin-stats'] });
       onClose();
     } catch {
       toast.show('Could not assign package');
@@ -551,8 +649,25 @@ function AssignPackageModal({ open, onClose }: { open: boolean; onClose: () => v
         </select>
         <label className="flex items-center gap-2 rounded-pill border border-cardborder bg-white px-3 py-2.5 text-[13px]">
           <input type="checkbox" checked={paid} onChange={(e) => setPaid(e.target.checked)} />
-          Marked as paid
+          Paid now (records it in Finance)
         </label>
+        {paid && (
+          <div className="flex gap-2">
+            {(['cash', 'bank'] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setMode(m)}
+                className={
+                  'flex-1 rounded-pill px-3 py-2 text-[12px] font-semibold capitalize transition ' +
+                  (mode === m ? 'bg-brand-red text-paper' : 'border border-cardborder bg-white text-ink/60')
+                }
+              >
+                {m}
+              </button>
+            ))}
+          </div>
+        )}
         <Button className="w-full" disabled={saving || !playerId || !typeId} onClick={assign}>
           {saving ? 'Assigning…' : 'Assign package'}
         </Button>

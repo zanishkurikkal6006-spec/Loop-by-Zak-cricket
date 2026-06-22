@@ -24,10 +24,10 @@ export default function AdminDashboard() {
       const weekAgo = new Date(Date.now() - 6 * 864e5).toISOString().slice(0, 10);
       const [players, reports, payments, packages, sessionsWeek, reportsWeek, matchFees, groundFees] =
         await Promise.all([
-          supabase.from('players').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+          supabase.from('players').select('id').eq('status', 'active'),
           supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'sent'),
           supabase.from('payments').select('amount, status'),
-          supabase.from('packages').select('sessions_remaining'),
+          supabase.from('packages').select('player_id, sessions_remaining'),
           supabase
             .from('attendance_sessions')
             .select('id', { count: 'exact', head: true })
@@ -43,9 +43,12 @@ export default function AdminDashboard() {
       const outstanding = pay.filter((r) => r.status !== 'confirmed').reduce((s, r) => s + Number(r.amount), 0);
       const pendingPayments = pay.filter((r) => r.status !== 'confirmed').length;
 
-      const pkg = (packages.data ?? []) as { sessions_remaining: number | null }[];
+      const pkg = (packages.data ?? []) as { player_id: string; sessions_remaining: number | null }[];
       const activePackages = pkg.filter((p) => p.sessions_remaining == null || p.sessions_remaining > 0).length;
       const renewals = pkg.filter((p) => p.sessions_remaining != null && p.sessions_remaining <= 2 && p.sessions_remaining >= 0).length;
+      const playerRows = (players.data ?? []) as { id: string }[];
+      const assignedIds = new Set(pkg.map((p) => p.player_id));
+      const unassignedPlayers = playerRows.filter((p) => !assignedIds.has(p.id)).length;
 
       const mf = (matchFees.data ?? []) as { fee: number; state: string }[];
       const matchCollected = mf.filter((f) => f.state === 'confirmed').reduce((s, f) => s + Number(f.fee), 0);
@@ -54,13 +57,14 @@ export default function AdminDashboard() {
       const groundCost = gf.reduce((s, f) => s + Number(f.amount), 0);
 
       return {
-        players: players.count ?? 0,
+        players: playerRows.length,
         reports: reports.count ?? 0,
         collected,
         outstanding,
         pendingPayments,
         activePackages,
         renewals,
+        unassignedPlayers,
         sessionsWeek: sessionsWeek.count ?? 0,
         reportsWeek: reportsWeek.count ?? 0,
         matchCollected,
@@ -128,7 +132,14 @@ export default function AdminDashboard() {
       {/* Needs attention */}
       <div>
         <div className="eyebrow mb-2 text-ink/40">Needs attention</div>
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          <ActionCard
+            to="/admin/payments"
+            icon="users"
+            label="Players without a package"
+            count={s?.unassignedPlayers ?? 0}
+            tone={(s?.unassignedPlayers ?? 0) > 0 ? 'amber' : 'green'}
+          />
           <ActionCard
             to="/admin/attendance"
             icon="check"

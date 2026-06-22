@@ -11,6 +11,7 @@ import { Modal } from '@/components/ui/Modal';
 import { LoopRing, RingAvatar } from '@/components/brand/LoopRing';
 import AddMatchModal from './AddMatchModal';
 import VenuePicker from './VenuePicker';
+import GroundFeesPanel from '@/features/finance/GroundFeesPanel';
 
 // Match log + per-match scorecard (the coach's accountability/evidence record).
 // `mine` scopes to the signed-in coach's matches; Head Coach passes mine=false
@@ -34,7 +35,7 @@ export default function MatchesList({
   const { data: matches = [], isLoading } = useMatches(mine);
   const [openId, setOpenId] = useState<string | null>(null);
   const [logOpen, setLogOpen] = useState(false);
-  const [view, setView] = useState<'log' | 'payments'>('log');
+  const [view, setView] = useState<'log' | 'payments' | 'grounds'>('log');
   const open = matches.find((m) => m.id === openId) ?? null;
 
   return (
@@ -52,7 +53,7 @@ export default function MatchesList({
       {/* Coaches coordinate matches, so they collect/confirm fees too. */}
       {mine && (
         <div className="flex gap-2">
-          {(['log', 'payments'] as const).map((v) => (
+          {(['log', 'payments', 'grounds'] as const).map((v) => (
             <button
               key={v}
               onClick={() => setView(v)}
@@ -61,15 +62,16 @@ export default function MatchesList({
                 (view === v ? 'bg-brand-red text-paper' : 'border border-cardborder bg-white text-ink/60')
               }
             >
-              {v === 'log' ? 'Match Log' : 'Match Payments'}
+              {v === 'log' ? 'Match Log' : v === 'payments' ? 'Match Payments' : 'Grounds'}
             </button>
           ))}
         </div>
       )}
 
       {mine && view === 'payments' && <CoachMatchPayments />}
+      {mine && view === 'grounds' && <GroundFeesPanel />}
 
-      {!(mine && view === 'payments') && (
+      {!(mine && (view === 'payments' || view === 'grounds')) && (
       <>
       {isLoading && <div className="text-[13px] text-ink/45">Loading matches…</div>}
       {!isLoading && !matches.length && (

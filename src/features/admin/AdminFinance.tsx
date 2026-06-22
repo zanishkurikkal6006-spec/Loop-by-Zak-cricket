@@ -103,7 +103,7 @@ export default function AdminFinance() {
     const collected = matchFees.filter((f) => f.state === 'confirmed').reduce((s, f) => s + Number(f.fee), 0);
     const pending = matchFees.filter((f) => f.state !== 'confirmed').reduce((s, f) => s + Number(f.fee), 0);
     const groundCost = groundFees.reduce((s, f) => s + Number(f.amount), 0);
-    const groundPaid = groundFees.filter((f) => f.status === 'confirmed').reduce((s, f) => s + Number(f.amount), 0);
+    const groundPaid = groundFees.reduce((s, f) => s + Number(f.paid_amount ?? 0), 0);
     return { collected, pending, groundCost, groundPaid, profit: collected - groundCost };
   }, [matchFees, groundFees]);
 

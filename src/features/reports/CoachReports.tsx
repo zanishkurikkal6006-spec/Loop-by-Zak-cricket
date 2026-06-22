@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/lib/toast';
 import { generateReport } from '@/lib/ai';
+import { downloadReportPdf } from '@/lib/reportPdf';
 import { sendWhatsApp, templates } from '@/lib/whatsapp';
 import { firstName, clsx } from '@/lib/utils';
 import { LoopRing } from '@/components/brand/LoopRing';
@@ -265,7 +266,25 @@ export default function CoachReports() {
               isDev ? 'h-72 font-mono text-[13px]' : 'h-40',
             )}
           />
-          <div className="text-[11px] text-ink/45">Edit freely above — your changes are kept.</div>
+          <div className="flex items-center justify-between">
+            <div className="text-[11px] text-ink/45">Edit freely above — your changes are kept.</div>
+            <button
+              onClick={() =>
+                downloadReportPdf({
+                  kind: mode,
+                  childName: player.full_name,
+                  groupName: groupName(player),
+                  coachName: profile?.full_name,
+                  academyName: 'Loop by Zak Cricket',
+                  date: new Date().toISOString().slice(0, 10),
+                  body: draft,
+                })
+              }
+              className="inline-flex items-center gap-1.5 rounded-pill border border-cardborder bg-white px-3 py-1.5 text-[12px] font-semibold text-brand-red hover:border-gold"
+            >
+              <Icon name="download" size={14} stroke="#9C1116" /> Download PDF
+            </button>
+          </div>
           {/* WhatsApp preview bubble */}
           <div className="rounded-card bg-[#075E54] p-4">
             <div className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold text-white/70">

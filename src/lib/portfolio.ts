@@ -1,8 +1,9 @@
 import { jsPDF } from 'jspdf';
+import { drawLoopMark, RED, DEEP, GOLD, INK, PAPER } from './brandPdf';
 
 // Coach career-record (portfolio) PDF — a branded one-pager the coach can
 // download from Home. Drawn with jsPDF primitives (no raster assets) to match
-// the Loop identity: deep-red header band, gold loop ring, Bebas-style title.
+// the Loop identity: deep-red header band, the real Loop mark, Bebas-style title.
 
 export interface PortfolioData {
   coachName: string;
@@ -12,12 +13,6 @@ export interface PortfolioData {
   highlights?: { label: string; value: string }[];
 }
 
-const RED: [number, number, number] = [156, 17, 22];
-const DEEP: [number, number, number] = [110, 12, 16];
-const GOLD: [number, number, number] = [201, 168, 76];
-const INK: [number, number, number] = [20, 20, 20];
-const PAPER: [number, number, number] = [250, 247, 244];
-
 export function downloadPortfolio(data: PortfolioData): void {
   const doc = new jsPDF({ unit: 'pt', format: 'a4' });
   const W = doc.internal.pageSize.getWidth();
@@ -26,19 +21,8 @@ export function downloadPortfolio(data: PortfolioData): void {
   doc.setFillColor(...DEEP);
   doc.rect(0, 0, W, 150, 'F');
 
-  // Loop ring mark
-  const cx = 70;
-  const cy = 75;
-  doc.setFillColor(...RED);
-  doc.circle(cx, cy, 26, 'F');
-  doc.setDrawColor(...GOLD);
-  doc.setLineWidth(2);
-  doc.circle(cx, cy, 22, 'S');
-  // angular "Z" suggestion
-  doc.setTextColor(...PAPER);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(22);
-  doc.text('Z', cx, cy + 8, { align: 'center' });
+  // The real Loop mark (red disc + gold ring + angular Z)
+  drawLoopMark(doc, 70, 75, 60);
 
   // Wordmark
   doc.setTextColor(...PAPER);

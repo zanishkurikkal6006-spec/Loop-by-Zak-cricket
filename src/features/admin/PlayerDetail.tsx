@@ -7,6 +7,7 @@ import { Card, Chip, Button } from '@/components/ui';
 import { LoopRing, RingAvatar } from '@/components/brand/LoopRing';
 import { aed, counterState, stateColor, firstName } from '@/lib/utils';
 import { sendWhatsApp, templates } from '@/lib/whatsapp';
+import { assignPackage as assignPackage_ } from '@/lib/packages';
 import { useToast } from '@/lib/toast';
 import type { Package, PackageType, Payment, Report, PlayerBadge, BadgeType, Player } from '@/lib/types';
 
@@ -110,36 +111,26 @@ export default function PlayerDetail({ player, onClose }: { player: Player | nul
     if (!t) return;
     setSavingPkg(true);
     try {
-      const { error } = await supabase.from('packages').insert({
-        academy_id: profile.academy_id,
-        player_id: player.id,
-        package_type_id: t.id,
-        sessions_total: t.sessions,
-        sessions_used: 0,
-        source: 'admin_assigned',
-        payment_status: payStatus,
-        assigned_by: profile.id,
+      // Creates the package + finance entry, and nets any already-taken extra
+      // (no-package) sessions off the new package.
+      const applied = await assignPackage_({
+        academyId: profile.academy_id,
+        playerId: player.id,
+        packageTypeId: t.id,
+        sessionsTotal: t.sessions,
+        price: Number(t.price) || 0,
+        paid: payStatus === 'paid',
+        mode: 'cash',
+        assignedBy: profile.id,
+        netExtra: true,
       });
-      if (error) throw error;
-      // Record the payment if marked paid and the package has a price.
-      if (payStatus === 'paid' && Number(t.price) > 0) {
-        await supabase.from('payments').insert({
-          academy_id: profile.academy_id,
-          player_id: player.id,
-          category: 'package',
-          amount: t.price,
-          mode: 'cash',
-          status: 'confirmed',
-          paid_at: new Date().toISOString().slice(0, 10),
-          confirmed_by: profile.id,
-        });
-      }
-      toast.show('Package assigned');
+      toast.show(applied > 0 ? `Package assigned · ${applied} extra deducted` : 'Package assigned');
       setAssigning(false);
       setTypeId('');
       qc.invalidateQueries({ queryKey: ['player-package', player.id] });
       qc.invalidateQueries({ queryKey: ['player-payments', player.id] });
       qc.invalidateQueries({ queryKey: ['admin-packages'] });
+      qc.invalidateQueries({ queryKey: ['players'] });
     } catch {
       toast.show('Could not assign package');
     } finally {
@@ -360,6 +351,17 @@ export default function PlayerDetail({ player, onClose }: { player: Player | nul
           </Card>
         ) : (
           <Card className="text-[13px] text-ink/45">No active package.</Card>
+        )}
+
+        {/* Extra (no-package) sessions taken — netted off the next package */}
+        {player.extra_sessions > 0 && (
+          <Card className="flex items-center justify-between">
+            <div>
+              <div className="text-[14px] font-semibold">{player.extra_sessions} extra session{player.extra_sessions === 1 ? '' : 's'} taken</div>
+              <div className="text-[11px] text-ink/45">Without a package · deducted from the next package bought</div>
+            </div>
+            <Chip tone="amber">Extra</Chip>
+          </Card>
         )}
 
         {/* Assign / change package */}

@@ -201,6 +201,9 @@ function AddPlayerModal({
           group_id: groupId || null,
           parent_name: parentName || null,
           parent_phone: parentPhone || null,
+          // Extra sessions already taken without a package — netted off the next
+          // package the player buys.
+          extra_sessions: Number(extraSessions) || 0,
         })
         .select()
         .single();
@@ -218,24 +221,6 @@ function AddPlayerModal({
           assigned_by: profile.id,
         });
         if (pErr) throw pErr;
-      }
-
-      // Extra sessions the player already TOOK but hasn't paid for — recorded as
-      // their own package line (used = total, payment pending) so the unpaid
-      // extras surface for collection and the base package stays intact.
-      const extra = Number(extraSessions);
-      if (extra > 0) {
-        const { error: eErr } = await supabase.from('packages').insert({
-          academy_id: profile.academy_id,
-          player_id: player.id,
-          package_type_id: null,
-          sessions_total: extra,
-          sessions_used: extra,
-          source: 'admin_assigned',
-          payment_status: 'pending',
-          assigned_by: profile.id,
-        });
-        if (eErr) throw eErr;
       }
 
       await autoEnrol(player.id, groupId || null);
@@ -507,8 +492,8 @@ function AddPlayerModal({
           </div>
         )}
 
-        {/* Extra sessions already taken but unpaid (logged for collection) */}
-        <Field label="Extra sessions already taken — unpaid (optional)">
+        {/* Extra sessions already taken without a package (netted off next pack) */}
+        <Field label="Extra sessions already taken (optional)">
           <input
             type="number"
             value={extraSessions}
@@ -517,8 +502,8 @@ function AddPlayerModal({
             className={inputCls}
           />
           <p className="mt-1 text-[11px] text-ink/45">
-            Sessions the player already took without paying — recorded as a separate
-            line marked Payment pending so you can collect later.
+            Sessions taken without a package. This keeps counting as they attend, and is
+            deducted from the next package they buy.
           </p>
         </Field>
 

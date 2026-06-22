@@ -77,6 +77,8 @@ export interface Player {
   joined_at: string | null;
   status: string;
   last_seen_at: string | null;
+  /** Sessions taken without an active package; netted off the next package. */
+  extra_sessions: number;
   created_at: string;
 }
 

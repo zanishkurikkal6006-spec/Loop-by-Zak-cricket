@@ -273,7 +273,10 @@ function PlayerRow({
       <div className="flex items-center gap-3">
         <RingAvatar name={player.full_name} size={40} color={state === 'late' ? '#C9A84C' : '#1F8A4C'} />
         <div>
-          <div className="text-[14px] font-medium">{player.full_name}</div>
+          <div className="flex items-center gap-2 text-[14px] font-medium">
+            {player.full_name}
+            {player.extra_sessions > 0 && <Chip tone="amber">{player.extra_sessions} extra</Chip>}
+          </div>
           {player.age && <div className="text-[11px] text-ink/45">Age {player.age}</div>}
         </div>
       </div>

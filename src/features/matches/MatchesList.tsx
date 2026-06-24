@@ -12,6 +12,7 @@ import { LoopRing, RingAvatar } from '@/components/brand/LoopRing';
 import AddMatchModal from './AddMatchModal';
 import VenuePicker from './VenuePicker';
 import GroundFeesPanel from '@/features/finance/GroundFeesPanel';
+import { aed } from '@/lib/utils';
 
 // Match log + per-match scorecard (the coach's accountability/evidence record).
 // `mine` scopes to the signed-in coach's matches; Head Coach passes mine=false
@@ -225,10 +226,7 @@ function CoachMatchPayments() {
         .select('*, player:players(*), match:matches(*)')
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return (data ?? []) as (import('@/lib/types').MatchFee & {
-        player: { full_name: string } | null;
-        match: { opponent: string | null } | null;
-      })[];
+      return (data ?? []) as CoachFeeRow[];
     },
   });
 
@@ -243,6 +241,22 @@ function CoachMatchPayments() {
     qc.invalidateQueries({ queryKey: ['coach-match-fees'] });
   }
 
+  // Group fees by match so each game's payments show as their own dated block.
+  const groups = (() => {
+    const m = new Map<string, { match: CoachFeeRow['match']; rows: CoachFeeRow[] }>();
+    for (const f of fees) {
+      const key = f.match_id ?? 'none';
+      const g = m.get(key) ?? { match: f.match, rows: [] };
+      g.rows.push(f);
+      m.set(key, g);
+    }
+    return [...m.values()].sort(
+      (a, b) => (b.match?.match_date ?? '').localeCompare(a.match?.match_date ?? ''),
+    );
+  })();
+  const dateLabel = (d?: string | null) =>
+    d ? new Date(d).toLocaleDateString('en-AE', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+
   return (
     <div className="space-y-3">
       <div className="flex justify-end">
@@ -256,33 +270,51 @@ function CoachMatchPayments() {
         coachScoped
         onSaved={() => qc.invalidateQueries({ queryKey: ['coach-match-fees'] })}
       />
-    <Card className="divide-y divide-hairline p-0">
-      {isLoading && <div className="px-4 py-4 text-[13px] text-ink/45">Loading…</div>}
-      {fees.map((f) => (
-        <div key={f.id} className="flex items-center justify-between px-4 py-2.5 text-[13px]">
-          <div>
-            <div className="font-medium">{f.player?.full_name ?? 'Player'}</div>
-            <div className="text-[11px] text-ink/45">vs {f.match?.opponent ?? '—'}</div>
-          </div>
-          <div className="flex items-center gap-2">
-            {f.state === 'confirmed' ? (
-              <Chip tone="green">{f.mode === 'cash' ? 'Cash' : 'Bank'} ✓</Chip>
-            ) : (
-              <>
-                <button onClick={() => collect(f.id, 'bank')} className="rounded-chip border border-cardborder px-2 py-1 text-[11px] font-semibold text-info">Confirm bank</button>
-                <button onClick={() => collect(f.id, 'cash')} className="rounded-chip border border-cardborder px-2 py-1 text-[11px] font-semibold text-success">Collect cash</button>
-              </>
-            )}
-          </div>
-        </div>
-      ))}
+      {isLoading && <div className="text-[13px] text-ink/45">Loading…</div>}
       {!isLoading && !fees.length && (
-        <div className="px-4 py-6 text-center text-[13px] text-ink/45">No match fees for your matches yet.</div>
+        <Card className="text-[13px] text-ink/45">No match fees for your matches yet.</Card>
       )}
-    </Card>
+      {groups.map((g, gi) => {
+        const gPaid = g.rows.filter((r) => r.state === 'confirmed').reduce((s, r) => s + Number(r.fee), 0);
+        const gTotal = g.rows.reduce((s, r) => s + Number(r.fee), 0);
+        return (
+          <Card key={g.match?.id ?? gi} className="p-0">
+            <div className="flex items-center justify-between border-b border-hairline px-4 py-2.5">
+              <div>
+                <div className="text-[14px] font-semibold">vs {g.match?.opponent ?? 'Opponent'}</div>
+                <div className="text-[11px] text-ink/45">{dateLabel(g.match?.match_date)}</div>
+              </div>
+              <Chip tone={gPaid >= gTotal ? 'green' : 'amber'}>{aed(gPaid)} / {aed(gTotal)}</Chip>
+            </div>
+            <div className="divide-y divide-hairline">
+              {g.rows.map((f) => (
+                <div key={f.id} className="flex items-center justify-between px-4 py-2.5 text-[13px]">
+                  <div className="font-medium">{f.player?.full_name ?? 'Player'}</div>
+                  <div className="flex items-center gap-2">
+                    {f.state === 'confirmed' ? (
+                      <Chip tone="green">{f.mode === 'cash' ? 'Cash' : 'Bank'} ✓</Chip>
+                    ) : (
+                      <>
+                        <button onClick={() => collect(f.id, 'bank')} className="rounded-chip border border-cardborder px-2 py-1 text-[11px] font-semibold text-info">Confirm bank</button>
+                        <button onClick={() => collect(f.id, 'cash')} className="rounded-chip border border-cardborder px-2 py-1 text-[11px] font-semibold text-success">Collect cash</button>
+                      </>
+                    )}
+                    <span className="w-14 text-right font-semibold">{aed(Number(f.fee))}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        );
+      })}
     </div>
   );
 }
+
+type CoachFeeRow = import('@/lib/types').MatchFee & {
+  player: { full_name: string } | null;
+  match: { id: string; opponent: string | null; match_date: string | null } | null;
+};
 
 // Log a match — CricHeros import (AI scorecard reading, placeholder for now) or
 // manual entry. Both paths save real data to matches + match_players.

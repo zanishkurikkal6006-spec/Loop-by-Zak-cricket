@@ -63,6 +63,24 @@ export default function AdminPayments() {
   const assignedIds = new Set(packages.map((p) => p.player_id));
   const unassigned = allPlayers.filter((p) => !assignedIds.has(p.id));
 
+  // Aggregate packages per player so each kid shows ONCE with their combined
+  // remaining (e.g. 1 left + an 8-pack = 9), instead of one card per package.
+  const aggregated: AggPkg[] = (() => {
+    const m = new Map<string, AggPkg>();
+    for (const p of packages) {
+      const cur =
+        m.get(p.player_id) ??
+        { player: p.player, playerId: p.player_id, total: 0, used: 0, remaining: 0, unlimited: false, pending: false };
+      if (p.sessions_total == null) cur.unlimited = true;
+      else cur.total += p.sessions_total;
+      cur.used += p.sessions_used;
+      cur.remaining += p.sessions_remaining ?? 0;
+      if (p.payment_status === 'pending') cur.pending = true;
+      m.set(p.player_id, cur);
+    }
+    return [...m.values()];
+  })();
+
   function openAssign(playerId = '') {
     setPresetPlayer(playerId);
     setAssignOpen(true);
@@ -125,10 +143,10 @@ export default function AdminPayments() {
           )}
 
           <div className="grid gap-3 md:grid-cols-2">
-            {packages.map((p) => (
-              <PackageCard key={p.id} pkg={p} />
+            {aggregated.map((a) => (
+              <PlayerPackageCard key={a.playerId} agg={a} />
             ))}
-            {!packages.length && !isLoading && (
+            {!aggregated.length && !isLoading && (
               <Card className="text-[13px] text-ink/45">No packages assigned yet.</Card>
             )}
           </div>
@@ -353,6 +371,25 @@ function MatchFeesTab() {
   const collected = fees.filter((f) => f.state === 'confirmed').reduce((s, f) => s + Number(f.fee), 0);
   const pending = fees.filter((f) => f.state !== 'confirmed').reduce((s, f) => s + Number(f.fee), 0);
 
+  // Group fees by the match they belong to, so each match's payments show as
+  // their own dated block instead of one long mixed list.
+  type Row = MatchFee & { player: Player | null; match: Match | null };
+  const groups = (() => {
+    const m = new Map<string, { match: Match | null; rows: Row[] }>();
+    for (const f of fees) {
+      const key = f.match_id ?? 'none';
+      const g = m.get(key) ?? { match: f.match, rows: [] };
+      g.rows.push(f);
+      m.set(key, g);
+    }
+    return [...m.values()].sort(
+      (a, b) => (b.match?.match_date ?? '').localeCompare(a.match?.match_date ?? ''),
+    );
+  })();
+
+  const dateLabel = (d?: string | null) =>
+    d ? new Date(d).toLocaleDateString('en-AE', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+
   return (
     <div className="space-y-3">
       <div className="flex justify-end">
@@ -375,37 +412,49 @@ function MatchFeesTab() {
           <div className="font-display text-3xl text-amber-text">{aed(pending)}</div>
         </Card>
       </div>
-      <Card className="divide-y divide-hairline p-0">
-        {isLoading && <div className="px-4 py-4 text-[13px] text-ink/45">Loading…</div>}
-        {fees.map((f) => (
-          <div key={f.id} className="flex items-center justify-between px-4 py-2.5 text-[13px]">
-            <div>
-              <div className="font-medium">{f.player?.full_name ?? 'Player'}</div>
-              <div className="text-[11px] text-ink/45">
-                vs {f.match?.opponent ?? '—'} · {f.mode ?? 'awaiting'}
+
+      {isLoading && <div className="text-[13px] text-ink/45">Loading…</div>}
+      {!isLoading && !fees.length && (
+        <Card className="text-[13px] text-ink/45">No match fees recorded.</Card>
+      )}
+
+      {groups.map((g, gi) => {
+        const gPaid = g.rows.filter((r) => r.state === 'confirmed').reduce((s, r) => s + Number(r.fee), 0);
+        const gTotal = g.rows.reduce((s, r) => s + Number(r.fee), 0);
+        return (
+          <Card key={g.match?.id ?? gi} className="p-0">
+            <div className="flex items-center justify-between border-b border-hairline px-4 py-2.5">
+              <div>
+                <div className="text-[14px] font-semibold">vs {g.match?.opponent ?? 'Opponent'}</div>
+                <div className="text-[11px] text-ink/45">{dateLabel(g.match?.match_date)}</div>
               </div>
+              <Chip tone={gPaid >= gTotal ? 'green' : 'amber'}>{aed(gPaid)} / {aed(gTotal)}</Chip>
             </div>
-            <div className="flex items-center gap-2">
-              {f.state === 'confirmed' ? (
-                <Chip tone="green">{f.mode === 'cash' ? 'Cash' : 'Bank'} ✓</Chip>
-              ) : (
-                <>
-                  <button onClick={() => collect(f, 'bank')} className="rounded-chip border border-cardborder px-2 py-1 text-[11px] font-semibold text-info">
-                    Confirm bank
-                  </button>
-                  <button onClick={() => collect(f, 'cash')} className="rounded-chip border border-cardborder px-2 py-1 text-[11px] font-semibold text-success">
-                    Collect cash
-                  </button>
-                </>
-              )}
-              <span className="w-16 text-right font-semibold">{aed(Number(f.fee))}</span>
+            <div className="divide-y divide-hairline">
+              {g.rows.map((f) => (
+                <div key={f.id} className="flex items-center justify-between px-4 py-2.5 text-[13px]">
+                  <div className="font-medium">{f.player?.full_name ?? 'Player'}</div>
+                  <div className="flex items-center gap-2">
+                    {f.state === 'confirmed' ? (
+                      <Chip tone="green">{f.mode === 'cash' ? 'Cash' : 'Bank'} ✓</Chip>
+                    ) : (
+                      <>
+                        <button onClick={() => collect(f, 'bank')} className="rounded-chip border border-cardborder px-2 py-1 text-[11px] font-semibold text-info">
+                          Confirm bank
+                        </button>
+                        <button onClick={() => collect(f, 'cash')} className="rounded-chip border border-cardborder px-2 py-1 text-[11px] font-semibold text-success">
+                          Collect cash
+                        </button>
+                      </>
+                    )}
+                    <span className="w-16 text-right font-semibold">{aed(Number(f.fee))}</span>
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
-        ))}
-        {!isLoading && !fees.length && (
-          <div className="px-4 py-6 text-center text-[13px] text-ink/45">No match fees recorded.</div>
-        )}
-      </Card>
+          </Card>
+        );
+      })}
     </div>
   );
 }
@@ -554,27 +603,35 @@ function AssignPackageModal({
   );
 }
 
-function PackageCard({ pkg }: { pkg: PackageRow }) {
-  const kind = pkg.package_type?.kind ?? 'standard';
-  const state = counterState(pkg.sessions_remaining, kind);
+interface AggPkg {
+  player: Player | null;
+  playerId: string;
+  total: number;
+  used: number;
+  remaining: number;
+  unlimited: boolean;
+  pending: boolean;
+}
+
+function PlayerPackageCard({ agg }: { agg: AggPkg }) {
+  const kind = agg.unlimited ? 'unlimited' : 'standard';
+  const remaining = agg.unlimited ? null : agg.remaining;
+  const state = counterState(remaining, kind);
   const color = stateColor(state);
-  const total = pkg.sessions_total ?? 0;
-  const progress = total ? pkg.sessions_used / total : 1;
+  const progress = agg.total ? agg.used / agg.total : 1;
 
   return (
     <Card className="flex items-center gap-3">
-      <LoopRing size={56} progress={kind === 'standard' ? progress : undefined} color={color}>
+      <LoopRing size={56} progress={agg.unlimited ? undefined : progress} color={color}>
         <div className="text-center leading-none">
-          <div className="font-display text-lg">
-            {pkg.sessions_remaining == null ? '∞' : pkg.sessions_remaining}
-          </div>
+          <div className="font-display text-lg">{remaining == null ? '∞' : remaining}</div>
           <div className="text-[8px] uppercase tracking-eyebrow text-ink/40">left</div>
         </div>
       </LoopRing>
       <div className="flex-1 min-w-0">
-        <div className="truncate text-[15px] font-semibold">{pkg.player?.full_name ?? 'Player'}</div>
+        <div className="truncate text-[15px] font-semibold">{agg.player?.full_name ?? 'Player'}</div>
         <div className="text-[11px] text-ink/45">
-          {pkg.package_type?.name ?? 'Package'} · {pkg.sessions_used}/{total || '∞'} used
+          {agg.used}/{agg.unlimited ? '∞' : agg.total} sessions used
         </div>
         <div className="mt-1.5 flex flex-wrap gap-1.5">
           <Chip
@@ -592,10 +649,7 @@ function PackageCard({ pkg }: { pkg: PackageRow }) {
           >
             {state}
           </Chip>
-          <Chip tone={pkg.source === 'admin_assigned' ? 'neutral' : 'amber'}>
-            {pkg.source === 'admin_assigned' ? 'Admin-assigned' : 'Coach-added'}
-          </Chip>
-          {pkg.payment_status === 'pending' && <Chip tone="amber">Payment pending</Chip>}
+          {agg.pending && <Chip tone="amber">Payment pending</Chip>}
         </div>
       </div>
     </Card>

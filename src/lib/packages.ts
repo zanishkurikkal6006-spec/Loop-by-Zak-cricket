@@ -75,10 +75,18 @@ export async function assignPackage(i: AssignPackageInput): Promise<number> {
   return applied;
 }
 
-// Accrue extra (no-package) sessions for a confirmed attendance session: every
-// marked player WITHOUT a usable package gets their deduct counted onto
-// players.extra_sessions. Best-effort; called by admin confirm paths.
-export async function accrueExtraSessions(sessionId: string): Promise<void> {
+interface PkgUsage {
+  id: string;
+  sessions_total: number | null;
+  sessions_used: number;
+  sessions_remaining: number | null;
+}
+
+// Apply a confirmed attendance session to session balances. For each marked
+// player: decrement their active package (oldest first); if they have unlimited
+// it just counts; if they have no package or run out, the remainder accrues as
+// extra (no-package) sessions. Best-effort; called by admin confirm paths.
+export async function applyAttendanceUsage(sessionId: string): Promise<void> {
   const { data: recs } = await supabase
     .from('attendance_records')
     .select('player_id, deduct_sessions')
@@ -87,24 +95,42 @@ export async function accrueExtraSessions(sessionId: string): Promise<void> {
   if (!records.length) return;
 
   const playerIds = [...new Set(records.map((r) => r.player_id))];
-  const { data: pkgs } = await supabase
+  const { data: pkgRows } = await supabase
     .from('packages')
-    .select('player_id, sessions_remaining, sessions_total')
-    .in('player_id', playerIds);
-  const usable = new Set<string>();
-  for (const p of (pkgs ?? []) as { player_id: string; sessions_remaining: number | null; sessions_total: number | null }[]) {
-    if (p.sessions_total === null || (p.sessions_remaining ?? 0) > 0) usable.add(p.player_id);
+    .select('id, player_id, sessions_total, sessions_used, sessions_remaining')
+    .in('player_id', playerIds)
+    .order('created_at', { ascending: true });
+
+  const byPlayer = new Map<string, PkgUsage[]>();
+  for (const p of (pkgRows ?? []) as (PkgUsage & { player_id: string })[]) {
+    const arr = byPlayer.get(p.player_id) ?? [];
+    arr.push(p);
+    byPlayer.set(p.player_id, arr);
   }
 
-  const inc = new Map<string, number>();
+  // Total sessions to apply per player (handles dedup deduct of 2).
+  const deductByPlayer = new Map<string, number>();
   for (const r of records) {
-    if (usable.has(r.player_id)) continue;
-    inc.set(r.player_id, (inc.get(r.player_id) ?? 0) + (r.deduct_sessions ?? 1));
+    deductByPlayer.set(r.player_id, (deductByPlayer.get(r.player_id) ?? 0) + (r.deduct_sessions ?? 1));
   }
 
-  for (const [pid, n] of inc) {
-    const { data: pl } = await supabase.from('players').select('extra_sessions').eq('id', pid).single();
-    const cur = (pl?.extra_sessions ?? 0) as number;
-    await supabase.from('players').update({ extra_sessions: cur + n }).eq('id', pid);
+  for (const [pid, deduct] of deductByPlayer) {
+    const pkgs = byPlayer.get(pid) ?? [];
+    if (pkgs.some((p) => p.sessions_total === null)) continue; // unlimited: nothing to deduct
+
+    let left = deduct;
+    for (const p of pkgs) {
+      if (left <= 0) break;
+      const rem = p.sessions_remaining ?? (p.sessions_total ?? 0) - p.sessions_used;
+      if (rem <= 0) continue;
+      const take = Math.min(rem, left);
+      await supabase.from('packages').update({ sessions_used: p.sessions_used + take }).eq('id', p.id);
+      left -= take;
+    }
+    if (left > 0) {
+      const { data: pl } = await supabase.from('players').select('extra_sessions').eq('id', pid).single();
+      const cur = (pl?.extra_sessions ?? 0) as number;
+      await supabase.from('players').update({ extra_sessions: cur + left }).eq('id', pid);
+    }
   }
 }

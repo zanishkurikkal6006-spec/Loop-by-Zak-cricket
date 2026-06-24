@@ -8,7 +8,7 @@ import { Button, Card, Chip, ScreenTitle } from '@/components/ui';
 import { Icon } from '@/components/ui/Icon';
 import { clsx } from '@/lib/utils';
 import BatchPicker, { type BatchSelection } from '@/features/attendance/BatchPicker';
-import { accrueExtraSessions } from '@/lib/packages';
+import { applyAttendanceUsage } from '@/lib/packages';
 import type { AttendanceRecord, AttendanceSession, AttendanceState, Player } from '@/lib/types';
 
 // Admin Attendance — three tabs:
@@ -135,13 +135,15 @@ function PendingCard({ session }: { session: AttendanceSession }) {
         .update({ status: 'confirmed', confirmed_by: profile.id })
         .eq('id', session.id);
       if (error) throw error;
-      // Count extra (no-package) sessions for players without a usable package.
-      await accrueExtraSessions(session.id);
+      // Decrement packages / accrue extra sessions for the marked players.
+      await applyAttendanceUsage(session.id);
       // Production: enqueue parent WhatsApp messages here (outbound_messages).
     },
     onSuccess: () => {
       toast.show('Confirmed · WhatsApp sent to parents');
       queryClient.invalidateQueries({ queryKey: ['attendance-pending'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-packages'] });
+      queryClient.invalidateQueries({ queryKey: ['players'] });
     },
     onError: (e) => toast.show(e instanceof Error ? e.message : 'Could not confirm'),
   });
@@ -349,12 +351,13 @@ function TakeAttendanceTab() {
       if (records.length) {
         const { error: rErr } = await supabase.from('attendance_records').insert(records);
         if (rErr) throw rErr;
-        await accrueExtraSessions(session.id);
+        await applyAttendanceUsage(session.id);
       }
       toast.show(`Attendance saved · ${records.length} marked`);
       setMarks({});
       qc.invalidateQueries({ queryKey: ['attendance-history'] });
       qc.invalidateQueries({ queryKey: ['players'] });
+      qc.invalidateQueries({ queryKey: ['admin-packages'] });
     } catch {
       toast.show('Could not save attendance');
     } finally {

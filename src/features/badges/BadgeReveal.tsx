@@ -4,11 +4,12 @@ import { firstName } from '@/lib/utils';
 import { downloadBadgeImage } from '@/lib/badgeImage';
 import { Icon } from '@/components/ui/Icon';
 import BadgeMedallion from './BadgeMedallion';
+import type { GlyphKey } from './badgeArt';
 
 export interface RevealBadge {
   childName: string;
   badgeName: string;
-  emblem: string | null;
+  glyph: GlyphKey;
   criteria: string | null;
   accent?: string | null;
   parentPhone?: string | null;
@@ -30,7 +31,7 @@ export default function BadgeReveal({ badge, onClose }: { badge: RevealBadge | n
     const p = new URLSearchParams({
       n: firstName(badge.childName),
       b: badge.badgeName,
-      ...(badge.emblem ? { e: badge.emblem } : {}),
+      g: badge.glyph,
       ...(badge.criteria ? { c: badge.criteria } : {}),
       ...(badge.accent ? { a: badge.accent } : {}),
     });
@@ -53,7 +54,7 @@ export default function BadgeReveal({ badge, onClose }: { badge: RevealBadge | n
     void downloadBadgeImage({
       childName: badge.childName,
       badgeName: badge.badgeName,
-      emblem: badge.emblem,
+      glyph: badge.glyph,
       criteria: badge.criteria,
       accent: badge.accent ?? undefined,
       academyName: 'Loop by Zak Cricket',
@@ -86,7 +87,7 @@ export default function BadgeReveal({ badge, onClose }: { badge: RevealBadge | n
 
         {/* Medallion with rotating rays */}
         <div className="mx-auto mt-4 flex justify-center">
-          <BadgeMedallion emblem={badge.emblem} accent={accent} size={128} />
+          <BadgeMedallion glyph={badge.glyph} accent={accent} size={128} />
         </div>
 
         <div className="animate-badge-rise">

@@ -6,9 +6,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/lib/toast';
 import { ScreenTitle, Card, Chip, Button } from '@/components/ui';
 import { Modal } from '@/components/ui/Modal';
-import { LoopRing, RingAvatar } from '@/components/brand/LoopRing';
+import { RingAvatar } from '@/components/brand/LoopRing';
 import { clsx } from '@/lib/utils';
 import BadgeReveal, { type RevealBadge } from './BadgeReveal';
+import PremiumBadge, { glyphFor } from './badgeArt';
 import type { BadgeCategory } from '@/lib/types';
 
 // Badge system — 26 badges across 4 groups, each a loop-ring medallion.
@@ -60,7 +61,7 @@ export default function Badges({
       setReveal({
         childName: pb.player?.full_name ?? 'Player',
         badgeName: pb.badge?.name ?? 'Badge',
-        emblem: pb.badge?.emblem ?? null,
+        glyph: glyphFor(pb.badge?.key, pb.badge?.category),
         criteria: pb.badge?.criteria ?? null,
         accent: pb.badge?.accent ?? null,
         parentPhone: pb.player?.parent_phone ?? null,
@@ -126,9 +127,7 @@ export default function Badges({
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             {items.map((b) => (
               <Card key={b.id} className="flex flex-col items-center text-center">
-                <LoopRing size={64} color={b.accent}>
-                  <span className="text-2xl">{b.emblem}</span>
-                </LoopRing>
+                <PremiumBadge glyph={glyphFor(b.key, b.category)} accent={b.accent} size={64} />
                 <div className="mt-2 text-[12px] font-semibold uppercase tracking-wide">{b.name}</div>
                 <div className="mt-1 text-[10.5px] leading-snug text-ink/45">{b.criteria}</div>
                 <Chip tone={b.send_flow === 'auto' ? 'green' : 'gold'} className={clsx('mt-2')}>
@@ -198,7 +197,7 @@ function AwardModal({
       onAwarded({
         childName: player.full_name,
         badgeName: badge.name,
-        emblem: badge.emblem,
+        glyph: glyphFor(badge.key, badge.category),
         criteria: badge.criteria,
         accent: badge.accent,
         parentPhone: player.parent_phone,

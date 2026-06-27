@@ -32,9 +32,9 @@ export async function downloadBadgeImage(d: BadgeImageData): Promise<void> {
       <div style="border:1px solid #C9A84C;padding:28px 24px;text-align:center;box-sizing:border-box;">
         <div style="display:flex;align-items:center;justify-content:center;gap:10px;">
           ${LOOP_SVG}
-          <div style="text-align:left;">
+          <div style="text-align:left;line-height:1;">
             <div style="font-size:22px;font-weight:800;letter-spacing:1px;color:#6E0C10;line-height:1;">LOOP</div>
-            <div style="font-size:9px;font-weight:700;letter-spacing:3px;color:#C9A84C;">BY ZAK CRICKET</div>
+            <div style="margin-top:5px;font-size:9px;font-weight:700;letter-spacing:3px;color:#C9A84C;">BY ZAK CRICKET</div>
           </div>
         </div>
 

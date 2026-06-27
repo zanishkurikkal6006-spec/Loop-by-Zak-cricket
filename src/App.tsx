@@ -28,6 +28,7 @@ const Badges = lazy(() => import('./features/badges/Badges'));
 const HeadCoachDashboard = lazy(() => import('./features/head-coach/HeadCoachDashboard'));
 const HeadCoachReports = lazy(() => import('./features/head-coach/HeadCoachReports'));
 const HeadCoachFlags = lazy(() => import('./features/head-coach/HeadCoachFlags'));
+const CelebratePage = lazy(() => import('./pages/CelebratePage'));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false } },
@@ -69,6 +70,7 @@ export default function App() {
           <Suspense fallback={<FullScreenLoader />}>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/celebrate" element={<CelebratePage />} />
             <Route path="/" element={<RootRedirect />} />
 
             {/* ── Coach ── */}

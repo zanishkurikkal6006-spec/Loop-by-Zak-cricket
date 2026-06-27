@@ -1,12 +1,13 @@
 import html2canvas from 'html2canvas';
+import { badgeSvgMarkup, type GlyphKey } from '@/features/badges/badgeArt';
 
 // Render a parent-facing badge certificate as a PNG image. We build a real DOM
-// node and rasterise it with html2canvas, so the medallion, gradients and the
-// emoji all render exactly as designed (jsPDF can't draw emoji).
+// node (with the premium medallion SVG) and rasterise it with html2canvas, so
+// the coin, gradients and engraved glyph render exactly as designed.
 export interface BadgeImageData {
   childName: string;
   badgeName: string;
-  emblem: string | null;
+  glyph: GlyphKey;
   criteria: string | null;
   accent?: string | null;
   academyName?: string;
@@ -39,11 +40,8 @@ export async function downloadBadgeImage(d: BadgeImageData): Promise<void> {
 
         <div style="margin-top:14px;font-size:11px;letter-spacing:3px;color:#141414;opacity:.6;">CERTIFICATE OF ACHIEVEMENT</div>
 
-        <div style="margin:22px auto 0;width:140px;height:140px;border-radius:9999px;
-          background:radial-gradient(circle at 35% 30%, ${accent}, #6E0C10);
-          box-shadow:0 12px 30px ${accent}55; position:relative;display:flex;align-items:center;justify-content:center;">
-          <div style="position:absolute;inset:8px;border-radius:9999px;border:3px solid #C9A84C;"></div>
-          <div style="font-size:64px;line-height:1;">${d.emblem || '🏅'}</div>
+        <div style="margin:18px auto 0;width:150px;height:150px;">
+          ${badgeSvgMarkup(d.glyph, accent, 150)}
         </div>
 
         <div style="margin-top:18px;font-size:30px;font-weight:800;color:${accent};line-height:1.1;">${escapeHtml(d.badgeName)}</div>

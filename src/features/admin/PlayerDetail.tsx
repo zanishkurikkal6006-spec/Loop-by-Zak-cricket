@@ -8,6 +8,7 @@ import { LoopRing, RingAvatar } from '@/components/brand/LoopRing';
 import { aed, counterState, stateColor, firstName } from '@/lib/utils';
 import { sendWhatsApp, templates } from '@/lib/whatsapp';
 import { assignPackage as assignPackage_ } from '@/lib/packages';
+import PremiumBadge, { glyphFor } from '@/features/badges/badgeArt';
 import { useToast } from '@/lib/toast';
 import type { Package, PackageType, Payment, Report, PlayerBadge, BadgeType, Player } from '@/lib/types';
 
@@ -445,9 +446,12 @@ export default function PlayerDetail({ player, onClose }: { player: Player | nul
             <div className="eyebrow mb-2 text-ink/40">Badges</div>
             <div className="flex flex-wrap gap-2">
               {badges.map((b) => (
-                <LoopRing key={b.id} size={40} color={b.badge?.accent}>
-                  <span className="text-lg">{b.badge?.emblem}</span>
-                </LoopRing>
+                <PremiumBadge
+                  key={b.id}
+                  glyph={glyphFor(b.badge?.key, b.badge?.category)}
+                  accent={b.badge?.accent ?? '#9C1116'}
+                  size={48}
+                />
               ))}
             </div>
           </div>

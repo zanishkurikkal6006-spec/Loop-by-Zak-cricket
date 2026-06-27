@@ -2,6 +2,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Wordmark } from '@/components/brand/LoopMark';
 import { downloadBadgeImage } from '@/lib/badgeImage';
 import BadgeMedallion from '@/features/badges/BadgeMedallion';
+import type { GlyphKey } from '@/features/badges/badgeArt';
 
 // Public, no-auth "unboxing" a parent opens from a shared link — the same
 // celebratory reveal the coach saw, in the parent's own browser.
@@ -11,7 +12,7 @@ export default function CelebratePage() {
   const [params] = useSearchParams();
   const childName = params.get('n') ?? 'Your child';
   const badgeName = params.get('b') ?? 'a badge';
-  const emblem = params.get('e');
+  const glyph = (params.get('g') as GlyphKey) || 'star';
   const criteria = params.get('c');
   const accent = params.get('a') || '#9C1116';
 
@@ -38,7 +39,7 @@ export default function CelebratePage() {
       <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold">Badge earned</div>
 
       <div className="my-6">
-        <BadgeMedallion emblem={emblem} accent={accent} size={150} />
+        <BadgeMedallion glyph={glyph} accent={accent} size={150} />
       </div>
 
       <div className="animate-badge-rise">
@@ -53,7 +54,7 @@ export default function CelebratePage() {
 
         <button
           onClick={() =>
-            downloadBadgeImage({ childName, badgeName, emblem, criteria, accent })
+            downloadBadgeImage({ childName, badgeName, glyph, criteria, accent })
           }
           className="mt-6 rounded-pill bg-gold px-5 py-2.5 text-[13px] font-semibold text-ink"
         >

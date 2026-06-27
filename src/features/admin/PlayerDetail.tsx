@@ -125,6 +125,15 @@ export default function PlayerDetail({ player, onClose }: { player: Player | nul
         netExtra: true,
       });
       toast.show(applied > 0 ? `Package assigned · ${applied} extra deducted` : 'Package assigned');
+      if (player.parent_phone) {
+        const remaining = t.sessions != null ? Math.max(0, t.sessions - applied) : null;
+        const sessionsLabel = t.sessions != null ? `${t.sessions}-session package` : `${t.name} package`;
+        await sendWhatsApp(
+          player.parent_phone,
+          templates.packageAssigned(firstName(player.full_name), sessionsLabel, remaining, applied),
+          { academyId: profile.academy_id, playerId: player.id, templateKey: 'packageAssigned' },
+        );
+      }
       setAssigning(false);
       setTypeId('');
       qc.invalidateQueries({ queryKey: ['player-package', player.id] });

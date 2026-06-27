@@ -1,4 +1,22 @@
-import { clsx } from '@/lib/utils';
+import { clsx, aed } from '@/lib/utils';
+
+// ── PaymentBar: red→gold progress with paid/total label ──────────────────────
+export function PaymentBar({ paid, total }: { paid: number; total: number }) {
+  const pct = total > 0 ? Math.min(100, Math.round((paid / total) * 100)) : 0;
+  return (
+    <div className="mt-2">
+      <div className="h-2 w-full overflow-hidden rounded-pill bg-hairline">
+        <div
+          className="h-full rounded-pill bg-gradient-to-r from-brand-red to-gold transition-all"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <div className="mt-1 text-[11px] text-ink/45">
+        {aed(paid)} collected · {aed(Math.max(0, total - paid))} to go
+      </div>
+    </div>
+  );
+}
 
 // ── Buttons ──────────────────────────────────────────────────────────────────
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {

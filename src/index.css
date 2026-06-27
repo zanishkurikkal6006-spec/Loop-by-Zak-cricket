@@ -17,6 +17,23 @@
   }
 }
 
+/* Badge "unboxing" reveal animations */
+@keyframes badge-pop {
+  0% { transform: scale(0.3) rotate(-12deg); opacity: 0; }
+  60% { transform: scale(1.12) rotate(4deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+@keyframes badge-rays { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes badge-shimmer { 0% { transform: translateX(-120%); } 100% { transform: translateX(220%); } }
+@keyframes badge-rise { from { transform: translateY(14px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes confetti-fall {
+  0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(280px) rotate(540deg); opacity: 0; }
+}
+.animate-badge-pop { animation: badge-pop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.animate-badge-rays { animation: badge-rays 9s linear infinite; }
+.animate-badge-rise { animation: badge-rise 0.5s ease-out 0.35s both; }
+
 @layer components {
   /* Eyebrow label — 10–11px, 600, uppercase, letter-spaced, muted ink. */
   .eyebrow {

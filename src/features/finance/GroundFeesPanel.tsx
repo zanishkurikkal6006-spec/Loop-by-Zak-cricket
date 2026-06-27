@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/lib/toast';
-import { Card, Chip, Button } from '@/components/ui';
+import { Card, Chip, Button, PaymentBar } from '@/components/ui';
 import { Modal } from '@/components/ui/Modal';
 import { aed } from '@/lib/utils';
 import VenuePicker from '@/features/matches/VenuePicker';
@@ -88,6 +88,10 @@ export default function GroundFeesPanel() {
           <div className="font-display text-2xl text-amber-text">{aed(outstanding)}</div>
         </Card>
       </div>
+
+      <Card>
+        <PaymentBar paid={paid} total={total} />
+      </Card>
 
       <div className="flex justify-end">
         <Button size="sm" onClick={() => setAdding(true)}>+ Add booking</Button>

@@ -1,8 +1,9 @@
 import { useAuth } from '@/contexts/AuthContext';
-import { sendWhatsApp, templates } from '@/lib/whatsapp';
+import { sendWhatsApp } from '@/lib/whatsapp';
 import { firstName } from '@/lib/utils';
-import { downloadBadgeCertificate } from '@/lib/badgePdf';
+import { downloadBadgeImage } from '@/lib/badgeImage';
 import { Icon } from '@/components/ui/Icon';
+import BadgeMedallion from './BadgeMedallion';
 
 export interface RevealBadge {
   childName: string;
@@ -24,24 +25,38 @@ export default function BadgeReveal({ badge, onClose }: { badge: RevealBadge | n
   if (!badge) return null;
   const accent = badge.accent || '#9C1116';
 
+  function celebrateUrl() {
+    if (!badge) return '';
+    const p = new URLSearchParams({
+      n: firstName(badge.childName),
+      b: badge.badgeName,
+      ...(badge.emblem ? { e: badge.emblem } : {}),
+      ...(badge.criteria ? { c: badge.criteria } : {}),
+      ...(badge.accent ? { a: badge.accent } : {}),
+    });
+    return `${window.location.origin}/celebrate?${p.toString()}`;
+  }
+
   function share() {
     if (!badge || !profile || !badge.parentPhone) return;
-    sendWhatsApp(
-      badge.parentPhone,
-      templates.badgeEarned(firstName(badge.childName), badge.badgeName),
-      { academyId: profile.academy_id, playerId: badge.playerId ?? null, templateKey: 'badgeEarned' },
-    );
+    const link = celebrateUrl();
+    const body = `🏅 ${badge.childName} just earned the "${badge.badgeName}" badge at Loop by Zak Cricket! Tap to open their celebration:\n${link}`;
+    sendWhatsApp(badge.parentPhone, body, {
+      academyId: profile.academy_id,
+      playerId: badge.playerId ?? null,
+      templateKey: 'badgeEarned',
+    });
   }
 
   function download() {
     if (!badge) return;
-    downloadBadgeCertificate({
+    void downloadBadgeImage({
       childName: badge.childName,
       badgeName: badge.badgeName,
       emblem: badge.emblem,
       criteria: badge.criteria,
+      accent: badge.accent ?? undefined,
       academyName: 'Loop by Zak Cricket',
-      date: new Date().toISOString().slice(0, 10),
     });
   }
 
@@ -70,28 +85,8 @@ export default function BadgeReveal({ badge, onClose }: { badge: RevealBadge | n
         <div className="text-[11px] font-semibold uppercase tracking-eyebrow text-brand-red">Badge earned</div>
 
         {/* Medallion with rotating rays */}
-        <div className="relative mx-auto mt-4 flex h-40 w-40 items-center justify-center">
-          <div
-            className="animate-badge-rays absolute inset-0"
-            style={{
-              background: `conic-gradient(from 0deg, transparent 0 18deg, ${accent}22 18deg 22deg, transparent 22deg 40deg, ${accent}22 40deg 44deg, transparent 44deg)`,
-              borderRadius: '9999px',
-            }}
-          />
-          <div
-            className="animate-badge-pop relative flex h-32 w-32 items-center justify-center rounded-full"
-            style={{ background: accent, boxShadow: `0 10px 30px ${accent}66` }}
-          >
-            <div className="absolute inset-2 rounded-full border-2" style={{ borderColor: '#C9A84C' }} />
-            {/* shimmer sweep */}
-            <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
-              <div
-                className="absolute top-0 h-full w-1/3 bg-white/25 blur-md"
-                style={{ animation: 'badge-shimmer 2.4s ease-in-out 0.8s infinite' }}
-              />
-            </div>
-            <span className="text-5xl">{badge.emblem || '🏅'}</span>
-          </div>
+        <div className="mx-auto mt-4 flex justify-center">
+          <BadgeMedallion emblem={badge.emblem} accent={accent} size={128} />
         </div>
 
         <div className="animate-badge-rise">

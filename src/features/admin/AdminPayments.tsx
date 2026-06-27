@@ -3,12 +3,13 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/lib/toast';
-import { ScreenTitle, Card, Chip, Button } from '@/components/ui';
+import { ScreenTitle, Card, Chip, Button, PaymentBar } from '@/components/ui';
 import { Modal } from '@/components/ui/Modal';
 import { LoopRing, RingAvatar } from '@/components/brand/LoopRing';
 import { counterState, stateColor, clsx, aed, firstName } from '@/lib/utils';
 import { sendWhatsApp, templates } from '@/lib/whatsapp';
 import { assignPackage } from '@/lib/packages';
+import { generateReport } from '@/lib/ai';
 import AddMatchModal from '@/features/matches/AddMatchModal';
 import GroundFeesPanel from '@/features/finance/GroundFeesPanel';
 import type { Package, PackageType, Player, MatchFee, Match } from '@/lib/types';
@@ -62,6 +63,7 @@ export default function AdminPayments() {
 
   const assignedIds = new Set(packages.map((p) => p.player_id));
   const unassigned = allPlayers.filter((p) => !assignedIds.has(p.id));
+  const withExtra = allPlayers.filter((p) => p.extra_sessions > 0);
 
   // Aggregate packages per player so each kid shows ONCE with their combined
   // remaining (e.g. 1 left + an 8-pack = 9), instead of one card per package.
@@ -84,6 +86,28 @@ export default function AdminPayments() {
   function openAssign(playerId = '') {
     setPresetPlayer(playerId);
     setAssignOpen(true);
+  }
+
+  // End-of-package progress report: AI drafts a development summary and opens
+  // WhatsApp with a renewal nudge — coach effort is one tap.
+  async function sendPackageReport(p: PackageRow) {
+    if (!profile || !p.player?.parent_phone) return toast.show('No parent number on file');
+    toast.show('Writing progress report…');
+    try {
+      const text = await generateReport({
+        type: 'development',
+        childFirstName: firstName(p.player.full_name),
+        coachName: profile.full_name,
+        focusAreas: '',
+      });
+      await sendWhatsApp(
+        p.player.parent_phone,
+        templates.packageComplete(firstName(p.player.full_name), text),
+        { academyId: profile.academy_id, playerId: p.player.id, templateKey: 'packageComplete', refType: 'package', refId: p.id },
+      );
+    } catch {
+      toast.show('Could not generate report');
+    }
   }
 
   return (
@@ -142,6 +166,31 @@ export default function AdminPayments() {
             </Card>
           )}
 
+          {/* Players carrying extra (no-package) sessions — netted off next pack */}
+          {withExtra.length > 0 && (
+            <Card className="p-0">
+              <div className="border-b border-hairline px-4 py-2 text-[11px] font-semibold uppercase tracking-eyebrow text-ink/40">
+                Extra sessions taken ({withExtra.length})
+              </div>
+              <div className="max-h-56 divide-y divide-hairline overflow-auto">
+                {withExtra.map((p) => (
+                  <div key={p.id} className="flex items-center justify-between px-4 py-2.5 text-[13px]">
+                    <span className="font-medium">{p.full_name}</span>
+                    <div className="flex items-center gap-2">
+                      <Chip tone="amber">{p.extra_sessions} extra</Chip>
+                      <button
+                        onClick={() => openAssign(p.id)}
+                        className="rounded-chip bg-brand-red px-3 py-1 text-[11px] font-semibold text-paper"
+                      >
+                        Assign package
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+
           <div className="grid gap-3 md:grid-cols-2">
             {aggregated.map((a) => (
               <PlayerPackageCard key={a.playerId} agg={a} />
@@ -190,19 +239,27 @@ export default function AdminPayments() {
                   </div>
                 </div>
                 {p.player?.parent_phone ? (
-                  <button
-                    onClick={async () => {
-                      if (!profile || !p.player?.parent_phone) return;
-                      await sendWhatsApp(
-                        p.player.parent_phone,
-                        templates.renewalNudge(firstName(p.player.full_name), p.sessions_remaining ?? 0),
-                        { academyId: profile.academy_id, playerId: p.player.id, templateKey: 'renewalNudge', refType: 'package', refId: p.id },
-                      );
-                    }}
-                    className="rounded-chip bg-[#25D366]/15 px-2.5 py-1 text-[11px] font-semibold text-[#1c8c47]"
-                  >
-                    Send reminder
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => sendPackageReport(p)}
+                      className="rounded-chip border border-cardborder px-2.5 py-1 text-[11px] font-semibold text-brand-red"
+                    >
+                      Progress report
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (!profile || !p.player?.parent_phone) return;
+                        await sendWhatsApp(
+                          p.player.parent_phone,
+                          templates.renewalNudge(firstName(p.player.full_name), p.sessions_remaining ?? 0),
+                          { academyId: profile.academy_id, playerId: p.player.id, templateKey: 'renewalNudge', refType: 'package', refId: p.id },
+                        );
+                      }}
+                      className="rounded-chip bg-[#25D366]/15 px-2.5 py-1 text-[11px] font-semibold text-[#1c8c47]"
+                    >
+                      Reminder
+                    </button>
+                  </div>
                 ) : (
                   <Chip tone="amber">No WhatsApp</Chip>
                 )}
@@ -421,14 +478,20 @@ function MatchFeesTab() {
       {groups.map((g, gi) => {
         const gPaid = g.rows.filter((r) => r.state === 'confirmed').reduce((s, r) => s + Number(r.fee), 0);
         const gTotal = g.rows.reduce((s, r) => s + Number(r.fee), 0);
+        const toCollect = g.rows.filter((r) => r.state !== 'confirmed').length;
         return (
           <Card key={g.match?.id ?? gi} className="p-0">
-            <div className="flex items-center justify-between border-b border-hairline px-4 py-2.5">
-              <div>
-                <div className="text-[14px] font-semibold">vs {g.match?.opponent ?? 'Opponent'}</div>
-                <div className="text-[11px] text-ink/45">{dateLabel(g.match?.match_date)}</div>
+            <div className="border-b border-hairline px-4 py-2.5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-[14px] font-semibold">vs {g.match?.opponent ?? 'Opponent'}</div>
+                  <div className="text-[11px] text-ink/45">{dateLabel(g.match?.match_date)}</div>
+                </div>
+                <Chip tone={toCollect === 0 ? 'green' : 'amber'}>
+                  {toCollect === 0 ? 'All collected' : `${toCollect} to collect`}
+                </Chip>
               </div>
-              <Chip tone={gPaid >= gTotal ? 'green' : 'amber'}>{aed(gPaid)} / {aed(gTotal)}</Chip>
+              <PaymentBar paid={gPaid} total={gTotal} />
             </div>
             <div className="divide-y divide-hairline">
               {g.rows.map((f) => (
@@ -533,6 +596,16 @@ function AssignPackageModal({
           ? `Package assigned · ${applied} extra session${applied === 1 ? '' : 's'} deducted`
           : paid ? 'Package assigned · payment recorded' : 'Package assigned · payment pending',
       );
+      // Notify the parent (click-to-send), explaining any extra-session deduction.
+      if (selectedPlayer?.parent_phone) {
+        const remaining = type.sessions != null ? Math.max(0, type.sessions - applied) : null;
+        const sessionsLabel = type.sessions != null ? `${type.sessions}-session package` : `${type.name} package`;
+        await sendWhatsApp(
+          selectedPlayer.parent_phone,
+          templates.packageAssigned(firstName(selectedPlayer.full_name), sessionsLabel, remaining, applied),
+          { academyId: profile.academy_id, playerId, templateKey: 'packageAssigned' },
+        );
+      }
       setPlayerId('');
       setTypeId('');
       qc.invalidateQueries({ queryKey: ['admin-packages'] });

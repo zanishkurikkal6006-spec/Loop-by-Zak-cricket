@@ -3,7 +3,10 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCoaches } from '@/lib/queries';
-import { ScreenTitle, Card, StatCard, Chip } from '@/components/ui';
+import { useToast } from '@/lib/toast';
+import { sendWhatsApp, templates } from '@/lib/whatsapp';
+import { firstName } from '@/lib/utils';
+import { ScreenTitle, Card, StatCard, Chip, Button } from '@/components/ui';
 import { Modal } from '@/components/ui/Modal';
 import { RingAvatar } from '@/components/brand/LoopRing';
 import type { Profile, Report, Player } from '@/lib/types';
@@ -17,10 +20,12 @@ interface CoachMetrics {
   reportsSent: number;
   reportsPending: number;
   players: number;
+  lastReportAt: string | null;
 }
 
 export default function HeadCoachDashboard() {
   const { profile } = useAuth();
+  const toast = useToast();
   const { data: coaches = [] } = useCoaches();
 
   const { data: metrics } = useQuery({
@@ -29,21 +34,22 @@ export default function HeadCoachDashboard() {
     queryFn: async (): Promise<Record<string, CoachMetrics>> => {
       const [sessions, reports, groups] = await Promise.all([
         supabase.from('one_to_one_sessions').select('logged_by'),
-        supabase.from('reports').select('coach_id, status'),
+        supabase.from('reports').select('coach_id, status, created_at'),
         supabase.from('coach_groups').select('coach_id, group_id'),
       ]);
 
       const acc: Record<string, CoachMetrics> = {};
       const get = (id: string) =>
-        (acc[id] ??= { coachId: id, sessions: 0, reportsSent: 0, reportsPending: 0, players: 0 });
+        (acc[id] ??= { coachId: id, sessions: 0, reportsSent: 0, reportsPending: 0, players: 0, lastReportAt: null });
 
       for (const s of (sessions.data ?? []) as { logged_by: string | null }[]) {
         if (s.logged_by) get(s.logged_by).sessions += 1;
       }
-      for (const r of (reports.data ?? []) as { coach_id: string; status: string }[]) {
+      for (const r of (reports.data ?? []) as { coach_id: string; status: string; created_at: string }[]) {
         const m = get(r.coach_id);
         if (r.status === 'sent') m.reportsSent += 1;
         else m.reportsPending += 1;
+        if (!m.lastReportAt || r.created_at > m.lastReportAt) m.lastReportAt = r.created_at;
       }
       // Players reachable per coach = players in that coach's groups.
       const groupRows = (groups.data ?? []) as { coach_id: string; group_id: string }[];
@@ -70,6 +76,18 @@ export default function HeadCoachDashboard() {
   const totalPending = Object.values(metrics ?? {}).reduce((s, m) => s + m.reportsPending, 0);
   const [selected, setSelected] = useState<Profile | null>(null);
 
+  const daysSince = (iso: string | null) =>
+    iso == null ? null : Math.floor((Date.now() - new Date(iso).getTime()) / 864e5);
+
+  function remind(coach: Profile, days: number | null) {
+    if (!profile) return;
+    if (!coach.phone) return toast.show('No phone number on file for this coach');
+    sendWhatsApp(coach.phone, templates.coachReminder(firstName(coach.full_name), days), {
+      academyId: profile.academy_id,
+      templateKey: 'coachReminder',
+    });
+  }
+
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
@@ -87,14 +105,17 @@ export default function HeadCoachDashboard() {
       <div className="grid gap-3 md:grid-cols-2">
         {coaches.map((c) => {
           const m = metrics?.[c.id];
-          const quiet = (m?.reportsSent ?? 0) === 0 && (m?.sessions ?? 0) === 0;
+          const days = daysSince(m?.lastReportAt ?? null);
+          const quiet = days == null || days >= 7;
           return (
             <Card key={c.id} className="flex cursor-pointer items-start gap-3" onClick={() => setSelected(c)}>
               <RingAvatar name={c.full_name} size={48} />
               <div className="flex-1">
                 <div className="flex items-center justify-between">
                   <div className="text-[15px] font-semibold">{c.full_name}</div>
-                  <Chip tone={quiet ? 'amber' : 'green'}>{quiet ? 'Quiet' : 'Reporting well'}</Chip>
+                  <Chip tone={quiet ? 'amber' : 'green'}>
+                    {days == null ? 'No reports yet' : days === 0 ? 'Reported today' : `${days}d since report`}
+                  </Chip>
                 </div>
                 <div className="mt-3 grid grid-cols-4 gap-2 text-center">
                   <Metric label="Sessions" value={m?.sessions ?? 0} />
@@ -102,6 +123,16 @@ export default function HeadCoachDashboard() {
                   <Metric label="Pending" value={m?.reportsPending ?? 0} />
                   <Metric label="Players" value={m?.players ?? 0} />
                 </div>
+                {quiet && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="mt-3"
+                    onClick={(e) => { e.stopPropagation(); remind(c, days); }}
+                  >
+                    Nudge to report
+                  </Button>
+                )}
               </div>
             </Card>
           );

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMyOneToOneBlocks, useMyGroups, usePlayers } from '@/lib/queries';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
@@ -7,48 +7,21 @@ import { useToast } from '@/lib/toast';
 import { LoopRing, RingAvatar } from '@/components/brand/LoopRing';
 import { Button, Chip, ScreenTitle } from '@/components/ui';
 import { Modal } from '@/components/ui/Modal';
+import { Icon } from '@/components/ui/Icon';
 import { stateColor, firstName } from '@/lib/utils';
-import type { OneToOneBlock, Player } from '@/lib/types';
+import type { OneToOneBlock, OneToOneSession, Player } from '@/lib/types';
 
 // 1-on-1 Sessions: gold hero (all-time delivered), assigned blocks sorted
 // most-remaining-first, each with the signature ring + bar tracker. Logging a
 // session deducts one from the block.
 export default function CoachOneToOne() {
-  const { profile } = useAuth();
-  const toast = useToast();
-  const queryClient = useQueryClient();
   const { data: blocks = [] } = useMyOneToOneBlocks();
   const { data: groups = [] } = useMyGroups();
   const { data: players = [] } = usePlayers(groups.length ? groups.map((g) => g.id) : undefined);
   const [adding, setAdding] = useState(false);
+  const [logBlock, setLogBlock] = useState<(OneToOneBlock & { player: Player }) | null>(null);
 
   const totalDelivered = blocks.reduce((s, b) => s + b.sessions_used, 0);
-
-  const logSession = useMutation({
-    mutationFn: async (block: OneToOneBlock) => {
-      if (!profile) throw new Error('Not signed in');
-      if (block.sessions_remaining <= 0) throw new Error('No sessions remaining');
-      // Record the session and decrement the block.
-      const { error: sErr } = await supabase.from('one_to_one_sessions').insert({
-        academy_id: profile.academy_id,
-        block_id: block.id,
-        session_date: new Date().toISOString().slice(0, 10),
-        time_slot: new Date().toLocaleTimeString('en-AE', { hour: '2-digit', minute: '2-digit' }),
-        logged_by: profile.id,
-      });
-      if (sErr) throw sErr;
-      const { error: uErr } = await supabase
-        .from('one_to_one_blocks')
-        .update({ sessions_used: block.sessions_used + 1 })
-        .eq('id', block.id);
-      if (uErr) throw uErr;
-    },
-    onSuccess: () => {
-      toast.show('Session logged');
-      queryClient.invalidateQueries({ queryKey: ['one-to-one'] });
-    },
-    onError: (e) => toast.show(e instanceof Error ? e.message : 'Could not log'),
-  });
 
   return (
     <div className="space-y-5">
@@ -68,12 +41,7 @@ export default function CoachOneToOne() {
 
       <div className="space-y-3">
         {blocks.map((block) => (
-          <BlockCard
-            key={block.id}
-            block={block}
-            onLog={() => logSession.mutate(block)}
-            pending={logSession.isPending}
-          />
+          <BlockCard key={block.id} block={block} onLog={() => setLogBlock(block)} />
         ))}
         {!blocks.length && (
           <div className="card flex h-32 items-center justify-center text-[13px] text-ink/40">
@@ -83,7 +51,74 @@ export default function CoachOneToOne() {
       </div>
 
       <AddBlockModal open={adding} onClose={() => setAdding(false)} players={players} />
+      <LogSessionModal block={logBlock} onClose={() => setLogBlock(null)} />
     </div>
+  );
+}
+
+// Log a private session with a chosen date + time slot (so a coach can keep an
+// accurate diary and plan around it), then decrement the block.
+function LogSessionModal({
+  block,
+  onClose,
+}: {
+  block: (OneToOneBlock & { player: Player }) | null;
+  onClose: () => void;
+}) {
+  const { profile } = useAuth();
+  const toast = useToast();
+  const qc = useQueryClient();
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [time, setTime] = useState('16:00');
+  const [saving, setSaving] = useState(false);
+
+  async function save() {
+    if (!profile || !block) return;
+    if (block.sessions_remaining <= 0) return toast.show('No sessions remaining');
+    setSaving(true);
+    try {
+      const { error: sErr } = await supabase.from('one_to_one_sessions').insert({
+        academy_id: profile.academy_id,
+        block_id: block.id,
+        session_date: date,
+        time_slot: time,
+        logged_by: profile.id,
+      });
+      if (sErr) throw sErr;
+      const { error: uErr } = await supabase
+        .from('one_to_one_blocks')
+        .update({ sessions_used: block.sessions_used + 1 })
+        .eq('id', block.id);
+      if (uErr) throw uErr;
+      toast.show('Session logged');
+      qc.invalidateQueries({ queryKey: ['one-to-one'] });
+      qc.invalidateQueries({ queryKey: ['one-to-one-sessions', block.id] });
+      onClose();
+    } catch {
+      toast.show('Could not log session');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const field = 'h-11 w-full rounded-pill border border-cardborder bg-white px-3 text-[14px] outline-none focus:border-gold';
+
+  return (
+    <Modal open={!!block} onClose={onClose} title={block ? `Log session · ${block.player?.full_name}` : ''}>
+      <div className="space-y-3">
+        <label className="block">
+          <span className="mb-1 block text-[11px] font-semibold uppercase tracking-eyebrow text-ink/40">Date</span>
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={field} />
+        </label>
+        <label className="block">
+          <span className="mb-1 block text-[11px] font-semibold uppercase tracking-eyebrow text-ink/40">Time slot</span>
+          <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className={field} />
+        </label>
+        <Button className="w-full" disabled={saving} onClick={save}>
+          {saving ? 'Logging…' : 'Log session'}
+        </Button>
+      </div>
+    </Modal>
   );
 }
 
@@ -175,16 +210,15 @@ function AddBlockModal({
 function BlockCard({
   block,
   onLog,
-  pending,
 }: {
   block: OneToOneBlock & { player: Player };
   onLog: () => void;
-  pending: boolean;
 }) {
   const remaining = block.sessions_remaining;
   const ringState = remaining >= 3 ? 'healthy' : remaining >= 1 ? 'low' : 'exhausted';
   const color = stateColor(ringState);
   const pct = block.sessions_total ? block.sessions_used / block.sessions_total : 0;
+  const [showHistory, setShowHistory] = useState(false);
 
   return (
     <div className="card p-4">
@@ -209,10 +243,51 @@ function BlockCard({
             {remaining === 0 ? 'Renewal needed' : `${remaining} remaining`}
           </span>
         </span>
-        <Button size="sm" disabled={pending || remaining <= 0} onClick={onLog}>
+        <Button size="sm" disabled={remaining <= 0} onClick={onLog}>
           + Log for {firstName(block.player?.full_name ?? '')}
         </Button>
       </div>
+
+      <button
+        onClick={() => setShowHistory((s) => !s)}
+        className="mt-3 flex items-center gap-1 text-[12px] font-semibold text-brand-red"
+      >
+        <Icon name={showHistory ? 'chevron-up' : 'chevron-down'} size={14} stroke="#9C1116" />
+        Session dates
+      </button>
+      {showHistory && <SessionHistory blockId={block.id} />}
+    </div>
+  );
+}
+
+function SessionHistory({ blockId }: { blockId: string }) {
+  const { data: sessions = [], isLoading } = useQuery({
+    queryKey: ['one-to-one-sessions', blockId],
+    queryFn: async (): Promise<OneToOneSession[]> => {
+      const { data, error } = await supabase
+        .from('one_to_one_sessions')
+        .select('*')
+        .eq('block_id', blockId)
+        .order('session_date', { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as OneToOneSession[];
+    },
+  });
+
+  const fmt = (d: string) => new Date(d).toLocaleDateString('en-AE', { weekday: 'short', day: 'numeric', month: 'short' });
+
+  return (
+    <div className="mt-2 rounded-card border border-cardborder bg-white p-2">
+      {isLoading && <div className="px-2 py-1 text-[12px] text-ink/45">Loading…</div>}
+      {!isLoading && !sessions.length && (
+        <div className="px-2 py-1 text-[12px] text-ink/45">No sessions logged yet.</div>
+      )}
+      {sessions.map((s) => (
+        <div key={s.id} className="flex items-center justify-between px-2 py-1.5 text-[12.5px]">
+          <span className="font-medium">{fmt(s.session_date)}</span>
+          <span className="text-ink/50">{s.time_slot ? s.time_slot.slice(0, 5) : ''}</span>
+        </div>
+      ))}
     </div>
   );
 }

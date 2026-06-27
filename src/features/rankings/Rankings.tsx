@@ -3,6 +3,8 @@ import { useRankings, useGroups, type RankingStat } from '@/lib/queries';
 import { ScreenTitle, Card, Chip } from '@/components/ui';
 import { RingAvatar } from '@/components/brand/LoopRing';
 import { clsx } from '@/lib/utils';
+import PlayerStatsModal from './PlayerStatsModal';
+import type { Player } from '@/lib/types';
 
 // Leaderboard with Group · Stat filters, re-sorting live. Shared by Coach and
 // Head Coach (read-only — same data, the view just differs by route/eyebrow).
@@ -32,11 +34,13 @@ function statValue(stat: RankingStat, r: { runs: number; avg: number; wickets: n
 export default function Rankings({ eyebrow = 'Coach' }: { eyebrow?: string }) {
   const [stat, setStat] = useState<RankingStat>('runs');
   const [groupId, setGroupId] = useState<string | undefined>();
+  const [selected, setSelected] = useState<Player | null>(null);
   const { data: groups = [] } = useGroups();
   const { data: rows = [], isLoading } = useRankings(stat, groupId);
 
   const podium = rows.slice(0, 3);
   const rest = rows.slice(3);
+  const groupName = (gid: string | null) => groups.find((g) => g.id === gid)?.name ?? null;
 
   return (
     <div className="space-y-5">
@@ -72,7 +76,7 @@ export default function Rankings({ eyebrow = 'Coach' }: { eyebrow?: string }) {
       {podium.length > 0 && (
         <div className="flex items-end justify-center gap-4">
           {podium.map((r, i) => (
-            <div key={r.player.id} className="flex flex-col items-center">
+            <button key={r.player.id} onClick={() => setSelected(r.player)} className="flex flex-col items-center">
               <RingAvatar name={r.player.full_name} size={i === 0 ? 72 : 56} color={PODIUM_COLORS[i]} />
               <div className="mt-2 max-w-[88px] truncate text-center text-[13px] font-semibold">
                 {r.player.full_name}
@@ -83,7 +87,7 @@ export default function Rankings({ eyebrow = 'Coach' }: { eyebrow?: string }) {
               <Chip tone={i === 0 ? 'gold' : 'neutral'} className="mt-1">
                 #{i + 1}
               </Chip>
-            </div>
+            </button>
           ))}
         </div>
       )}
@@ -92,7 +96,11 @@ export default function Rankings({ eyebrow = 'Coach' }: { eyebrow?: string }) {
       {rest.length > 0 && (
         <Card className="divide-y divide-hairline p-0">
           {rest.map((r, i) => (
-            <div key={r.player.id} className="flex items-center gap-3 px-4 py-3">
+            <button
+              key={r.player.id}
+              onClick={() => setSelected(r.player)}
+              className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-hairline/40"
+            >
               <span className="w-6 text-center font-display text-lg text-ink/40">{i + 4}</span>
               <RingAvatar name={r.player.full_name} size={36} />
               <div className="flex-1 min-w-0">
@@ -102,10 +110,16 @@ export default function Rankings({ eyebrow = 'Coach' }: { eyebrow?: string }) {
                 </div>
               </div>
               <span className="font-display text-xl">{statValue(stat, r)}</span>
-            </div>
+            </button>
           ))}
         </Card>
       )}
+
+      <PlayerStatsModal
+        player={selected}
+        groupName={selected ? groupName(selected.group_id) : null}
+        onClose={() => setSelected(null)}
+      />
     </div>
   );
 }

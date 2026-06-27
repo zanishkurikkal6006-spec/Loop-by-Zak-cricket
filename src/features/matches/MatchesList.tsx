@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/lib/toast';
 import { parseCricHerosScorecard, type ParsedScorecard } from '@/lib/ai';
 import { supabase } from '@/lib/supabase';
-import { ScreenTitle, Card, Chip, Button } from '@/components/ui';
+import { ScreenTitle, Card, Chip, Button, PaymentBar } from '@/components/ui';
 import { Icon } from '@/components/ui/Icon';
 import { Modal } from '@/components/ui/Modal';
 import { LoopRing, RingAvatar } from '@/components/brand/LoopRing';
@@ -134,18 +134,21 @@ function ScorecardModal({
   const toast = useToast();
   const { data: rows = [] } = useMatchScorecard(match?.id ?? null);
   const [notes, setNotes] = useState<Record<string, string>>({});
+  const [field, setField] = useState<Record<string, { catches?: string; runOuts?: string }>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
 
-  // Save the coach "why" note — the accountability/evidence record.
-  async function saveNote(rowId: string) {
-    setSavingId(rowId);
-    const { error } = await supabase
-      .from('match_players')
-      .update({ coach_why_note: notes[rowId] ?? '' })
-      .eq('id', rowId);
+  // Save the coach "why" note + fielding (catches / run-outs) for this player.
+  async function saveRow(row: { id: string; catches: number; run_outs: number; coach_why_note: string | null }) {
+    setSavingId(row.id);
+    const f = field[row.id] ?? {};
+    const update: Record<string, unknown> = {};
+    if (notes[row.id] !== undefined) update.coach_why_note = notes[row.id];
+    if (f.catches !== undefined) update.catches = Number(f.catches) || 0;
+    if (f.runOuts !== undefined) update.run_outs = Number(f.runOuts) || 0;
+    const { error } = await supabase.from('match_players').update(update).eq('id', row.id);
     setSavingId(null);
-    if (error) return toast.show('Could not save note');
-    toast.show('Note saved');
+    if (error) return toast.show('Could not save');
+    toast.show('Saved');
     qc.invalidateQueries({ queryKey: ['scorecard', match?.id] });
   }
 
@@ -179,28 +182,57 @@ function ScorecardModal({
             {/* The coach "why" note — read-only for oversight, editable for the
                 owning coach (e.g. "moved to 4 to face spin"). */}
             {editable ? (
-              <div className="mt-2 flex items-center gap-2">
-                <input
-                  defaultValue={r.coach_why_note ?? ''}
-                  onChange={(e) => setNotes((n) => ({ ...n, [r.id]: e.target.value }))}
-                  placeholder="Why note (e.g. moved to 4 to face spin)"
-                  className="h-9 flex-1 rounded-chip border border-cardborder bg-white px-3 text-[12px] outline-none focus:border-gold"
-                />
-                <button
-                  onClick={() => saveNote(r.id)}
-                  disabled={savingId === r.id || notes[r.id] === undefined}
-                  className="rounded-chip border border-cardborder px-2 py-1 text-[11px] font-semibold text-brand-red disabled:opacity-40"
-                >
-                  Save
-                </button>
+              <div className="mt-2 space-y-2">
+                <div className="flex items-center gap-2">
+                  <label className="flex items-center gap-1 text-[11px] text-ink/55">
+                    Catches
+                    <input
+                      type="number"
+                      defaultValue={r.catches ?? 0}
+                      onChange={(e) => setField((f) => ({ ...f, [r.id]: { ...f[r.id], catches: e.target.value } }))}
+                      className="h-8 w-14 rounded-chip border border-cardborder bg-white px-2 text-[12px] outline-none focus:border-gold"
+                    />
+                  </label>
+                  <label className="flex items-center gap-1 text-[11px] text-ink/55">
+                    Run-outs
+                    <input
+                      type="number"
+                      defaultValue={r.run_outs ?? 0}
+                      onChange={(e) => setField((f) => ({ ...f, [r.id]: { ...f[r.id], runOuts: e.target.value } }))}
+                      className="h-8 w-14 rounded-chip border border-cardborder bg-white px-2 text-[12px] outline-none focus:border-gold"
+                    />
+                  </label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    defaultValue={r.coach_why_note ?? ''}
+                    onChange={(e) => setNotes((n) => ({ ...n, [r.id]: e.target.value }))}
+                    placeholder="Why note (e.g. moved to 4 to face spin)"
+                    className="h-9 flex-1 rounded-chip border border-cardborder bg-white px-3 text-[12px] outline-none focus:border-gold"
+                  />
+                  <button
+                    onClick={() => saveRow(r)}
+                    disabled={savingId === r.id}
+                    className="rounded-chip border border-cardborder px-2 py-1 text-[11px] font-semibold text-brand-red disabled:opacity-40"
+                  >
+                    Save
+                  </button>
+                </div>
               </div>
             ) : (
-              r.coach_why_note && (
-                <div className="mt-2 rounded-chip bg-chip-gold px-3 py-2 text-[12px] text-gold-dark">
-                  <span className="font-semibold">Coach's note: </span>
-                  {r.coach_why_note}
-                </div>
-              )
+              <>
+                {((r.catches ?? 0) + (r.run_outs ?? 0)) > 0 && (
+                  <div className="mt-2 text-[11px] text-ink/55">
+                    Fielding: {r.catches ?? 0} catch{(r.catches ?? 0) === 1 ? '' : 'es'} · {r.run_outs ?? 0} run-out{(r.run_outs ?? 0) === 1 ? '' : 's'}
+                  </div>
+                )}
+                {r.coach_why_note && (
+                  <div className="mt-2 rounded-chip bg-chip-gold px-3 py-2 text-[12px] text-gold-dark">
+                    <span className="font-semibold">Coach's note: </span>
+                    {r.coach_why_note}
+                  </div>
+                )}
+              </>
             )}
           </div>
         ))}
@@ -277,14 +309,20 @@ function CoachMatchPayments() {
       {groups.map((g, gi) => {
         const gPaid = g.rows.filter((r) => r.state === 'confirmed').reduce((s, r) => s + Number(r.fee), 0);
         const gTotal = g.rows.reduce((s, r) => s + Number(r.fee), 0);
+        const toCollect = g.rows.filter((r) => r.state !== 'confirmed').length;
         return (
           <Card key={g.match?.id ?? gi} className="p-0">
-            <div className="flex items-center justify-between border-b border-hairline px-4 py-2.5">
-              <div>
-                <div className="text-[14px] font-semibold">vs {g.match?.opponent ?? 'Opponent'}</div>
-                <div className="text-[11px] text-ink/45">{dateLabel(g.match?.match_date)}</div>
+            <div className="border-b border-hairline px-4 py-2.5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-[14px] font-semibold">vs {g.match?.opponent ?? 'Opponent'}</div>
+                  <div className="text-[11px] text-ink/45">{dateLabel(g.match?.match_date)}</div>
+                </div>
+                <Chip tone={toCollect === 0 ? 'green' : 'amber'}>
+                  {toCollect === 0 ? 'All collected' : `${toCollect} to collect`}
+                </Chip>
               </div>
-              <Chip tone={gPaid >= gTotal ? 'green' : 'amber'}>{aed(gPaid)} / {aed(gTotal)}</Chip>
+              <PaymentBar paid={gPaid} total={gTotal} />
             </div>
             <div className="divide-y divide-hairline">
               {g.rows.map((f) => (

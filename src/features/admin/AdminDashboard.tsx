@@ -30,7 +30,7 @@ export default function AdminDashboard() {
           supabase.from('packages').select('player_id, sessions_remaining'),
           supabase
             .from('attendance_sessions')
-            .select('id', { count: 'exact', head: true })
+            .select('id')
             .eq('status', 'confirmed')
             .gte('session_date', weekAgo),
           supabase.from('reports').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo),
@@ -50,6 +50,20 @@ export default function AdminDashboard() {
       const assignedIds = new Set(pkg.map((p) => p.player_id));
       const unassignedPlayers = playerRows.filter((p) => !assignedIds.has(p.id)).length;
 
+      // Distinct kids who attended (across all groups) in the last 7 days.
+      const weekSessionIds = ((sessionsWeek.data ?? []) as { id: string }[]).map((s) => s.id);
+      let kidsAttendedWeek = 0;
+      let attendanceMarksWeek = 0;
+      if (weekSessionIds.length) {
+        const { data: recs } = await supabase
+          .from('attendance_records')
+          .select('player_id')
+          .in('session_id', weekSessionIds);
+        const rows = (recs ?? []) as { player_id: string }[];
+        attendanceMarksWeek = rows.length;
+        kidsAttendedWeek = new Set(rows.map((r) => r.player_id)).size;
+      }
+
       const mf = (matchFees.data ?? []) as { fee: number; state: string }[];
       const matchCollected = mf.filter((f) => f.state === 'confirmed').reduce((s, f) => s + Number(f.fee), 0);
       const matchPending = mf.filter((f) => f.state !== 'confirmed').reduce((s, f) => s + Number(f.fee), 0);
@@ -65,7 +79,9 @@ export default function AdminDashboard() {
         activePackages,
         renewals,
         unassignedPlayers,
-        sessionsWeek: sessionsWeek.count ?? 0,
+        sessionsWeek: weekSessionIds.length,
+        kidsAttendedWeek,
+        attendanceMarksWeek,
         reportsWeek: reportsWeek.count ?? 0,
         matchCollected,
         matchPending,
@@ -166,8 +182,16 @@ export default function AdminDashboard() {
 
       {/* This week */}
       <Card>
-        <div className="eyebrow text-ink/40">Last 7 days</div>
-        <div className="mt-3 grid grid-cols-3 gap-3">
+        <div className="eyebrow text-ink/40">Last 7 days · all groups</div>
+        <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
+          <div>
+            <div className="font-display text-2xl leading-none text-success">{s?.kidsAttendedWeek ?? '—'}</div>
+            <div className="mt-1 text-[11px] text-ink/45">Kids attended</div>
+          </div>
+          <div>
+            <div className="font-display text-2xl leading-none">{s?.attendanceMarksWeek ?? '—'}</div>
+            <div className="mt-1 text-[11px] text-ink/45">Total attendances</div>
+          </div>
           <div>
             <div className="font-display text-2xl leading-none">{s?.sessionsWeek ?? '—'}</div>
             <div className="mt-1 text-[11px] text-ink/45">Sessions run</div>
@@ -175,10 +199,6 @@ export default function AdminDashboard() {
           <div>
             <div className="font-display text-2xl leading-none">{s?.reportsWeek ?? '—'}</div>
             <div className="mt-1 text-[11px] text-ink/45">Reports written</div>
-          </div>
-          <div>
-            <div className="font-display text-2xl leading-none">{aed(s?.matchPending ?? 0)}</div>
-            <div className="mt-1 text-[11px] text-ink/45">Match fees pending</div>
           </div>
         </div>
       </Card>

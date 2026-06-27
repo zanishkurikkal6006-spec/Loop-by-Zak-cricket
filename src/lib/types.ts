@@ -200,6 +200,8 @@ export interface MatchPlayer {
   balls: number;
   how_out: string | null;
   wickets: number;
+  catches: number;
+  run_outs: number;
   coach_why_note: string | null;
 }
 

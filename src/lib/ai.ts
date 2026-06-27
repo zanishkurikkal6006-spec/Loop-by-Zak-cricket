@@ -136,8 +136,20 @@ function samplePlaceholderDevelopmentReport(i: DevelopmentReportInput): string {
     `Next block we'll focus on playing straighter under pace and building longer innings through better running between the wickets. A little work on the front-foot defence will round out a very solid game.`,
     `The next step is converting good starts into bigger scores and sharpening decision-making in the middle overs. We'll also add some targeted work on backing up in the field.`,
   ];
+  const headlineVariants = [
+    `A really encouraging block for ${name}${group} — clear progress, a great attitude, and plenty to build on.`,
+    `${name}${group} has grown noticeably this block, both in skill and confidence. Here's the full picture.`,
+    `A strong block of development for ${name}${group}, with standout moments and clear next steps.`,
+  ];
+  const attitudeVariants = [
+    `${name} brings energy and a coachable attitude to every session, listens carefully, and supports teammates well.`,
+    `Consistent effort, great body language, and a genuine love for the game — ${name} sets a positive tone in the group.`,
+  ];
+  // Sections are emitted as UPPERCASE headings followed by body text; the PDF
+  // renders each as its own styled block (the title is added by the template).
   return [
-    `DEVELOPMENT REPORT — ${name}${group}`,
+    `HEADLINE`,
+    pick(headlineVariants),
     ``,
     `FOCUS AREAS THIS BLOCK`,
     focus.charAt(0).toUpperCase() + focus.slice(1) + '.',
@@ -145,11 +157,14 @@ function samplePlaceholderDevelopmentReport(i: DevelopmentReportInput): string {
     `PROGRESS & STRENGTHS`,
     pick(strengthsVariants),
     ``,
+    `ATTITUDE & EFFORT`,
+    pick(attitudeVariants),
+    ``,
     `WHAT TO WORK ON NEXT`,
     pick(nextVariants),
     ``,
     `COACH'S NOTE`,
-    `${name} is a joy to coach and sets a great example with their attitude and effort. Keep supporting their love of the game at home — the foundations being laid now will serve them well. — ${coach}, Loop by Zak Cricket`,
+    `${name} is a joy to coach. Keep supporting their love of the game at home — the foundations being laid now will serve them well. — ${coach}, Loop by Zak Cricket`,
   ].join('\n');
 }
 

@@ -268,6 +268,26 @@ export interface PlayerBadge {
   sent_at: string | null;
 }
 
+export interface AssessmentRating {
+  rating: number; // 1–5
+  comment?: string;
+}
+
+export interface Assessment {
+  id: string;
+  academy_id: string;
+  player_id: string;
+  coach_id: string | null;
+  assessment_date: string;
+  ratings: Record<string, AssessmentRating>;
+  strengths: string | null;
+  areas: string | null;
+  coach_comments: string | null;
+  goals: string | null;
+  video_url: string | null;
+  created_at: string;
+}
+
 export interface Program {
   id: string;
   academy_id: string;

@@ -35,6 +35,7 @@ export function academyLogoUrl(): string | null {
 /** Fetch the academy logo as a data URL (cached), for embedding in PDFs. */
 export async function academyLogoDataUrl(): Promise<string | null> {
   if (!_logoUrl) return null;
+  if (_logoUrl.startsWith('data:')) return _logoUrl; // already inline
   if (_logoData) return _logoData;
   if (!_logoLoading) {
     _logoLoading = fetch(_logoUrl)

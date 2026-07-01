@@ -34,7 +34,8 @@ export default function BadgeReveal({ badge, onClose }: { badge: RevealBadge | n
       b: badge.badgeName,
       g: badge.glyph,
       ac: academyName(),
-      ...(academyLogoUrl() ? { lo: academyLogoUrl() as string } : {}),
+      // Only pass hosted logo URLs in the link (inline data-URLs are too large).
+      ...(academyLogoUrl()?.startsWith('http') ? { lo: academyLogoUrl() as string } : {}),
       ...(badge.criteria ? { c: badge.criteria } : {}),
       ...(badge.accent ? { a: badge.accent } : {}),
     });

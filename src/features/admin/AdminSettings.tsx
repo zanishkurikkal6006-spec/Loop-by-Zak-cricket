@@ -96,6 +96,39 @@ export default function AdminSettings() {
       setAcLogo(academy.logo_url ?? '');
     }
   }, [academy]);
+  // Upload a logo file — downscale to <=256px and store it inline (a data URL),
+  // so no image hosting / URL is needed.
+  async function onLogoFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (!file.type.startsWith('image/')) return toast.show('Please choose an image file');
+    try {
+      const dataUrl = await new Promise<string>((res, rej) => {
+        const reader = new FileReader();
+        reader.onload = () => res(reader.result as string);
+        reader.onerror = rej;
+        reader.readAsDataURL(file);
+      });
+      const img = await new Promise<HTMLImageElement>((res, rej) => {
+        const i = new Image();
+        i.onload = () => res(i);
+        i.onerror = rej;
+        i.src = dataUrl;
+      });
+      const max = 256;
+      const scale = Math.min(1, max / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d')?.drawImage(img, 0, 0, canvas.width, canvas.height);
+      setAcLogo(canvas.toDataURL('image/png'));
+      toast.show('Logo ready — tap Save branding');
+    } catch {
+      toast.show('Could not read that image');
+    }
+  }
+
   async function saveBranding() {
     if (!profile || !acName.trim()) return toast.show('Academy name is required');
     const { error } = await supabase
@@ -267,14 +300,22 @@ export default function AdminSettings() {
           Your academy name &amp; logo appear on all reports, certificates and parent messages.
           “Powered by Loop by Zak Cricket” stays as the platform credit.
         </p>
-        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-          <input value={acName} onChange={(e) => setAcName(e.target.value)} placeholder="Academy name (e.g. Danube Cricket Academy)" className={field} />
-          <input value={acLogo} onChange={(e) => setAcLogo(e.target.value)} placeholder="Logo image URL (https://…)" className={field} />
+        <input value={acName} onChange={(e) => setAcName(e.target.value)} placeholder="Academy name (e.g. Danube Cricket Academy)" className={field} />
+        <div className="mt-3 flex items-center gap-3">
+          {acLogo.trim() ? (
+            <img src={acLogo.trim()} alt="" className="h-14 w-14 rounded-card border border-cardborder object-contain" />
+          ) : (
+            <div className="flex h-14 w-14 items-center justify-center rounded-card border border-dashed border-cardborder text-[10px] text-ink/40">No logo</div>
+          )}
+          <label className="cursor-pointer rounded-pill border border-cardborder bg-white px-4 py-2 text-[12px] font-semibold text-brand-red">
+            {acLogo ? 'Change logo' : 'Upload logo'}
+            <input type="file" accept="image/*" onChange={onLogoFile} className="hidden" />
+          </label>
+          {acLogo && (
+            <button onClick={() => setAcLogo('')} className="text-[12px] font-semibold text-danger">Remove</button>
+          )}
         </div>
-        <div className="mt-2 flex items-center gap-3">
-          {acLogo.trim() && <img src={acLogo.trim()} alt="" className="h-10 w-10 rounded-full object-contain" />}
-          <Button size="sm" onClick={saveBranding}>Save branding</Button>
-        </div>
+        <Button size="sm" className="mt-3" onClick={saveBranding}>Save branding</Button>
       </Card>
 
       {/* Coaches & staff */}

@@ -6,7 +6,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/lib/toast';
 import { Button, Card, Chip, ScreenTitle } from '@/components/ui';
 import { Icon } from '@/components/ui/Icon';
-import { clsx } from '@/lib/utils';
+import { Modal } from '@/components/ui/Modal';
+import { clsx, firstName } from '@/lib/utils';
+import { sendWhatsApp, templates } from '@/lib/whatsapp';
 import BatchPicker, { type BatchSelection } from '@/features/attendance/BatchPicker';
 import { applyAttendanceUsage } from '@/lib/packages';
 import type { AttendanceRecord, AttendanceSession, AttendanceState, Player } from '@/lib/types';
@@ -71,6 +73,7 @@ function PendingCard({ session }: { session: AttendanceSession }) {
   const { profile } = useAuth();
   const toast = useToast();
   const queryClient = useQueryClient();
+  const [notify, setNotify] = useState(false);
 
   const records = useQuery({
     queryKey: ['attendance-records', session.id],
@@ -137,16 +140,33 @@ function PendingCard({ session }: { session: AttendanceSession }) {
       if (error) throw error;
       // Decrement packages / accrue extra sessions for the marked players.
       await applyAttendanceUsage(session.id);
-      // Production: enqueue parent WhatsApp messages here (outbound_messages).
     },
     onSuccess: () => {
-      toast.show('Confirmed · WhatsApp sent to parents');
-      queryClient.invalidateQueries({ queryKey: ['attendance-pending'] });
+      toast.show('Confirmed — now notify parents');
       queryClient.invalidateQueries({ queryKey: ['admin-packages'] });
       queryClient.invalidateQueries({ queryKey: ['players'] });
+      // Open the "send to parents" step; the card leaves Pending when it closes.
+      setNotify(true);
     },
     onError: (e) => toast.show(e instanceof Error ? e.message : 'Could not confirm'),
   });
+
+  const dateLabel = new Date(session.session_date).toLocaleDateString('en-AE', {
+    weekday: 'short', day: 'numeric', month: 'short',
+  });
+
+  function messageParent(r: (typeof rows)[number]) {
+    if (!profile || !r.player?.parent_phone) return;
+    sendWhatsApp(
+      r.player.parent_phone,
+      templates.attendanceConfirmed(firstName(r.player.full_name), dateLabel, r.state === 'late'),
+      { academyId: profile.academy_id, playerId: r.player_id, templateKey: 'attendanceConfirmed', refType: 'attendance_session', refId: session.id },
+    );
+  }
+  function closeNotify() {
+    setNotify(false);
+    queryClient.invalidateQueries({ queryKey: ['attendance-pending'] });
+  }
 
   return (
     <Card>
@@ -198,6 +218,42 @@ function PendingCard({ session }: { session: AttendanceSession }) {
           );
         })}
       </div>
+
+      {/* Step: send attendance confirmations to parents */}
+      <Modal open={notify} onClose={closeNotify} title={`Notify parents · ${dateLabel}`}>
+        <div className="space-y-3">
+          <p className="text-[12px] text-ink/55">
+            Attendance confirmed. Send each parent a WhatsApp confirmation.
+          </p>
+          <Card className="divide-y divide-hairline p-0">
+            {rows.map((r) => (
+              <div key={r.id} className="flex items-center justify-between px-4 py-2.5 text-[13px]">
+                <div>
+                  <div className="font-medium">{r.player?.full_name}</div>
+                  <div className="text-[11px] text-ink/45">{r.state === 'present' ? 'Present' : 'Late'}</div>
+                </div>
+                {r.player?.parent_phone ? (
+                  <button onClick={() => messageParent(r)} className="rounded-chip bg-[#25D366]/15 px-3 py-1 text-[11px] font-semibold text-[#1c8c47]">
+                    WhatsApp
+                  </button>
+                ) : (
+                  <Chip tone="amber">No number</Chip>
+                )}
+              </div>
+            ))}
+          </Card>
+          <div className="flex gap-2">
+            <Button
+              variant="whatsapp"
+              className="flex-1"
+              onClick={() => rows.forEach((r) => r.player?.parent_phone && messageParent(r))}
+            >
+              Message all parents
+            </Button>
+            <Button variant="ghost" onClick={closeNotify}>Done</Button>
+          </div>
+        </div>
+      </Modal>
     </Card>
   );
 }

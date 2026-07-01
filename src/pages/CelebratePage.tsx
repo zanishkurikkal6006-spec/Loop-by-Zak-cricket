@@ -15,6 +15,8 @@ export default function CelebratePage() {
   const glyph = (params.get('g') as GlyphKey) || 'star';
   const criteria = params.get('c');
   const accent = params.get('a') || '#9C1116';
+  const acName = params.get('ac') || 'Loop by Zak Cricket';
+  const logoUrl = params.get('lo');
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-brand-deep to-ink p-6 text-center text-paper">
@@ -34,7 +36,15 @@ export default function CelebratePage() {
         ))}
       </div>
 
-      <div className="mb-6"><Wordmark size={22} light /></div>
+      <div className="mb-6 flex flex-col items-center gap-1">
+        {logoUrl ? (
+          <img src={logoUrl} alt="" className="h-12 w-12 rounded-full object-contain" />
+        ) : (
+          <Wordmark size={20} light />
+        )}
+        <div className="font-display text-lg tracking-wide text-paper">{acName}</div>
+        <div className="text-[9px] uppercase tracking-[0.3em] text-gold">Powered by Loop by Zak Cricket</div>
+      </div>
 
       <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold">Badge earned</div>
 
@@ -49,12 +59,12 @@ export default function CelebratePage() {
           Congratulations <span className="font-semibold text-gold">{childName}</span>! 🎉
         </div>
         <p className="mx-auto mt-2 max-w-xs text-[12px] text-paper/55">
-          Awarded at Loop by Zak Cricket for outstanding effort on and off the pitch.
+          Awarded at {acName} for outstanding effort on and off the pitch.
         </p>
 
         <button
           onClick={() =>
-            downloadBadgeImage({ childName, badgeName, glyph, criteria, accent })
+            downloadBadgeImage({ childName, badgeName, glyph, criteria, accent, academyName: acName, logoUrl })
           }
           className="mt-6 rounded-pill bg-gold px-5 py-2.5 text-[13px] font-semibold text-ink"
         >

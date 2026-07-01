@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/lib/toast';
 import { ScreenTitle, Card, Button } from '@/components/ui';
 import { createStaff } from '@/lib/staff';
+import { setBranding } from '@/lib/branding';
 import type { UserRole, Group, Profile, TrainingCenter, Batch } from '@/lib/types';
 
 // Admin Settings — academy configuration: staff, training centres, batches &
@@ -79,12 +80,33 @@ export default function AdminSettings() {
     queryFn: async () => {
       const { data } = await supabase
         .from('academies')
-        .select('id, bank_details')
+        .select('id, name, logo_url, bank_details')
         .eq('id', profile!.academy_id)
         .single();
-      return data as { id: string; bank_details: Record<string, string> } | null;
+      return data as { id: string; name: string; logo_url: string | null; bank_details: Record<string, string> } | null;
     },
   });
+
+  // ── Academy branding (name + logo, used on all reports & messages) ──────────
+  const [acName, setAcName] = useState('');
+  const [acLogo, setAcLogo] = useState('');
+  useEffect(() => {
+    if (academy) {
+      setAcName(academy.name ?? '');
+      setAcLogo(academy.logo_url ?? '');
+    }
+  }, [academy]);
+  async function saveBranding() {
+    if (!profile || !acName.trim()) return toast.show('Academy name is required');
+    const { error } = await supabase
+      .from('academies')
+      .update({ name: acName.trim(), logo_url: acLogo.trim() || null })
+      .eq('id', profile.academy_id);
+    if (error) return toast.show('Could not save branding');
+    setBranding(acName.trim(), acLogo.trim() || null);
+    toast.show('Branding saved');
+    qc.invalidateQueries({ queryKey: ['settings-academy'] });
+  }
 
   // ── Training centers ───────────────────────────────────────────────────────
   const [centerName, setCenterName] = useState('');
@@ -237,6 +259,23 @@ export default function AdminSettings() {
   return (
     <div className="space-y-5">
       <ScreenTitle eyebrow="Admin" title="Settings" />
+
+      {/* Academy branding */}
+      <Card>
+        <div className="eyebrow mb-3 text-ink/40">Academy Branding</div>
+        <p className="mb-3 text-[12px] text-ink/50">
+          Your academy name &amp; logo appear on all reports, certificates and parent messages.
+          “Powered by Loop by Zak Cricket” stays as the platform credit.
+        </p>
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+          <input value={acName} onChange={(e) => setAcName(e.target.value)} placeholder="Academy name (e.g. Danube Cricket Academy)" className={field} />
+          <input value={acLogo} onChange={(e) => setAcLogo(e.target.value)} placeholder="Logo image URL (https://…)" className={field} />
+        </div>
+        <div className="mt-2 flex items-center gap-3">
+          {acLogo.trim() && <img src={acLogo.trim()} alt="" className="h-10 w-10 rounded-full object-contain" />}
+          <Button size="sm" onClick={saveBranding}>Save branding</Button>
+        </div>
+      </Card>
 
       {/* Coaches & staff */}
       <Card>

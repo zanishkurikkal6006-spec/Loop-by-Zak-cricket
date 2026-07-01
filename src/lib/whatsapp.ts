@@ -52,41 +52,44 @@ export async function sendWhatsApp(
 
 // ── Message templates ─────────────────────────────────────────────────────────
 // Centralised so wording is consistent and a future Business-API template
-// mapping is trivial.
+// mapping is trivial. Each message is signed with the academy's own name
+// (multi-tenant) via academyName().
+
+import { academyName } from './branding';
 
 export const templates = {
   reportSent: (childFirstName: string, body: string) =>
-    `Hi! Here's an update on ${childFirstName} from Loop by Zak Cricket:\n\n${body}`,
+    `Hi! Here's an update on ${childFirstName} from ${academyName()}:\n\n${body}`,
 
   attendanceConfirmed: (childFirstName: string, dateLabel: string, late: boolean) =>
-    `Hi! ${childFirstName} attended training on ${dateLabel}${late ? ' (arrived a little late, still counted as attended)' : ''}. — Loop by Zak Cricket`,
+    `Hi! ${childFirstName} attended training on ${dateLabel}${late ? ' (arrived a little late, still counted as attended)' : ''}. — ${academyName()}`,
 
   paymentReminder: (childFirstName: string, amountLabel: string) =>
-    `Hi! A friendly reminder regarding ${childFirstName}'s outstanding balance of ${amountLabel}. Thank you! — Loop by Zak Cricket`,
+    `Hi! A friendly reminder regarding ${childFirstName}'s outstanding balance of ${amountLabel}. Thank you! — ${academyName()}`,
 
   renewalNudge: (childFirstName: string, remaining: number) =>
-    `Hi! ${childFirstName} has ${remaining} session${remaining === 1 ? '' : 's'} remaining. Would you like to renew the package? — Loop by Zak Cricket`,
+    `Hi! ${childFirstName} has ${remaining} session${remaining === 1 ? '' : 's'} remaining. Would you like to renew the package? — ${academyName()}`,
 
   packageAssigned: (childFirstName: string, sessionsLabel: string, remaining: number | null, deducted: number) => {
-    const base = `Hi! ${childFirstName} has been assigned a ${sessionsLabel} at Loop by Zak Cricket.`;
+    const base = `Hi! ${childFirstName} has been assigned a ${sessionsLabel} at ${academyName()}.`;
     const extra =
       deducted > 0
         ? ` ${deducted} already-taken session${deducted === 1 ? '' : 's'} ${deducted === 1 ? 'was' : 'were'} deducted, leaving ${remaining} session${remaining === 1 ? '' : 's'} remaining.`
         : remaining != null
           ? ` ${remaining} session${remaining === 1 ? '' : 's'} to enjoy.`
           : '';
-    return `${base}${extra} Thank you! — Loop by Zak Cricket`;
+    return `${base}${extra} Thank you! — ${academyName()}`;
   },
 
   badgeEarned: (childFirstName: string, badgeName: string) =>
-    `🏅 Congratulations! ${childFirstName} just earned the "${badgeName}" badge at Loop by Zak Cricket!`,
+    `🏅 Congratulations! ${childFirstName} just earned the "${badgeName}" badge at ${academyName()}!`,
 
   coachReminder: (coachFirstName: string, days: number | null) =>
-    `Hi ${coachFirstName}, quick nudge from the Head Coach — ${days == null ? "let's get some player reports out this week" : `it's been ${days} day${days === 1 ? '' : 's'} since your last report, let's keep parents updated`}. Thanks! 🏏 — Loop by Zak Cricket`,
+    `Hi ${coachFirstName}, quick nudge from the Head Coach — ${days == null ? "let's get some player reports out this week" : `it's been ${days} day${days === 1 ? '' : 's'} since your last report, let's keep parents updated`}. Thanks! 🏏 — ${academyName()}`,
 
   packageComplete: (childFirstName: string, body: string) =>
-    `Hi! ${childFirstName} has completed their package at Loop by Zak Cricket — here's a progress summary:\n\n${body}\n\nWe'd love to continue the journey — reply to renew. Thank you!`,
+    `Hi! ${childFirstName} has completed their package at ${academyName()} — here's a progress summary:\n\n${body}\n\nWe'd love to continue the journey — reply to renew. Thank you!`,
 
   matchFeeRequest: (childFirstName: string, amountLabel: string, bankDetails: string) =>
-    `Hi! Match fee for ${childFirstName} is ${amountLabel}. You can pay by cash on the day or bank transfer:\n\n${bankDetails}\n\nPlease send a screenshot once transferred. Thank you! — Loop by Zak Cricket`,
+    `Hi! Match fee for ${childFirstName} is ${amountLabel}. You can pay by cash on the day or bank transfer:\n\n${bankDetails}\n\nPlease send a screenshot once transferred. Thank you! — ${academyName()}`,
 };

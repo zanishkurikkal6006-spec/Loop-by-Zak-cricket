@@ -1,5 +1,6 @@
 import html2canvas from 'html2canvas';
 import { badgeSvgMarkup, type GlyphKey } from '@/features/badges/badgeArt';
+import { academyName, academyLogoUrl, platformName } from './branding';
 
 // Render a parent-facing badge certificate as a PNG image. We build a real DOM
 // node (with the premium medallion SVG) and rasterise it with html2canvas, so
@@ -11,6 +12,7 @@ export interface BadgeImageData {
   criteria: string | null;
   accent?: string | null;
   academyName?: string;
+  logoUrl?: string | null;
 }
 
 const LOOP_SVG = `
@@ -23,6 +25,11 @@ const LOOP_SVG = `
 export async function downloadBadgeImage(d: BadgeImageData): Promise<void> {
   const accent = d.accent || '#9C1116';
   const date = new Date().toLocaleDateString('en-AE', { day: 'numeric', month: 'long', year: 'numeric' });
+  const brand = d.academyName || academyName();
+  const logoUrl = d.logoUrl ?? academyLogoUrl();
+  const logoMarkup = logoUrl
+    ? `<img src="${logoUrl}" crossorigin="anonymous" style="width:44px;height:44px;object-fit:contain;" />`
+    : LOOP_SVG;
 
   const node = document.createElement('div');
   node.style.cssText =
@@ -31,10 +38,10 @@ export async function downloadBadgeImage(d: BadgeImageData): Promise<void> {
     <div style="margin:0;padding:36px;background:#FAF7F4;border:3px solid #6E0C10;box-sizing:border-box;">
       <div style="border:1px solid #C9A84C;padding:28px 24px;text-align:center;box-sizing:border-box;">
         <div style="display:flex;align-items:center;justify-content:center;gap:10px;">
-          ${LOOP_SVG}
-          <div style="text-align:left;line-height:1;">
-            <div style="font-size:22px;font-weight:800;letter-spacing:1px;color:#6E0C10;line-height:1;">LOOP</div>
-            <div style="margin-top:5px;font-size:9px;font-weight:700;letter-spacing:3px;color:#C9A84C;">BY ZAK CRICKET</div>
+          ${logoMarkup}
+          <div style="text-align:left;line-height:1.1;">
+            <div style="font-size:20px;font-weight:800;letter-spacing:.5px;color:#6E0C10;line-height:1.05;">${escapeHtml(brand)}</div>
+            <div style="margin-top:5px;font-size:8px;font-weight:700;letter-spacing:2px;color:#C9A84C;">POWERED BY ${escapeHtml(platformName().toUpperCase())}</div>
           </div>
         </div>
 
@@ -50,7 +57,7 @@ export async function downloadBadgeImage(d: BadgeImageData): Promise<void> {
         <div style="margin-top:18px;font-size:11px;letter-spacing:2px;color:#141414;opacity:.5;">AWARDED TO</div>
         <div style="margin-top:4px;font-size:24px;font-weight:800;color:#141414;">${escapeHtml(d.childName)}</div>
 
-        <div style="margin-top:22px;font-size:10px;color:#141414;opacity:.45;">${date} · ${escapeHtml(d.academyName || 'Loop by Zak Cricket')}</div>
+        <div style="margin-top:22px;font-size:10px;color:#141414;opacity:.45;">${date} · ${escapeHtml(brand)}</div>
       </div>
     </div>`;
 

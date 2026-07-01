@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf';
-import { drawLoopMark, RED, DEEP, GOLD, INK, PAPER } from './brandPdf';
+import { RED, DEEP, GOLD, INK, PAPER } from './brandPdf';
+import { academyName, academyLogoDataUrl, drawBrandLogo, platformName } from './branding';
 
 // The skill list for the 3-month assessment (Age 3–12 focus, but works for all).
 export const ASSESSMENT_SKILLS: { key: string; label: string }[] = [
@@ -56,25 +57,23 @@ export async function downloadAssessmentPdf(d: AssessmentPdfData): Promise<void>
   };
 
   // ── Header band ──────────────────────────────────────────────────────────
+  const logo = await academyLogoDataUrl();
+  const brand = academyName();
   doc.setFillColor(...DEEP);
   doc.rect(0, 0, W, 110, 'F');
-  drawLoopMark(doc, 56, 55, 58);
+  drawBrandLogo(doc, logo, 56, 55, 58);
   doc.setTextColor(...PAPER);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(22);
-  doc.text('LOOP', 94, 50);
-  doc.setFontSize(8);
+  doc.setFontSize(17);
+  doc.text(brand, 92, 50, { maxWidth: W - 240 });
+  doc.setFontSize(7.5);
   doc.setTextColor(...GOLD);
   doc.setFont('helvetica', 'normal');
-  doc.text('BY ZAK CRICKET', 95, 64);
+  doc.text(`Powered by ${platformName()}`, 93, 64);
   doc.setTextColor(...PAPER);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
-  doc.text('3-Month Skill Assessment', W - M, 50, { align: 'right' });
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(220, 200, 160);
-  doc.text(d.academyName, W - M, 64, { align: 'right' });
+  doc.text('3-Month Skill Assessment', W - M, 62, { align: 'right' });
 
   // ── Player info table ──────────────────────────────────────────────────────
   y = 134;
@@ -247,7 +246,7 @@ export async function downloadAssessmentPdf(d: AssessmentPdfData): Promise<void>
   doc.line(M, H - 40, W - M, H - 40);
   doc.setFontSize(8);
   doc.setTextColor(150, 150, 150);
-  doc.text(`${d.academyName} · Generated ${new Date().toLocaleDateString('en-AE', { day: 'numeric', month: 'long', year: 'numeric' })}`, M, H - 26);
+  doc.text(`${brand} · Generated ${new Date().toLocaleDateString('en-AE', { day: 'numeric', month: 'long', year: 'numeric' })} · Powered by ${platformName()}`, M, H - 26);
   doc.text('Keep believing. Keep training. 🏏', W - M, H - 26, { align: 'right' });
 
   const safe = d.childName.replace(/[^a-z0-9]+/gi, '-').toLowerCase();

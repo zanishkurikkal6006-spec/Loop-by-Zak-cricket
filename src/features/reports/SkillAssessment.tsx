@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { useToast } from '@/lib/toast';
 import { generateReport } from '@/lib/ai';
 import { sendWhatsApp } from '@/lib/whatsapp';
+import { academyName } from '@/lib/branding';
 import { downloadAssessmentPdf, ASSESSMENT_SKILLS } from '@/lib/assessmentPdf';
 import { firstName, clsx } from '@/lib/utils';
 import { Button, ScreenTitle } from '@/components/ui';
@@ -284,7 +285,7 @@ export default function SkillAssessment() {
               if (!profile || !player.parent_phone) return;
               sendWhatsApp(
                 player.parent_phone,
-                `Hi! Here's ${firstName(player.full_name)}'s 3-month skill assessment from Loop by Zak Cricket. (Coach will attach the report.)${videoUrl ? `\nSession video: ${videoUrl}` : ''}`,
+                `Hi! Here's ${firstName(player.full_name)}'s 3-month skill assessment from ${academyName()}. (Coach will attach the report.)${videoUrl ? `\nSession video: ${videoUrl}` : ''}`,
                 { academyId: profile.academy_id, playerId: player.id, templateKey: 'assessment' },
               );
             }}

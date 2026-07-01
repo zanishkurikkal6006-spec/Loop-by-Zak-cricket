@@ -1,6 +1,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { sendWhatsApp } from '@/lib/whatsapp';
 import { firstName } from '@/lib/utils';
+import { academyName, academyLogoUrl } from '@/lib/branding';
 import { downloadBadgeImage } from '@/lib/badgeImage';
 import { Icon } from '@/components/ui/Icon';
 import BadgeMedallion from './BadgeMedallion';
@@ -32,6 +33,8 @@ export default function BadgeReveal({ badge, onClose }: { badge: RevealBadge | n
       n: firstName(badge.childName),
       b: badge.badgeName,
       g: badge.glyph,
+      ac: academyName(),
+      ...(academyLogoUrl() ? { lo: academyLogoUrl() as string } : {}),
       ...(badge.criteria ? { c: badge.criteria } : {}),
       ...(badge.accent ? { a: badge.accent } : {}),
     });
@@ -41,7 +44,7 @@ export default function BadgeReveal({ badge, onClose }: { badge: RevealBadge | n
   function share() {
     if (!badge || !profile || !badge.parentPhone) return;
     const link = celebrateUrl();
-    const body = `🏅 ${badge.childName} just earned the "${badge.badgeName}" badge at Loop by Zak Cricket! Tap to open their celebration:\n${link}`;
+    const body = `🏅 ${badge.childName} just earned the "${badge.badgeName}" badge at ${academyName()}! Tap to open their celebration:\n${link}`;
     sendWhatsApp(badge.parentPhone, body, {
       academyId: profile.academy_id,
       playerId: badge.playerId ?? null,
@@ -57,7 +60,8 @@ export default function BadgeReveal({ badge, onClose }: { badge: RevealBadge | n
       glyph: badge.glyph,
       criteria: badge.criteria,
       accent: badge.accent ?? undefined,
-      academyName: 'Loop by Zak Cricket',
+      academyName: academyName(),
+      logoUrl: academyLogoUrl(),
     });
   }
 

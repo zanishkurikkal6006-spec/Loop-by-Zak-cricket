@@ -253,6 +253,7 @@ export default function AdminSettings() {
   // ── Add staff (coach / head coach) ─────────────────────────────────────────
   const [staffName, setStaffName] = useState('');
   const [staffEmail, setStaffEmail] = useState('');
+  const [staffPhone, setStaffPhone] = useState('');
   const [staffPass, setStaffPass] = useState('');
   const [staffRole, setStaffRole] = useState<UserRole>('coach');
   const [addingStaff, setAddingStaff] = useState(false);
@@ -269,10 +270,12 @@ export default function AdminSettings() {
         password: staffPass,
         role: staffRole,
         academyId: profile.academy_id,
+        phone: staffPhone.trim() || undefined,
       });
       toast.show('Staff member created');
       setStaffName('');
       setStaffEmail('');
+      setStaffPhone('');
       setStaffPass('');
       setStaffRole('coach');
       qc.invalidateQueries({ queryKey: ['settings-staff'] });
@@ -324,7 +327,10 @@ export default function AdminSettings() {
         <div className="divide-y divide-hairline">
           {staff.map((s) => (
             <div key={s.id} className="flex items-center justify-between py-2 text-[13px]">
-              <span className="font-medium">{s.full_name}</span>
+              <span className="font-medium">
+                {s.full_name}
+                {s.phone ? <span className="ml-2 text-[11px] font-normal text-ink/45">· {s.phone}</span> : null}
+              </span>
               <span className="text-ink/45">{roleLabel[s.role] ?? s.role}</span>
             </div>
           ))}
@@ -333,6 +339,7 @@ export default function AdminSettings() {
         <div className="mt-3 grid grid-cols-2 gap-2">
           <input value={staffName} onChange={(e) => setStaffName(e.target.value)} placeholder="Full name" className={field} />
           <input value={staffEmail} onChange={(e) => setStaffEmail(e.target.value)} placeholder="Email" className={field} />
+          <input value={staffPhone} onChange={(e) => setStaffPhone(e.target.value)} placeholder="WhatsApp number (+9715…)" className={field} />
           <input type="password" value={staffPass} onChange={(e) => setStaffPass(e.target.value)} placeholder="Temp password (6+)" className={field} />
           <select value={staffRole} onChange={(e) => setStaffRole(e.target.value as UserRole)} className={field}>
             <option value="coach">Coach</option>

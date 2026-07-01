@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/lib/toast';
 import { ScreenTitle, Card, Button } from '@/components/ui';
+import { Modal } from '@/components/ui/Modal';
 import { createStaff } from '@/lib/staff';
 import { setBranding } from '@/lib/branding';
 import type { UserRole, Group, Profile, TrainingCenter, Batch } from '@/lib/types';
@@ -288,6 +289,46 @@ export default function AdminSettings() {
     }
   }
 
+  // ── Edit / remove a staff member ───────────────────────────────────────────
+  const [editStaff, setEditStaff] = useState<Profile | null>(null);
+  const [eName, setEName] = useState('');
+  const [ePhone, setEPhone] = useState('');
+  const [eRole, setERole] = useState<UserRole>('coach');
+  const [savingEdit, setSavingEdit] = useState(false);
+  function openEdit(s: Profile) {
+    setEditStaff(s);
+    setEName(s.full_name);
+    setEPhone(s.phone ?? '');
+    setERole(s.role);
+  }
+  function invalidateStaff() {
+    qc.invalidateQueries({ queryKey: ['settings-staff'] });
+    qc.invalidateQueries({ queryKey: ['settings-coaches'] });
+    qc.invalidateQueries({ queryKey: ['coaches'] });
+  }
+  async function saveEdit() {
+    if (!editStaff || !eName.trim()) return toast.show('Name is required');
+    setSavingEdit(true);
+    const { error } = await supabase
+      .from('profiles')
+      .update({ full_name: eName.trim(), phone: ePhone.trim() || null, role: eRole })
+      .eq('id', editStaff.id);
+    setSavingEdit(false);
+    if (error) return toast.show('Could not save changes');
+    toast.show('Staff updated');
+    invalidateStaff();
+    setEditStaff(null);
+  }
+  async function removeStaff() {
+    if (!editStaff || !profile) return;
+    if (editStaff.id === profile.id) return toast.show("You can't remove yourself");
+    const { error } = await supabase.from('profiles').delete().eq('id', editStaff.id);
+    if (error) return toast.show('Could not remove');
+    toast.show('Staff removed');
+    invalidateStaff();
+    setEditStaff(null);
+  }
+
   const roleLabel: Record<string, string> = { coach: 'Coach', head_coach: 'Head Coach', admin: 'Admin' };
 
   const field = 'h-11 w-full rounded-pill border border-cardborder bg-white px-3 text-[14px] outline-none focus:border-gold';
@@ -326,13 +367,16 @@ export default function AdminSettings() {
         <div className="eyebrow mb-3 text-ink/40">Coaches &amp; Staff</div>
         <div className="divide-y divide-hairline">
           {staff.map((s) => (
-            <div key={s.id} className="flex items-center justify-between py-2 text-[13px]">
+            <button key={s.id} onClick={() => openEdit(s)} className="flex w-full items-center justify-between py-2 text-left text-[13px] hover:opacity-70">
               <span className="font-medium">
                 {s.full_name}
                 {s.phone ? <span className="ml-2 text-[11px] font-normal text-ink/45">· {s.phone}</span> : null}
               </span>
-              <span className="text-ink/45">{roleLabel[s.role] ?? s.role}</span>
-            </div>
+              <span className="flex items-center gap-2 text-ink/45">
+                {roleLabel[s.role] ?? s.role}
+                <span className="text-[11px] font-semibold text-brand-red">Edit</span>
+              </span>
+            </button>
           ))}
           {!staff.length && <div className="py-2 text-[13px] text-ink/45">No staff yet.</div>}
         </div>
@@ -498,6 +542,33 @@ export default function AdminSettings() {
         </div>
         <Button size="sm" className="mt-3" onClick={saveBank}>Save bank details</Button>
       </Card>
+
+      {/* Edit / remove staff */}
+      <Modal open={!!editStaff} onClose={() => setEditStaff(null)} title="Edit Staff Member">
+        <div className="space-y-3">
+          <input value={eName} onChange={(e) => setEName(e.target.value)} placeholder="Full name" className={field} />
+          <input value={ePhone} onChange={(e) => setEPhone(e.target.value)} placeholder="WhatsApp number (+9715…)" className={field} />
+          <select value={eRole} onChange={(e) => setERole(e.target.value as UserRole)} className={field}>
+            <option value="coach">Coach</option>
+            <option value="head_coach">Head Coach</option>
+            <option value="admin">Admin</option>
+          </select>
+          {editStaff?.email && <p className="text-[11px] text-ink/45">Login email: {editStaff.email} (can't be changed here)</p>}
+          <div className="flex gap-2">
+            <Button className="flex-1" disabled={savingEdit} onClick={saveEdit}>
+              {savingEdit ? 'Saving…' : 'Save changes'}
+            </Button>
+            {editStaff?.id !== profile?.id && (
+              <Button variant="ghost" onClick={removeStaff}>
+                <span className="text-danger">Remove</span>
+              </Button>
+            )}
+          </div>
+          <p className="text-[11px] text-ink/45">
+            Removing takes them out of your academy (their login stays disabled from access).
+          </p>
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -15,6 +15,7 @@ const CoachHome = lazy(() => import('./features/coach/CoachHome'));
 const CoachOneToOne = lazy(() => import('./features/coach/CoachOneToOne'));
 const CoachAttendance = lazy(() => import('./features/attendance/CoachAttendance'));
 const CoachReports = lazy(() => import('./features/reports/CoachReports'));
+const SkillAssessment = lazy(() => import('./features/reports/SkillAssessment'));
 const AdminDashboard = lazy(() => import('./features/admin/AdminDashboard'));
 const AdminPlayers = lazy(() => import('./features/admin/AdminPlayers'));
 const AdminAttendance = lazy(() => import('./features/admin/AdminAttendance'));
@@ -87,6 +88,7 @@ export default function App() {
               <Route path="/coach/matches" element={<MatchesList eyebrow="Coach" mine />} />
               <Route path="/coach/rankings" element={<Rankings eyebrow="Coach" />} />
               <Route path="/coach/reports" element={<CoachReports />} />
+              <Route path="/coach/assessment" element={<SkillAssessment />} />
             </Route>
 
             {/* ── Head Coach ── */}

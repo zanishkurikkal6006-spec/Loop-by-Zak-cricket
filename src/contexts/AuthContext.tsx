@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
+import { setBranding } from '@/lib/branding';
 import type { Profile } from '@/lib/types';
 
 interface AuthState {
@@ -20,7 +21,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function loadProfile(userId: string) {
     const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
-    setProfile((data as Profile) ?? null);
+    const p = (data as Profile) ?? null;
+    setProfile(p);
+    // Load per-tenant branding (academy name + logo) for reports & messages.
+    if (p) {
+      const { data: ac } = await supabase
+        .from('academies')
+        .select('name, logo_url')
+        .eq('id', p.academy_id)
+        .single();
+      const a = ac as { name: string; logo_url: string | null } | null;
+      setBranding(a?.name, a?.logo_url);
+    }
   }
 
   useEffect(() => {

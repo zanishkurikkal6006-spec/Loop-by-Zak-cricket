@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf';
-import { drawLoopMark, RED, DEEP, GOLD, INK, PAPER } from './brandPdf';
+import { RED, DEEP, GOLD, INK, PAPER } from './brandPdf';
+import { academyName, academyLogoDataUrl, drawBrandLogo, platformName } from './branding';
 
 // Coach career-record (portfolio) PDF — a branded one-pager the coach can
 // download from Home. Drawn with jsPDF primitives (no raster assets) to match
@@ -13,33 +14,32 @@ export interface PortfolioData {
   highlights?: { label: string; value: string }[];
 }
 
-export function downloadPortfolio(data: PortfolioData): void {
+export async function downloadPortfolio(data: PortfolioData): Promise<void> {
   const doc = new jsPDF({ unit: 'pt', format: 'a4' });
   const W = doc.internal.pageSize.getWidth();
+  const logo = await academyLogoDataUrl();
+  const brand = academyName();
 
   // ── Header band ──────────────────────────────────────────────────────────
   doc.setFillColor(...DEEP);
   doc.rect(0, 0, W, 150, 'F');
 
-  // The real Loop mark (red disc + gold ring + angular Z)
-  drawLoopMark(doc, 70, 75, 60);
+  // Academy logo (or the Loop mark)
+  drawBrandLogo(doc, logo, 70, 75, 60);
 
-  // Wordmark
+  // Wordmark = academy name
   doc.setTextColor(...PAPER);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(34);
-  doc.text('LOOP', 112, 70);
-  doc.setFontSize(9);
+  doc.setFontSize(26);
+  doc.text(brand, 112, 72, { maxWidth: W - 320 });
+  doc.setFontSize(8);
   doc.setTextColor(201, 168, 76);
   doc.setFont('helvetica', 'normal');
-  doc.text('BY ZAK CRICKET', 113, 86);
+  doc.text(`Powered by ${platformName()}`, 113, 88);
 
   doc.setFontSize(11);
   doc.setTextColor(...PAPER);
-  doc.text('Coaching Career Record', W - 40, 70, { align: 'right' });
-  doc.setFontSize(9);
-  doc.setTextColor(220, 200, 160);
-  doc.text(data.academyName, W - 40, 86, { align: 'right' });
+  doc.text('Coaching Career Record', W - 40, 78, { align: 'right' });
 
   // ── Coach name ───────────────────────────────────────────────────────────
   doc.setTextColor(...INK);
@@ -96,7 +96,7 @@ export function downloadPortfolio(data: PortfolioData): void {
   doc.setFontSize(8);
   doc.setTextColor(150, 150, 150);
   doc.text(
-    `Generated ${new Date().toLocaleDateString('en-AE', { day: 'numeric', month: 'long', year: 'numeric' })} · Loop by Zak Cricket`,
+    `${brand} · Generated ${new Date().toLocaleDateString('en-AE', { day: 'numeric', month: 'long', year: 'numeric' })} · Powered by ${platformName()}`,
     40,
     H - 30,
   );

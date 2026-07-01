@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf';
-import { drawLoopMark, RED, DEEP, GOLD, INK, PAPER } from './brandPdf';
+import { RED, DEEP, GOLD, INK, PAPER } from './brandPdf';
+import { academyName, academyLogoDataUrl, drawBrandLogo, platformName } from './branding';
 
 export interface PlayerMatchRow {
   opponent: string;
@@ -23,31 +24,29 @@ export interface PlayerRecordData {
 
 // Parent-facing per-player record — season summary + per-match breakdown
 // (batting, bowling, fielding) on a branded sheet a coach can share.
-export function downloadPlayerRecord(d: PlayerRecordData): void {
+export async function downloadPlayerRecord(d: PlayerRecordData): Promise<void> {
   const doc = new jsPDF({ unit: 'pt', format: 'a4' });
   const W = doc.internal.pageSize.getWidth();
   const H = doc.internal.pageSize.getHeight();
+  const logo = await academyLogoDataUrl();
+  const brand = academyName();
 
   // Header
   doc.setFillColor(...DEEP);
   doc.rect(0, 0, W, 116, 'F');
-  drawLoopMark(doc, 56, 58, 60);
+  drawBrandLogo(doc, logo, 56, 58, 60);
   doc.setTextColor(...PAPER);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(24);
-  doc.text('LOOP', 96, 52);
-  doc.setFontSize(8);
+  doc.setFontSize(18);
+  doc.text(brand, 94, 52, { maxWidth: W - 230 });
+  doc.setFontSize(7.5);
   doc.setTextColor(...GOLD);
   doc.setFont('helvetica', 'normal');
-  doc.text('BY ZAK CRICKET', 97, 66);
+  doc.text(`Powered by ${platformName()}`, 95, 66);
   doc.setTextColor(...PAPER);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
-  doc.text('Player Match Record', W - 40, 52, { align: 'right' });
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(220, 200, 160);
-  doc.text(d.academyName, W - 40, 66, { align: 'right' });
+  doc.text('Player Match Record', W - 40, 62, { align: 'right' });
 
   // Player name
   doc.setTextColor(...INK);
@@ -136,7 +135,7 @@ export function downloadPlayerRecord(d: PlayerRecordData): void {
   doc.setFontSize(8);
   doc.setTextColor(150, 150, 150);
   doc.text(
-    `Generated ${new Date().toLocaleDateString('en-AE', { day: 'numeric', month: 'long', year: 'numeric' })} · Loop by Zak Cricket`,
+    `${brand} · Generated ${new Date().toLocaleDateString('en-AE', { day: 'numeric', month: 'long', year: 'numeric' })} · Powered by ${platformName()}`,
     40,
     H - 28,
   );

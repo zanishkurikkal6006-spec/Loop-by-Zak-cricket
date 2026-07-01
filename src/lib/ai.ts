@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { academyName } from './branding';
 import type { Player } from './types';
 
 // ============================================================================
@@ -164,7 +165,7 @@ function samplePlaceholderDevelopmentReport(i: DevelopmentReportInput): string {
     pick(nextVariants),
     ``,
     `COACH'S NOTE`,
-    `${name} is a joy to coach. Keep supporting their love of the game at home — the foundations being laid now will serve them well. — ${coach}, Loop by Zak Cricket`,
+    `${name} is a joy to coach. Keep supporting their love of the game at home — the foundations being laid now will serve them well. — ${coach}, ${academyName()}`,
   ].join('\n');
 }
 

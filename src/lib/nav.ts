@@ -17,6 +17,7 @@ export const navByRole: Record<UserRole, NavItem[]> = {
     { to: '/coach/matches', label: 'Matches', icon: 'trophy' },
     { to: '/coach/rankings', label: 'Ranking', icon: 'chart' },
     { to: '/coach/reports', label: 'Reports', icon: 'message' },
+    { to: '/coach/assessment', label: 'Assess', icon: 'badge' },
   ],
   head_coach: [
     { to: '/head-coach', label: 'Coaches', icon: 'users' },

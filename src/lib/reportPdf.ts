@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf';
-import { drawLoopMark, RED, DEEP, GOLD, INK, PAPER } from './brandPdf';
+import { RED, DEEP, GOLD, INK, PAPER } from './brandPdf';
+import { academyName, academyLogoDataUrl, drawBrandLogo, platformName } from './branding';
 
 // Parent-facing report PDF — a polished, branded one-pager a coach can send
 // alongside the WhatsApp message. Used for both the end-of-block Development
@@ -15,34 +16,32 @@ export interface ReportPdfData {
   body: string;
 }
 
-export function downloadReportPdf(data: ReportPdfData): void {
+export async function downloadReportPdf(data: ReportPdfData): Promise<void> {
   const doc = new jsPDF({ unit: 'pt', format: 'a4' });
   const W = doc.internal.pageSize.getWidth();
   const H = doc.internal.pageSize.getHeight();
   const isDev = data.kind === 'development';
+  const logo = await academyLogoDataUrl();
+  const brand = academyName();
 
   // ── Header band ────────────────────────────────────────────────────────────
   doc.setFillColor(...DEEP);
   doc.rect(0, 0, W, 120, 'F');
-  drawLoopMark(doc, 58, 60, 64);
+  drawBrandLogo(doc, logo, 58, 60, 64);
 
   doc.setTextColor(...PAPER);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(26);
-  doc.text('LOOP', 100, 56);
-  doc.setFontSize(8);
+  doc.setFontSize(19);
+  doc.text(brand, 100, 55, { maxWidth: W - 240 });
+  doc.setFontSize(7.5);
   doc.setTextColor(...GOLD);
   doc.setFont('helvetica', 'normal');
-  doc.text('BY ZAK CRICKET', 101, 70);
+  doc.text(`Powered by ${platformName()}`, 101, 70);
 
   doc.setTextColor(...PAPER);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
-  doc.text(isDev ? 'Development Report' : 'Session Feedback', W - 40, 54, { align: 'right' });
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(220, 200, 160);
-  doc.text(data.academyName, W - 40, 70, { align: 'right' });
+  doc.text(isDev ? 'Development Report' : 'Session Feedback', W - 40, 66, { align: 'right' });
 
   // ── Player header ────────────────────────────────────────────────────────────
   doc.setTextColor(...INK);
@@ -134,11 +133,10 @@ export function downloadReportPdf(data: ReportPdfData): void {
   doc.setFontSize(8);
   doc.setTextColor(150, 150, 150);
   doc.text(
-    `Generated ${new Date().toLocaleDateString('en-AE', { day: 'numeric', month: 'long', year: 'numeric' })} · Loop by Zak Cricket`,
+    `${brand} · Generated ${new Date().toLocaleDateString('en-AE', { day: 'numeric', month: 'long', year: 'numeric' })} · Powered by ${platformName()}`,
     40,
     H - 34,
   );
-  doc.text('Keep believing. Keep training. 🏏', W - 40, H - 34, { align: 'right' });
 
   const safe = data.childName.replace(/[^a-z0-9]+/gi, '-').toLowerCase();
   doc.save(`loop-${isDev ? 'development' : 'feedback'}-${safe}.pdf`);

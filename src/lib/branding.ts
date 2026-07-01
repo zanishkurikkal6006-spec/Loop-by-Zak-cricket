@@ -57,12 +57,18 @@ export async function academyLogoDataUrl(): Promise<string | null> {
   return _logoLoading;
 }
 
-/** Draw the academy logo (or the Loop mark) centred at (cx, cy). */
+/** Draw the academy logo (or the Loop mark) centred at (cx, cy), aspect-preserved. */
 export function drawBrandLogo(doc: jsPDF, logo: string | null, cx: number, cy: number, size: number): void {
   if (logo) {
-    const fmt = logo.startsWith('data:image/png') ? 'PNG' : 'JPEG';
     try {
-      doc.addImage(logo, fmt, cx - size / 2, cy - size / 2, size, size, undefined, 'FAST');
+      const props = doc.getImageProperties(logo);
+      const ratio = props.width / props.height;
+      let w = size;
+      let h = size;
+      if (ratio > 1) h = size / ratio;
+      else w = size * ratio;
+      const fmt = (props.fileType as string) || (logo.startsWith('data:image/png') ? 'PNG' : 'JPEG');
+      doc.addImage(logo, fmt, cx - w / 2, cy - h / 2, w, h, undefined, 'FAST');
       return;
     } catch {
       /* fall through to the Loop mark */

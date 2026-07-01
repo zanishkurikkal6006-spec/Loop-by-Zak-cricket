@@ -1,10 +1,9 @@
-import { jsPDF } from 'jspdf';
-import { RED, DEEP, GOLD, INK, PAPER } from './brandPdf';
-import { academyName, academyLogoDataUrl, drawBrandLogo, platformName } from './branding';
+import { htmlToPdf, escapeHtml, brandHeader } from './htmlPdf';
+import { academyName, academyLogoUrl, platformName } from './branding';
 
-// Parent-facing report PDF — a polished, branded one-pager a coach can send
-// alongside the WhatsApp message. Used for both the end-of-block Development
-// Report and Quick Session Feedback (the title/eyebrow just change).
+// Parent-facing report — a professionally designed, HTML-rendered document
+// (Development Report or Quick Feedback). Rendered via html2canvas so the
+// logo keeps its aspect and the typography looks designed.
 
 export interface ReportPdfData {
   kind: 'development' | 'quick';
@@ -16,160 +15,97 @@ export interface ReportPdfData {
   body: string;
 }
 
-export async function downloadReportPdf(data: ReportPdfData): Promise<void> {
-  const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-  const W = doc.internal.pageSize.getWidth();
-  const H = doc.internal.pageSize.getHeight();
-  const isDev = data.kind === 'development';
-  const logo = await academyLogoDataUrl();
-  const brand = academyName();
-
-  // ── Header band ────────────────────────────────────────────────────────────
-  doc.setFillColor(...DEEP);
-  doc.rect(0, 0, W, 120, 'F');
-  drawBrandLogo(doc, logo, 58, 60, 64);
-
-  doc.setTextColor(...PAPER);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(19);
-  doc.text(brand, 100, 55, { maxWidth: W - 240 });
-  doc.setFontSize(7.5);
-  doc.setTextColor(...GOLD);
-  doc.setFont('helvetica', 'normal');
-  doc.text(`Powered by ${platformName()}`, 101, 70);
-
-  doc.setTextColor(...PAPER);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(12);
-  doc.text(isDev ? 'Development Report' : 'Session Feedback', W - 40, 66, { align: 'right' });
-
-  // ── Player header ────────────────────────────────────────────────────────────
-  doc.setTextColor(...INK);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(24);
-  doc.text(data.childName, 40, 168);
-  doc.setDrawColor(...GOLD);
-  doc.setLineWidth(2);
-  doc.line(40, 178, 90, 178);
-
-  // Meta chips line
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
-  doc.setTextColor(120, 120, 120);
-  const meta = [
-    data.groupName ? `Group: ${data.groupName}` : null,
-    data.coachName ? `Coach: ${data.coachName}` : null,
-    `Date: ${new Date(data.date).toLocaleDateString('en-AE', { day: 'numeric', month: 'long', year: 'numeric' })}`,
-  ]
-    .filter(Boolean)
-    .join('    ·    ');
-  doc.text(meta, 40, 198);
-
-  // ── Body ───────────────────────────────────────────────────────────────────
-  const cardX = 40;
-  const cardW = W - 80;
-  let y = 220;
-  const ensure = (h: number) => {
-    if (y + h > H - 70) {
-      doc.addPage();
-      y = 50;
-    }
-  };
-
-  if (isDev) {
-    // Development report → polished sectioned layout (one styled block per
-    // section, with a gold underline heading), so it reads like a real report.
-    const sections = parseSections(data.body);
-    for (const sec of sections) {
-      ensure(46);
-      doc.setFillColor(...RED);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(10);
-      doc.setTextColor(...RED);
-      doc.text(sec.heading.toUpperCase(), cardX, y);
-      doc.setDrawColor(...GOLD);
-      doc.setLineWidth(1.5);
-      doc.line(cardX, y + 5, cardX + 32, y + 5);
-      y += 20;
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(11.5);
-      doc.setTextColor(...INK);
-      const lines = doc.splitTextToSize(sec.body, cardW) as string[];
-      for (const ln of lines) {
-        ensure(16);
-        doc.text(ln, cardX, y);
-        y += 16;
-      }
-      y += 14;
-    }
-  } else {
-    // Quick feedback → a single warm message card.
-    const padding = 22;
-    const textW = cardW - padding * 2;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(12);
-    const lines = doc.splitTextToSize(data.body.trim(), textW) as string[];
-    const lineH = 18;
-    const cardH = Math.min(padding * 2 + lines.length * lineH, H - y - 70);
-    doc.setFillColor(255, 255, 255);
-    doc.setDrawColor(236, 231, 225);
-    doc.setLineWidth(1);
-    doc.roundedRect(cardX, y, cardW, cardH, 10, 10, 'FD');
-    doc.setFillColor(...GOLD);
-    doc.rect(cardX, y + 14, 4, cardH - 28, 'F');
-    doc.setTextColor(...INK);
-    let ty = y + padding + 4;
-    for (const line of lines) {
-      if (ty > y + cardH - padding) break;
-      doc.text(line, cardX + padding, ty);
-      ty += lineH;
-    }
-  }
-
-  // ── Footer ─────────────────────────────────────────────────────────────────
-  doc.setDrawColor(...RED);
-  doc.setLineWidth(2);
-  doc.line(40, H - 50, W - 40, H - 50);
-  doc.setFontSize(8);
-  doc.setTextColor(150, 150, 150);
-  doc.text(
-    `${brand} · Generated ${new Date().toLocaleDateString('en-AE', { day: 'numeric', month: 'long', year: 'numeric' })} · Powered by ${platformName()}`,
-    40,
-    H - 34,
-  );
-
-  const safe = data.childName.replace(/[^a-z0-9]+/gi, '-').toLowerCase();
-  doc.save(`loop-${isDev ? 'development' : 'feedback'}-${safe}.pdf`);
-}
-
 interface Section {
   heading: string;
   body: string;
 }
 
-// Parse a development report into sections. A heading is a short UPPERCASE line
-// (e.g. "PROGRESS & STRENGTHS"); everything until the next heading is its body.
-// If no headings are found, the whole text is returned as one "Report" section.
 function parseSections(text: string): Section[] {
   const isHeading = (l: string) => {
     const t = l.trim();
     return t.length > 0 && t.length <= 40 && /[A-Z]/.test(t) && t === t.toUpperCase() && !/[a-z]/.test(t);
   };
   const lines = text.split('\n');
-  const sections: Section[] = [];
+  const out: Section[] = [];
   let cur: Section | null = null;
   for (const raw of lines) {
     const line = raw.trim();
     if (!line) continue;
     if (isHeading(line)) {
       cur = { heading: line, body: '' };
-      sections.push(cur);
+      out.push(cur);
     } else if (cur) {
       cur.body += (cur.body ? ' ' : '') + line;
     } else {
       cur = { heading: 'Report', body: line };
-      sections.push(cur);
+      out.push(cur);
     }
   }
-  return sections.length ? sections : [{ heading: 'Report', body: text.trim() }];
+  return out.length ? out : [{ heading: 'Report', body: text.trim() }];
+}
+
+function titleCase(h: string): string {
+  return h
+    .toLowerCase()
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+    .replace(/'S\b/i, "'s");
+}
+
+export async function downloadReportPdf(data: ReportPdfData): Promise<void> {
+  const isDev = data.kind === 'development';
+  const brand = academyName();
+  const dateLabel = new Date(data.date).toLocaleDateString('en-AE', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  const meta = [
+    data.groupName ? `Group · ${data.groupName}` : null,
+    data.coachName ? `Coach · ${data.coachName}` : null,
+    `Date · ${dateLabel}`,
+  ]
+    .filter(Boolean)
+    .join('&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;');
+
+  let bodyHtml: string;
+  if (isDev) {
+    bodyHtml = parseSections(data.body)
+      .map(
+        (s) => `
+        <div style="margin-bottom:22px;break-inside:avoid;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div style="width:22px;height:3px;background:#C9A84C;border-radius:2px;"></div>
+            <div style="font-size:12px;font-weight:800;letter-spacing:1.5px;color:#9C1116;text-transform:uppercase;">${escapeHtml(titleCase(s.heading))}</div>
+          </div>
+          <div style="font-size:14.5px;line-height:1.7;color:#2b2b2b;">${escapeHtml(s.body)}</div>
+        </div>`,
+      )
+      .join('');
+  } else {
+    bodyHtml = `
+      <div style="border:1px solid #ece7e1;border-left:4px solid #C9A84C;border-radius:12px;padding:22px 24px;background:#fbf9f6;">
+        <div style="font-size:15.5px;line-height:1.75;color:#2b2b2b;white-space:pre-wrap;">${escapeHtml(data.body.trim())}</div>
+      </div>`;
+  }
+
+  const html = `
+  <div>
+    ${brandHeader({
+      academy: brand,
+      logoUrl: academyLogoUrl(),
+      platform: platformName(),
+      title: isDev ? 'Development Report' : 'Session Feedback',
+      subtitle: dateLabel,
+    })}
+    <div style="padding:34px;">
+      <div style="font-size:30px;font-weight:800;color:#141414;line-height:1.05;">${escapeHtml(data.childName)}</div>
+      <div style="width:54px;height:3px;background:#C9A84C;border-radius:2px;margin:10px 0 12px;"></div>
+      <div style="font-size:11.5px;color:#8a8078;letter-spacing:.3px;margin-bottom:26px;">${meta}</div>
+      ${bodyHtml}
+    </div>
+    <div style="margin-top:8px;border-top:2px solid #9C1116;padding:14px 34px 26px;display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-size:9px;color:#9a938a;">${escapeHtml(brand)} &nbsp;·&nbsp; ${dateLabel} &nbsp;·&nbsp; Powered by ${escapeHtml(platformName())}</div>
+      <div style="font-size:9px;color:#C9A84C;font-weight:700;letter-spacing:1px;">KEEP BELIEVING. KEEP TRAINING.</div>
+    </div>
+  </div>`;
+
+  const safe = data.childName.replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+  await htmlToPdf(html, `loop-${isDev ? 'development' : 'feedback'}-${safe}.pdf`);
 }

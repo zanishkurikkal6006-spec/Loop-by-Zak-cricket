@@ -19,9 +19,11 @@ export async function createStaff(input: {
   full_name: string;
   role: UserRole;
   academyId: string;
+  phone?: string;
 }): Promise<void> {
   const email = input.email.trim().toLowerCase();
   const fullName = input.full_name.trim();
+  const phone = input.phone?.trim() || null;
 
   const tmp = createClient(url, anon, {
     auth: { persistSession: false, autoRefreshToken: false, storageKey: 'loop-staff-signup' },
@@ -41,6 +43,7 @@ export async function createStaff(input: {
     role: input.role,
     full_name: fullName,
     email,
+    phone,
   });
   if (pErr) throw pErr;
 }

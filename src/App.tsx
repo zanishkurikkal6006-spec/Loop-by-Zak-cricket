@@ -30,6 +30,12 @@ const HeadCoachDashboard = lazy(() => import('./features/head-coach/HeadCoachDas
 const HeadCoachReports = lazy(() => import('./features/head-coach/HeadCoachReports'));
 const HeadCoachFlags = lazy(() => import('./features/head-coach/HeadCoachFlags'));
 const CelebratePage = lazy(() => import('./pages/CelebratePage'));
+// ── Growth Engine (Phase 1) — Director & Operations Manager ──
+const CommandCenter = lazy(() => import('./features/command/CommandCenter'));
+const TodaysActions = lazy(() => import('./features/command/TodaysActions'));
+const LeadCRM = lazy(() => import('./features/growth/LeadCRM'));
+const Trials = lazy(() => import('./features/growth/Trials'));
+const FollowUps = lazy(() => import('./features/growth/FollowUps'));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false } },
@@ -73,6 +79,41 @@ export default function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/celebrate" element={<CelebratePage />} />
             <Route path="/" element={<RootRedirect />} />
+
+            {/* ── Director (Command Center + Growth, strategic view) ── */}
+            <Route
+              element={
+                <RequireRole roles={['director']}>
+                  <AppShell role="director" />
+                </RequireRole>
+              }
+            >
+              <Route path="/director" element={<CommandCenter base="/director" />} />
+              <Route path="/director/actions" element={<TodaysActions base="/director" />} />
+              <Route path="/director/leads" element={<LeadCRM base="/director" />} />
+              <Route path="/director/trials" element={<Trials />} />
+              <Route path="/director/followups" element={<FollowUps />} />
+              <Route path="/director/players" element={<AdminPlayers />} />
+              <Route path="/director/revenue" element={<AdminPayments />} />
+            </Route>
+
+            {/* ── Operations Manager (full operational control) ── */}
+            <Route
+              element={
+                <RequireRole roles={['operations_manager']}>
+                  <AppShell role="operations_manager" />
+                </RequireRole>
+              }
+            >
+              <Route path="/ops" element={<CommandCenter base="/ops" />} />
+              <Route path="/ops/actions" element={<TodaysActions base="/ops" />} />
+              <Route path="/ops/leads" element={<LeadCRM base="/ops" />} />
+              <Route path="/ops/trials" element={<Trials />} />
+              <Route path="/ops/followups" element={<FollowUps />} />
+              <Route path="/ops/players" element={<AdminPlayers />} />
+              <Route path="/ops/attendance" element={<AdminAttendance />} />
+              <Route path="/ops/payments" element={<AdminPayments />} />
+            </Route>
 
             {/* ── Coach ── */}
             <Route

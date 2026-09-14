@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { navByRole, roleLabel } from '@/lib/nav';
+import { navByRole, roleHome, roleLabel } from '@/lib/nav';
 import { Wordmark } from '@/components/brand/LoopMark';
 import { Icon } from '@/components/ui/Icon';
 import { clsx } from '@/lib/utils';
@@ -40,7 +40,7 @@ export function AppShell({ role }: { role: UserRole }) {
             <NavLink
               key={item.to}
               to={item.to}
-              end={item.to === `/${role.replace('_', '-')}`}
+              end={item.to === roleHome[role]}
               className={({ isActive }) =>
                 clsx(
                   'flex items-center gap-3 rounded-pill px-3 py-2.5 text-[13px] font-semibold transition',
@@ -121,7 +121,7 @@ export function AppShell({ role }: { role: UserRole }) {
           <NavLink
             key={item.to}
             to={item.to}
-            end={item.to === `/${role.replace('_', '-')}`}
+            end={item.to === roleHome[role]}
             onClick={() => setMoreOpen(false)}
             className={({ isActive }) =>
               clsx(

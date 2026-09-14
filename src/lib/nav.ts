@@ -10,6 +10,27 @@ export interface NavItem {
 
 // Nav per role, matching the design handoff.
 export const navByRole: Record<UserRole, NavItem[]> = {
+  // ── Director — strategy & business visibility (not routine attendance) ──
+  director: [
+    { to: '/director', label: 'Command', icon: 'sparkles' },
+    { to: '/director/actions', label: 'Today', icon: 'check', badgeKey: 'todaysActions' },
+    { to: '/director/leads', label: 'Lead CRM', icon: 'trending' },
+    { to: '/director/trials', label: 'Trials', icon: 'calendar' },
+    { to: '/director/followups', label: 'Follow-ups', icon: 'inbox' },
+    { to: '/director/players', label: 'Players', icon: 'users' },
+    { to: '/director/revenue', label: 'Revenue', icon: 'wallet' },
+  ],
+  // ── Operations Manager — full operational control ──
+  operations_manager: [
+    { to: '/ops', label: 'Command', icon: 'sparkles' },
+    { to: '/ops/actions', label: 'Today', icon: 'check', badgeKey: 'todaysActions' },
+    { to: '/ops/leads', label: 'Lead CRM', icon: 'trending' },
+    { to: '/ops/trials', label: 'Trials', icon: 'calendar' },
+    { to: '/ops/followups', label: 'Follow-ups', icon: 'inbox' },
+    { to: '/ops/players', label: 'Players', icon: 'users' },
+    { to: '/ops/attendance', label: 'Attendance', icon: 'check', badgeKey: 'attendancePending' },
+    { to: '/ops/payments', label: 'Payments', icon: 'card' },
+  ],
   coach: [
     { to: '/coach', label: 'Home', icon: 'home' },
     { to: '/coach/one-to-one', label: '1-on-1', icon: 'target' },
@@ -40,12 +61,16 @@ export const navByRole: Record<UserRole, NavItem[]> = {
 };
 
 export const roleHome: Record<UserRole, string> = {
+  director: '/director',
+  operations_manager: '/ops',
   coach: '/coach',
   head_coach: '/head-coach',
   admin: '/admin',
 };
 
 export const roleLabel: Record<UserRole, string> = {
+  director: 'Director',
+  operations_manager: 'Operations Manager',
   coach: 'Coach',
   head_coach: 'Head Coach',
   admin: 'Admin',

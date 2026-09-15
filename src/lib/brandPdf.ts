@@ -4,7 +4,7 @@ import type { jsPDF } from 'jspdf';
 // real identity mark from the design handoff: red disc + gold ring + the angular
 // "Z" glyph (not a typed letter). Keeps every PDF on-brand and consistent.
 
-export const RED: [number, number, number] = [156, 17, 22];
+export const RED: [number, number, number] = [18, 58, 123];
 export const DEEP: [number, number, number] = [110, 12, 16];
 export const GOLD: [number, number, number] = [201, 168, 76];
 export const INK: [number, number, number] = [20, 20, 20];

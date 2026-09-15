@@ -1,11 +1,35 @@
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { NavLink, Outlet } from 'react-router-dom';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { navByRole, roleHome, roleLabel } from '@/lib/nav';
 import { Wordmark } from '@/components/brand/LoopMark';
 import { Icon } from '@/components/ui/Icon';
 import { clsx } from '@/lib/utils';
 import type { UserRole } from '@/lib/types';
+
+/** Academy logo (uploaded in Settings) in the header, falling back to the Loop mark. */
+function BrandHeader({ light, size }: { light?: boolean; size: number }) {
+  const { profile } = useAuth();
+  const { data } = useQuery({
+    queryKey: ['shell-brand', profile?.academy_id],
+    enabled: !!profile,
+    queryFn: async () => {
+      const { data } = await supabase.from('academies').select('name, logo_url').eq('id', profile!.academy_id).single();
+      return data as { name: string; logo_url: string | null } | null;
+    },
+  });
+  if (data?.logo_url) {
+    const img = <img src={data.logo_url} alt={data.name} className="w-auto object-contain" style={{ height: size + 8, maxWidth: 168 }} />;
+    // On the dark (navy) sidebar, sit the logo on a white tile so navy-on-navy
+    // logos stay visible — mirroring the academy's own site footer.
+    return light
+      ? <span className="inline-flex items-center rounded-xl bg-white px-2.5 py-1.5">{img}</span>
+      : img;
+  }
+  return <Wordmark size={size} light={light} />;
+}
 
 /**
  * Role-aware app shell: 240px sidebar on desktop, bottom nav on mobile.
@@ -26,7 +50,7 @@ export function AppShell({ role }: { role: UserRole }) {
       {/* ── Desktop sidebar ── */}
       <aside className="fixed inset-y-0 left-0 hidden w-60 flex-col bg-ink px-4 py-6 text-paper md:flex">
         <div className="px-2">
-          <Wordmark size={22} light />
+          <BrandHeader size={22} light />
         </div>
 
         {role === 'head_coach' && (
@@ -71,7 +95,7 @@ export function AppShell({ role }: { role: UserRole }) {
 
       {/* ── Mobile top bar ── */}
       <header className="sticky top-0 z-20 flex items-center justify-between border-b border-cardborder bg-paper px-4 py-3 md:hidden">
-        <Wordmark size={18} />
+        <BrandHeader size={18} />
         <button
           onClick={() => signOut()}
           className="flex items-center gap-1.5 rounded-pill border border-cardborder px-3 py-1.5 text-[11px] font-semibold text-ink/60"

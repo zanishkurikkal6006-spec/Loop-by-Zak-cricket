@@ -14,8 +14,8 @@ import { clsx } from '@/lib/utils';
 import type { ChurnReason, LeadSource } from '@/lib/types';
 
 const inputCls = 'h-11 w-full rounded-pill border border-cardborder bg-white px-3 text-[14px] outline-none focus:border-gold';
-const BAR = '#9C1116';
-const GOLD = '#C9A84C';
+const BAR = '#123A7B';
+const GOLD = '#F4C20C';
 
 // Churn Management — every exit has a reason, and the reasons are analysed by
 // cause, acquisition source and month so patterns surface. Marking a player

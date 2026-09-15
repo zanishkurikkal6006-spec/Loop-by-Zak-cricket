@@ -1,7 +1,9 @@
 import { useRef, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { askAcademyAI, generateDailyBrief, generateWeeklyBrief, AI_PROVIDER, type AiAnswer, type Brief } from '@/lib/aiOps';
+import { proposeActions, executeAction, fetchAuditLog, type ProposedAction } from '@/lib/aiActions';
 import { academyName, platformName } from '@/lib/branding';
 import { htmlToPdf, brandHeader, escapeHtml } from '@/lib/htmlPdf';
 import { useToast } from '@/lib/toast';
@@ -9,7 +11,7 @@ import { Button, Card, Chip, ScreenTitle } from '@/components/ui';
 import { Icon } from '@/components/ui/Icon';
 import { clsx } from '@/lib/utils';
 
-type Tab = 'ask' | 'daily' | 'weekly';
+type Tab = 'ask' | 'daily' | 'weekly' | 'actions';
 
 const SUGGESTED_MGMT = [
   'Are we on track for 500 players?',
@@ -50,13 +52,15 @@ export default function AskAI() {
       </div>
       {/* Head Coach gets the coaching-scoped assistant only (no business briefs). */}
       {!isCoach && (
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <TabBtn active={tab === 'ask'} onClick={() => setTab('ask')}>Ask</TabBtn>
+          <TabBtn active={tab === 'actions'} onClick={() => setTab('actions')}>Actions</TabBtn>
           <TabBtn active={tab === 'daily'} onClick={() => setTab('daily')}>Daily Brief</TabBtn>
           <TabBtn active={tab === 'weekly'} onClick={() => setTab('weekly')}>Director Brief</TabBtn>
         </div>
       )}
       {(tab === 'ask' || isCoach) && <AskTab isCoach={isCoach} />}
+      {!isCoach && tab === 'actions' && <ActionsTab />}
       {!isCoach && tab === 'daily' && <BriefTab kind="daily" />}
       {!isCoach && tab === 'weekly' && <BriefTab kind="weekly" />}
     </div>
@@ -262,6 +266,114 @@ function BriefTab({ kind }: { kind: 'daily' | 'weekly' }) {
         </>
       )}
     </div>
+  );
+}
+
+function ActionsTab() {
+  const { profile } = useAuth();
+  const qc = useQueryClient();
+  const toast = useToast();
+  const proposals = useQuery({ queryKey: ['ai-proposals'], queryFn: proposeActions, enabled: !!profile });
+  const audit = useQuery({ queryKey: ['audit-log'], queryFn: () => fetchAuditLog(15), enabled: !!profile });
+  const [confirming, setConfirming] = useState<string | null>(null);
+  const [running, setRunning] = useState<string | null>(null);
+
+  async function run(a: ProposedAction) {
+    if (!profile) return;
+    setRunning(a.kind);
+    try {
+      const n = await executeAction(a, { academyId: profile.academy_id, userId: profile.id });
+      toast.show(`Created ${n} task${n === 1 ? '' : 's'}`);
+      qc.invalidateQueries({ queryKey: ['ai-proposals'] });
+      qc.invalidateQueries({ queryKey: ['audit-log'] });
+      qc.invalidateQueries({ queryKey: ['follow-ups'] });
+      qc.invalidateQueries({ queryKey: ['todays-actions'] });
+    } catch (e) {
+      toast.show(e instanceof Error ? e.message : 'Failed');
+    } finally {
+      setRunning(null); setConfirming(null);
+    }
+  }
+
+  const list = proposals.data ?? [];
+
+  return (
+    <div className="space-y-4">
+      <Card className="border-info/30 text-[13px] text-info">
+        The AI proposes actions from live data — nothing is written until you confirm. Every execution is logged to the audit trail.
+      </Card>
+
+      {proposals.isLoading && <Card className="text-[13px] text-ink/45">Looking for actions to propose…</Card>}
+
+      {!proposals.isLoading && !list.length && (
+        <Card className="flex flex-col items-center gap-2 py-10 text-center">
+          <Icon name="check" size={26} stroke="#1F8A4C" />
+          <p className="text-[13px] text-ink/45">Nothing to propose — everything's already being worked. 🎉</p>
+        </Card>
+      )}
+
+      {list.map((a) => (
+        <ActionCard
+          key={a.kind}
+          action={a}
+          confirming={confirming === a.kind}
+          running={running === a.kind}
+          onArm={() => setConfirming(a.kind)}
+          onCancel={() => setConfirming(null)}
+          onRun={() => run(a)}
+        />
+      ))}
+
+      <Card>
+        <div className="eyebrow mb-2 text-ink/40">Audit trail</div>
+        {(audit.data ?? []).length === 0 && <p className="text-[12px] text-ink/40">No AI actions executed yet.</p>}
+        <div className="space-y-1.5">
+          {(audit.data ?? []).map((e) => (
+            <div key={e.id} className="flex items-center justify-between border-b border-hairline pb-1.5 text-[12px] last:border-0">
+              <span className="text-ink/70">{String((e.detail as { title?: string }).title ?? e.action)}</span>
+              <span className="text-ink/40">{new Date(e.created_at).toLocaleDateString('en-AE', { day: 'numeric', month: 'short' })} · {String((e.detail as { count?: number }).count ?? '')}</span>
+            </div>
+          ))}
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function ActionCard({ action, confirming, running, onArm, onCancel, onRun }: {
+  action: ProposedAction; confirming: boolean; running: boolean; onArm: () => void; onCancel: () => void; onRun: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Card className="space-y-2">
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <div className="text-[15px] font-semibold">{action.title}</div>
+          <div className="text-[12px] text-ink/55">{action.description}</div>
+        </div>
+        <Chip tone="gold">{action.items.length}</Chip>
+      </div>
+
+      <button onClick={() => setOpen((v) => !v)} className="text-[12px] font-semibold text-brand-red">
+        {open ? 'Hide' : 'Preview'} {action.items.length} item{action.items.length === 1 ? '' : 's'}
+      </button>
+      {open && (
+        <div className="max-h-40 space-y-0.5 overflow-auto rounded-card bg-hairline p-2.5">
+          {action.items.map((it) => <div key={it.id} className="text-[12px] text-ink/70">{it.label}</div>)}
+        </div>
+      )}
+
+      {confirming ? (
+        <div className="flex items-center gap-2">
+          <Button size="sm" disabled={running} onClick={onRun}>
+            {running ? 'Creating…' : `Confirm — create ${action.items.length}`}
+          </Button>
+          <Button size="sm" variant="ghost" disabled={running} onClick={onCancel}>Cancel</Button>
+        </div>
+      ) : (
+        <Button size="sm" variant="gold" onClick={onArm}>Review &amp; confirm</Button>
+      )}
+    </Card>
   );
 }
 

@@ -30,6 +30,30 @@ const HeadCoachDashboard = lazy(() => import('./features/head-coach/HeadCoachDas
 const HeadCoachReports = lazy(() => import('./features/head-coach/HeadCoachReports'));
 const HeadCoachFlags = lazy(() => import('./features/head-coach/HeadCoachFlags'));
 const CelebratePage = lazy(() => import('./pages/CelebratePage'));
+// ── Growth Engine (Phase 1) — Director & Operations Manager ──
+const CommandCenter = lazy(() => import('./features/command/CommandCenter'));
+const TodaysActions = lazy(() => import('./features/command/TodaysActions'));
+const LeadCRM = lazy(() => import('./features/growth/LeadCRM'));
+const Trials = lazy(() => import('./features/growth/Trials'));
+const FollowUps = lazy(() => import('./features/growth/FollowUps'));
+// ── Retention & Parent Experience (Phase 2) ──
+const Retention = lazy(() => import('./features/experience/Retention'));
+const ParentExperience = lazy(() => import('./features/experience/ParentExperience'));
+const Churn = lazy(() => import('./features/experience/Churn'));
+// ── Acquisition (Phase 3) ──
+const Schools = lazy(() => import('./features/growth/Schools'));
+const Events = lazy(() => import('./features/growth/Events'));
+const Referrals = lazy(() => import('./features/growth/Referrals'));
+const Campaigns = lazy(() => import('./features/growth/Campaigns'));
+// ── Operations Intelligence (Phase 4) ──
+const RevenueIntelligence = lazy(() => import('./features/ops/RevenueIntelligence'));
+const Capacity = lazy(() => import('./features/ops/Capacity'));
+const Venues = lazy(() => import('./features/ops/Venues'));
+const CoachUtilization = lazy(() => import('./features/ops/CoachUtilization'));
+// ── AI Operations (Phase 5) ──
+const AskAI = lazy(() => import('./features/ai/AskAI'));
+// ── Strategy (Phase 7) ──
+const Strategy = lazy(() => import('./features/strategy/Strategy'));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false } },
@@ -74,6 +98,65 @@ export default function App() {
             <Route path="/celebrate" element={<CelebratePage />} />
             <Route path="/" element={<RootRedirect />} />
 
+            {/* ── Director (Command Center + Growth, strategic view) ── */}
+            <Route
+              element={
+                <RequireRole roles={['director']}>
+                  <AppShell role="director" />
+                </RequireRole>
+              }
+            >
+              <Route path="/director" element={<CommandCenter base="/director" />} />
+              <Route path="/director/ai" element={<AskAI />} />
+              <Route path="/director/actions" element={<TodaysActions base="/director" />} />
+              <Route path="/director/leads" element={<LeadCRM base="/director" />} />
+              <Route path="/director/trials" element={<Trials />} />
+              <Route path="/director/followups" element={<FollowUps />} />
+              <Route path="/director/schools" element={<Schools />} />
+              <Route path="/director/events" element={<Events />} />
+              <Route path="/director/referrals" element={<Referrals />} />
+              <Route path="/director/campaigns" element={<Campaigns />} />
+              <Route path="/director/players" element={<AdminPlayers />} />
+              <Route path="/director/retention" element={<Retention />} />
+              <Route path="/director/experience" element={<ParentExperience />} />
+              <Route path="/director/churn" element={<Churn />} />
+              <Route path="/director/capacity" element={<Capacity />} />
+              <Route path="/director/venues" element={<Venues />} />
+              <Route path="/director/coaches" element={<CoachUtilization />} />
+              <Route path="/director/revenue" element={<RevenueIntelligence />} />
+              <Route path="/director/strategy" element={<Strategy />} />
+            </Route>
+
+            {/* ── Operations Manager (full operational control) ── */}
+            <Route
+              element={
+                <RequireRole roles={['operations_manager']}>
+                  <AppShell role="operations_manager" />
+                </RequireRole>
+              }
+            >
+              <Route path="/ops" element={<CommandCenter base="/ops" />} />
+              <Route path="/ops/ai" element={<AskAI />} />
+              <Route path="/ops/actions" element={<TodaysActions base="/ops" />} />
+              <Route path="/ops/leads" element={<LeadCRM base="/ops" />} />
+              <Route path="/ops/trials" element={<Trials />} />
+              <Route path="/ops/followups" element={<FollowUps />} />
+              <Route path="/ops/schools" element={<Schools />} />
+              <Route path="/ops/events" element={<Events />} />
+              <Route path="/ops/referrals" element={<Referrals />} />
+              <Route path="/ops/campaigns" element={<Campaigns />} />
+              <Route path="/ops/players" element={<AdminPlayers />} />
+              <Route path="/ops/attendance" element={<AdminAttendance />} />
+              <Route path="/ops/retention" element={<Retention />} />
+              <Route path="/ops/experience" element={<ParentExperience />} />
+              <Route path="/ops/churn" element={<Churn />} />
+              <Route path="/ops/capacity" element={<Capacity />} />
+              <Route path="/ops/venues" element={<Venues />} />
+              <Route path="/ops/coaches" element={<CoachUtilization />} />
+              <Route path="/ops/revenue" element={<RevenueIntelligence />} />
+              <Route path="/ops/payments" element={<AdminPayments />} />
+            </Route>
+
             {/* ── Coach ── */}
             <Route
               element={
@@ -105,6 +188,7 @@ export default function App() {
               <Route path="/head-coach/matches" element={<MatchesList eyebrow="Head Coach" mine={false} />} />
               <Route path="/head-coach/rankings" element={<Rankings eyebrow="Head Coach" />} />
               <Route path="/head-coach/badges" element={<Badges eyebrow="Head Coach" canApprove={false} />} />
+              <Route path="/head-coach/ai" element={<AskAI />} />
             </Route>
 
             {/* ── Admin ── */}

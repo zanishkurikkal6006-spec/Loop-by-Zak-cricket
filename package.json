@@ -13,7 +13,8 @@
     "db:link": "supabase link --project-ref qdsymhyfknagjpnggetk",
     "db:push": "supabase db push",
     "db:diff": "supabase db diff",
-    "functions:deploy": "supabase functions deploy generate-report"
+    "functions:deploy": "supabase functions deploy generate-report",
+    "functions:deploy:ai": "supabase functions deploy ask-academy-ai"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",

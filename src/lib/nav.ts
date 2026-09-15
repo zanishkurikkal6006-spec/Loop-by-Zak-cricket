@@ -25,6 +25,9 @@ export const navByRole: Record<UserRole, NavItem[]> = {
     { to: '/director/retention', label: 'Retention', icon: 'heart' },
     { to: '/director/experience', label: 'Experience', icon: 'message' },
     { to: '/director/churn', label: 'Churn', icon: 'chart' },
+    { to: '/director/capacity', label: 'Capacity', icon: 'gauge' },
+    { to: '/director/venues', label: 'Venues', icon: 'building' },
+    { to: '/director/coaches', label: 'Coaches', icon: 'clipboard' },
     { to: '/director/revenue', label: 'Revenue', icon: 'wallet' },
   ],
   // ── Operations Manager — full operational control ──
@@ -43,6 +46,10 @@ export const navByRole: Record<UserRole, NavItem[]> = {
     { to: '/ops/retention', label: 'Retention', icon: 'heart' },
     { to: '/ops/experience', label: 'Experience', icon: 'message' },
     { to: '/ops/churn', label: 'Churn', icon: 'chart' },
+    { to: '/ops/capacity', label: 'Capacity', icon: 'gauge' },
+    { to: '/ops/venues', label: 'Venues', icon: 'building' },
+    { to: '/ops/coaches', label: 'Coaches', icon: 'clipboard' },
+    { to: '/ops/revenue', label: 'Revenue', icon: 'wallet' },
     { to: '/ops/payments', label: 'Payments', icon: 'card' },
   ],
   coach: [

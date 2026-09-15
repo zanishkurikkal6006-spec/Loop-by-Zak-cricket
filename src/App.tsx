@@ -45,6 +45,11 @@ const Schools = lazy(() => import('./features/growth/Schools'));
 const Events = lazy(() => import('./features/growth/Events'));
 const Referrals = lazy(() => import('./features/growth/Referrals'));
 const Campaigns = lazy(() => import('./features/growth/Campaigns'));
+// ── Operations Intelligence (Phase 4) ──
+const RevenueIntelligence = lazy(() => import('./features/ops/RevenueIntelligence'));
+const Capacity = lazy(() => import('./features/ops/Capacity'));
+const Venues = lazy(() => import('./features/ops/Venues'));
+const CoachUtilization = lazy(() => import('./features/ops/CoachUtilization'));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false } },
@@ -110,7 +115,10 @@ export default function App() {
               <Route path="/director/retention" element={<Retention />} />
               <Route path="/director/experience" element={<ParentExperience />} />
               <Route path="/director/churn" element={<Churn />} />
-              <Route path="/director/revenue" element={<AdminPayments />} />
+              <Route path="/director/capacity" element={<Capacity />} />
+              <Route path="/director/venues" element={<Venues />} />
+              <Route path="/director/coaches" element={<CoachUtilization />} />
+              <Route path="/director/revenue" element={<RevenueIntelligence />} />
             </Route>
 
             {/* ── Operations Manager (full operational control) ── */}
@@ -135,6 +143,10 @@ export default function App() {
               <Route path="/ops/retention" element={<Retention />} />
               <Route path="/ops/experience" element={<ParentExperience />} />
               <Route path="/ops/churn" element={<Churn />} />
+              <Route path="/ops/capacity" element={<Capacity />} />
+              <Route path="/ops/venues" element={<Venues />} />
+              <Route path="/ops/coaches" element={<CoachUtilization />} />
+              <Route path="/ops/revenue" element={<RevenueIntelligence />} />
               <Route path="/ops/payments" element={<AdminPayments />} />
             </Route>
 

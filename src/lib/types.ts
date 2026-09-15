@@ -61,6 +61,7 @@ export interface Batch {
   center_id: string | null;
   start_time: string | null;
   end_time: string | null;
+  capacity: number | null;
 }
 
 export interface Player {
@@ -577,5 +578,20 @@ export interface Referral {
   reward: string | null;
   reward_status: RewardStatus;
   reward_value: number;
+  created_at: string;
+}
+
+// ── Operations Intelligence (Phase 4) ─────────────────────────────────────────
+
+export interface Venue {
+  id: string;
+  academy_id: string;
+  name: string;
+  center_id: string | null;
+  rental_cost: number;
+  available_hours: number;
+  contract_start: string | null;
+  contract_end: string | null;
+  notes: string | null;
   created_at: string;
 }

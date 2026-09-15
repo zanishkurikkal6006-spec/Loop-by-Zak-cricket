@@ -81,20 +81,22 @@ export default function AdminSettings() {
     queryFn: async () => {
       const { data } = await supabase
         .from('academies')
-        .select('id, name, logo_url, bank_details, intake_token')
+        .select('id, name, logo_url, tagline, bank_details, intake_token')
         .eq('id', profile!.academy_id)
         .single();
-      return data as { id: string; name: string; logo_url: string | null; bank_details: Record<string, string>; intake_token: string | null } | null;
+      return data as { id: string; name: string; logo_url: string | null; tagline: string | null; bank_details: Record<string, string>; intake_token: string | null } | null;
     },
   });
 
   // ── Academy branding (name + logo, used on all reports & messages) ──────────
   const [acName, setAcName] = useState('');
   const [acLogo, setAcLogo] = useState('');
+  const [acTagline, setAcTagline] = useState('');
   useEffect(() => {
     if (academy) {
       setAcName(academy.name ?? '');
       setAcLogo(academy.logo_url ?? '');
+      setAcTagline(academy.tagline ?? '');
     }
   }, [academy]);
   // Upload a logo file — downscale to <=256px and store it inline (a data URL),
@@ -134,10 +136,10 @@ export default function AdminSettings() {
     if (!profile || !acName.trim()) return toast.show('Academy name is required');
     const { error } = await supabase
       .from('academies')
-      .update({ name: acName.trim(), logo_url: acLogo.trim() || null })
+      .update({ name: acName.trim(), logo_url: acLogo.trim() || null, tagline: acTagline.trim() || null })
       .eq('id', profile.academy_id);
     if (error) return toast.show('Could not save branding');
-    setBranding(acName.trim(), acLogo.trim() || null);
+    setBranding(acName.trim(), acLogo.trim() || null, acTagline.trim() || null);
     toast.show('Branding saved');
     qc.invalidateQueries({ queryKey: ['settings-academy'] });
   }
@@ -344,7 +346,8 @@ export default function AdminSettings() {
           Your academy name &amp; logo appear on all reports, certificates and parent messages.
           “Powered by Loop by Zak Cricket” stays as the platform credit.
         </p>
-        <input value={acName} onChange={(e) => setAcName(e.target.value)} placeholder="Academy name (e.g. Danube Cricket Academy)" className={field} />
+        <input value={acName} onChange={(e) => setAcName(e.target.value)} placeholder="Academy name (e.g. Super Kings Academy Dubai)" className={field} />
+        <input value={acTagline} onChange={(e) => setAcTagline(e.target.value)} placeholder="Tagline (e.g. We don't just build players. We build character.)" className={`${field} mt-3`} />
         <div className="mt-3 flex items-center gap-3">
           {acLogo.trim() ? (
             <img src={acLogo.trim()} alt="" className="h-14 w-14 rounded-card border border-cardborder object-contain" />

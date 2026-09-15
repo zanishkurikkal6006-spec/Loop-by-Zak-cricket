@@ -27,11 +27,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (p) {
       const { data: ac } = await supabase
         .from('academies')
-        .select('name, logo_url')
+        .select('name, logo_url, tagline')
         .eq('id', p.academy_id)
         .single();
-      const a = ac as { name: string; logo_url: string | null } | null;
-      setBranding(a?.name, a?.logo_url);
+      const a = ac as { name: string; logo_url: string | null; tagline: string | null } | null;
+      setBranding(a?.name, a?.logo_url, a?.tagline);
     }
   }
 

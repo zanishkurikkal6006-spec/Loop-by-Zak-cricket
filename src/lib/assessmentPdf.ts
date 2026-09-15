@@ -1,6 +1,6 @@
 import { jsPDF } from 'jspdf';
 import { RED, DEEP, GOLD, INK, PAPER } from './brandPdf';
-import { academyName, academyLogoDataUrl, drawBrandLogo, platformName } from './branding';
+import { academyName, academyLogoDataUrl, academyTagline, drawBrandLogo, platformName } from './branding';
 
 // The skill list for the 3-month assessment (Age 3–12 focus, but works for all).
 export const ASSESSMENT_SKILLS: { key: string; label: string }[] = [
@@ -247,7 +247,7 @@ export async function downloadAssessmentPdf(d: AssessmentPdfData): Promise<void>
   doc.setFontSize(8);
   doc.setTextColor(150, 150, 150);
   doc.text(`${brand} · Generated ${new Date().toLocaleDateString('en-AE', { day: 'numeric', month: 'long', year: 'numeric' })} · Powered by ${platformName()}`, M, H - 26);
-  doc.text('Keep believing. Keep training. 🏏', W - M, H - 26, { align: 'right' });
+  doc.text(academyTagline() || 'Keep believing. Keep training.', W - M, H - 26, { align: 'right' });
 
   const safe = d.childName.replace(/[^a-z0-9]+/gi, '-').toLowerCase();
   doc.save(`loop-assessment-${safe}.pdf`);

@@ -103,6 +103,11 @@ function TaskRow({ task }: { task: Row }) {
       <Chip tone={P_TONE[task.priority]} className="capitalize">{task.priority}</Chip>
       <div className="flex-1">
         <div className="text-[14px] font-semibold">{task.title}</div>
+        {task.notes && (
+          <div className="mt-0.5 flex items-center gap-1 text-[12px] font-medium text-amber-text">
+            <Icon name="alert" size={12} stroke="currentColor" />{task.notes}
+          </div>
+        )}
         <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-ink/45">
           <span>{TASK_KIND_LABELS[task.kind]}</span>
           {task.due_date && (

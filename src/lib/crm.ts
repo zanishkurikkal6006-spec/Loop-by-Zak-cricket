@@ -209,6 +209,7 @@ export async function createFollowUp(input: {
   ownerId?: string | null;
   dueDate?: string | null;
   priority?: TaskPriority;
+  notes?: string | null;
   createdBy?: string | null;
 }): Promise<void> {
   await supabase.from('follow_up_tasks').insert({
@@ -221,6 +222,7 @@ export async function createFollowUp(input: {
     owner_id: input.ownerId ?? null,
     due_date: input.dueDate ?? null,
     priority: input.priority ?? 'medium',
+    notes: input.notes ?? null,
     created_by: input.createdBy ?? null,
   });
 }

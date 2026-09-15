@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 import { computeHealth } from './health';
 import { createFollowUp } from './crm';
+import { renewalContext } from './utils';
 
 // ============================================================================
 // AI Actions — the AI PROPOSES operational work; a human confirms; the system
@@ -12,7 +13,7 @@ import { createFollowUp } from './crm';
 
 export type ActionKind = 'create_followups_leads' | 'renewals' | 'flag_retention' | 'post_trial';
 
-export interface ActionItem { id: string; label: string; leadId?: string }
+export interface ActionItem { id: string; label: string; leadId?: string; note?: string }
 export interface ProposedAction {
   kind: ActionKind;
   title: string;
@@ -29,7 +30,7 @@ export async function proposeActions(): Promise<ProposedAction[]> {
   const [leads, tasks, players, packages, payments, issues, assessments, attendance, trials, trialAssess] = await Promise.all([
     supabase.from('leads').select('id, player_name, stage'),
     supabase.from('follow_up_tasks').select('lead_id, player_id, status').eq('status', 'open'),
-    supabase.from('players').select('id, full_name, last_seen_at, renewal_date, status').eq('status', 'active'),
+    supabase.from('players').select('id, full_name, last_seen_at, renewal_date, extra_sessions, status').eq('status', 'active'),
     supabase.from('packages').select('player_id, sessions_remaining, sessions_total'),
     supabase.from('payments').select('player_id, status'),
     supabase.from('issues').select('player_id, status').eq('status', 'open'),
@@ -64,13 +65,14 @@ export async function proposeActions(): Promise<ProposedAction[]> {
     if (p.sessions_total == null || p.sessions_remaining == null) continue;
     minRem.set(p.player_id, Math.min(minRem.get(p.player_id) ?? Infinity, p.sessions_remaining));
   }
-  const activePlayers = (players.data ?? []) as { id: string; full_name: string; last_seen_at: string | null; renewal_date: string | null }[];
+  const activePlayers = (players.data ?? []) as { id: string; full_name: string; last_seen_at: string | null; renewal_date: string | null; extra_sessions: number }[];
+  const ctxFor = (id: string, extra: number) => renewalContext(minRem.has(id) ? minRem.get(id)! : null, extra ?? 0);
   const renewals = activePlayers.filter((p) => (minRem.get(p.id) ?? Infinity) <= 2 && !openPlayerIds.has(p.id));
   if (renewals.length) proposals.push({
     kind: 'renewals',
     title: `Create renewal tasks for ${renewals.length} player${renewals.length === 1 ? '' : 's'}`,
-    description: 'Players with 2 or fewer sessions left and no open task. Creates a renewal follow-up for each.',
-    items: renewals.map((p) => ({ id: p.id, label: p.full_name })),
+    description: 'Players with 2 or fewer sessions left and no open task. Creates a renewal follow-up for each, noting exactly where their package stands.',
+    items: renewals.map((p) => ({ id: p.id, label: p.full_name, note: ctxFor(p.id, p.extra_sessions) })),
   });
   const renewalIds = new Set(renewals.map((r) => r.id));
 
@@ -100,7 +102,7 @@ export async function proposeActions(): Promise<ProposedAction[]> {
     kind: 'flag_retention',
     title: `Flag ${redRisk.length} at-risk famil${redRisk.length === 1 ? 'y' : 'ies'} for a retention call`,
     description: 'Red-risk players with no open task. Creates a critical retention check-in for each.',
-    items: redRisk.map((p) => ({ id: p.id, label: p.full_name })),
+    items: redRisk.map((p) => ({ id: p.id, label: p.full_name, note: ctxFor(p.id, p.extra_sessions) })),
   });
 
   // 4 · Trials attended but not yet assessed / followed up.
@@ -127,9 +129,9 @@ export async function executeAction(
     if (action.kind === 'create_followups_leads') {
       await createFollowUp({ academyId: ctx.academyId, kind: 'new_lead', title: `Contact ${item.label}`, leadId: item.id, ownerId: ctx.userId, dueDate: due, priority: 'high', createdBy: ctx.userId });
     } else if (action.kind === 'renewals') {
-      await createFollowUp({ academyId: ctx.academyId, kind: 'renewal_follow_up', title: `Renewal · ${item.label}`, playerId: item.id, ownerId: ctx.userId, dueDate: due, priority: 'high', createdBy: ctx.userId });
+      await createFollowUp({ academyId: ctx.academyId, kind: 'renewal_follow_up', title: `Renewal · ${item.label}`, playerId: item.id, ownerId: ctx.userId, dueDate: due, priority: 'high', notes: item.note ?? null, createdBy: ctx.userId });
     } else if (action.kind === 'flag_retention') {
-      await createFollowUp({ academyId: ctx.academyId, kind: 'renewal_follow_up', title: `Retention check-in · ${item.label}`, playerId: item.id, ownerId: ctx.userId, dueDate: due, priority: 'critical', createdBy: ctx.userId });
+      await createFollowUp({ academyId: ctx.academyId, kind: 'renewal_follow_up', title: `Retention check-in · ${item.label}`, playerId: item.id, ownerId: ctx.userId, dueDate: due, priority: 'critical', notes: item.note ?? null, createdBy: ctx.userId });
     } else if (action.kind === 'post_trial') {
       await createFollowUp({ academyId: ctx.academyId, kind: 'post_trial', title: `Post-trial follow-up · ${item.label}`, leadId: item.leadId ?? null, trialId: item.id, ownerId: ctx.userId, dueDate: due, priority: 'high', createdBy: ctx.userId });
     }

@@ -86,6 +86,9 @@ export interface Player {
   source_campaign: string | null;
   school: string | null;
   area: string | null;
+  // ── Retention (Phase 2) ──
+  renewal_date: string | null;
+  exited_at: string | null;
   created_at: string;
 }
 
@@ -425,4 +428,57 @@ export interface FollowUpTask {
   created_by: string | null;
   created_at: string;
   completed_at: string | null;
+}
+
+// ── Retention & Parent Experience (Phase 2) ───────────────────────────────────
+
+export type RiskLevel = 'green' | 'amber' | 'red';
+export type IssueCategory =
+  | 'coaching' | 'schedule' | 'payment' | 'communication' | 'facility'
+  | 'match_selection' | 'tournament' | 'safety' | 'other';
+export type IssueStatus = 'open' | 'in_progress' | 'resolved';
+export type ChurnReason =
+  | 'price' | 'location' | 'timing' | 'coach' | 'school_pressure' | 'no_improvement'
+  | 'insufficient_match_exposure' | 'child_lost_interest' | 'moved_country'
+  | 'joined_competitor' | 'facility' | 'parent_experience' | 'other';
+
+export interface Issue {
+  id: string;
+  academy_id: string;
+  player_id: string | null;
+  parent_id: string | null;
+  category: IssueCategory;
+  title: string;
+  body: string | null;
+  priority: TaskPriority;
+  status: IssueStatus;
+  owner_id: string | null;
+  resolution: string | null;
+  created_by: string | null;
+  created_at: string;
+  resolved_at: string | null;
+}
+
+export interface PlayerHealthSnapshot {
+  id: string;
+  academy_id: string;
+  player_id: string;
+  score: number;
+  risk: RiskLevel;
+  factors: { label: string; penalty: number }[];
+  snapshot_date: string;
+  created_at: string;
+}
+
+export interface ChurnRecord {
+  id: string;
+  academy_id: string;
+  player_id: string;
+  exit_date: string;
+  reason: ChurnReason;
+  reason_detail: string | null;
+  lead_source: LeadSource | null;
+  join_cohort: string | null;
+  recorded_by: string | null;
+  created_at: string;
 }

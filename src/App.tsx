@@ -36,6 +36,10 @@ const TodaysActions = lazy(() => import('./features/command/TodaysActions'));
 const LeadCRM = lazy(() => import('./features/growth/LeadCRM'));
 const Trials = lazy(() => import('./features/growth/Trials'));
 const FollowUps = lazy(() => import('./features/growth/FollowUps'));
+// ── Retention & Parent Experience (Phase 2) ──
+const Retention = lazy(() => import('./features/experience/Retention'));
+const ParentExperience = lazy(() => import('./features/experience/ParentExperience'));
+const Churn = lazy(() => import('./features/experience/Churn'));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false } },
@@ -94,6 +98,9 @@ export default function App() {
               <Route path="/director/trials" element={<Trials />} />
               <Route path="/director/followups" element={<FollowUps />} />
               <Route path="/director/players" element={<AdminPlayers />} />
+              <Route path="/director/retention" element={<Retention />} />
+              <Route path="/director/experience" element={<ParentExperience />} />
+              <Route path="/director/churn" element={<Churn />} />
               <Route path="/director/revenue" element={<AdminPayments />} />
             </Route>
 
@@ -112,6 +119,9 @@ export default function App() {
               <Route path="/ops/followups" element={<FollowUps />} />
               <Route path="/ops/players" element={<AdminPlayers />} />
               <Route path="/ops/attendance" element={<AdminAttendance />} />
+              <Route path="/ops/retention" element={<Retention />} />
+              <Route path="/ops/experience" element={<ParentExperience />} />
+              <Route path="/ops/churn" element={<Churn />} />
               <Route path="/ops/payments" element={<AdminPayments />} />
             </Route>
 

@@ -482,3 +482,100 @@ export interface ChurnRecord {
   recorded_by: string | null;
   created_at: string;
 }
+
+// ── Acquisition (Phase 3): Schools · Events · Campaigns · Referrals ────────────
+
+export type SchoolStage =
+  | 'target' | 'contacted' | 'meeting' | 'proposal' | 'activation_agreed'
+  | 'active_partner' | 'closed_lost';
+export type EventType =
+  | 'junior_cricket_day' | 'open_day' | 'camp' | 'tournament' | 'school_activation'
+  | 'community' | 'awards' | 'talent_day' | 'other';
+export type ReferralStatus = 'created' | 'lead' | 'trial' | 'enrolled' | 'rewarded' | 'expired';
+export type RewardStatus = 'none' | 'pending' | 'approved' | 'paid';
+
+export interface School {
+  id: string;
+  academy_id: string;
+  name: string;
+  area: string | null;
+  curriculum: string | null;
+  contact_name: string | null;
+  contact_role: string | null;
+  phone: string | null;
+  email: string | null;
+  stage: SchoolStage;
+  potential_students: number | null;
+  first_contact: string | null;
+  last_contact: string | null;
+  next_action: string | null;
+  next_action_date: string | null;
+  activation_date: string | null;
+  students_reached: number;
+  leads: number;
+  trials: number;
+  enrolments: number;
+  revenue: number;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface SchoolActivity {
+  id: string;
+  academy_id: string;
+  school_id: string;
+  body: string | null;
+  created_by: string | null;
+  created_at: string;
+}
+
+export interface AcademyEvent {
+  id: string;
+  academy_id: string;
+  name: string;
+  type: EventType;
+  event_date: string | null;
+  center_id: string | null;
+  budget: number;
+  registrations: number;
+  attendance: number;
+  leads: number;
+  trials: number;
+  enrolments: number;
+  revenue: number;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface Campaign {
+  id: string;
+  academy_id: string;
+  platform: string | null;
+  name: string;
+  period: string | null;
+  spend: number;
+  leads: number;
+  qualified_leads: number;
+  trials: number;
+  trial_attendance: number;
+  enrolments: number;
+  revenue: number;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface Referral {
+  id: string;
+  academy_id: string;
+  code: string;
+  referrer_player_id: string | null;
+  referrer_name: string | null;
+  invited_name: string | null;
+  invited_phone: string | null;
+  invited_lead_id: string | null;
+  status: ReferralStatus;
+  reward: string | null;
+  reward_status: RewardStatus;
+  reward_value: number;
+  created_at: string;
+}

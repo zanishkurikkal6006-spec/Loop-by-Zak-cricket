@@ -40,6 +40,11 @@ const FollowUps = lazy(() => import('./features/growth/FollowUps'));
 const Retention = lazy(() => import('./features/experience/Retention'));
 const ParentExperience = lazy(() => import('./features/experience/ParentExperience'));
 const Churn = lazy(() => import('./features/experience/Churn'));
+// ── Acquisition (Phase 3) ──
+const Schools = lazy(() => import('./features/growth/Schools'));
+const Events = lazy(() => import('./features/growth/Events'));
+const Referrals = lazy(() => import('./features/growth/Referrals'));
+const Campaigns = lazy(() => import('./features/growth/Campaigns'));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false } },
@@ -97,6 +102,10 @@ export default function App() {
               <Route path="/director/leads" element={<LeadCRM base="/director" />} />
               <Route path="/director/trials" element={<Trials />} />
               <Route path="/director/followups" element={<FollowUps />} />
+              <Route path="/director/schools" element={<Schools />} />
+              <Route path="/director/events" element={<Events />} />
+              <Route path="/director/referrals" element={<Referrals />} />
+              <Route path="/director/campaigns" element={<Campaigns />} />
               <Route path="/director/players" element={<AdminPlayers />} />
               <Route path="/director/retention" element={<Retention />} />
               <Route path="/director/experience" element={<ParentExperience />} />
@@ -117,6 +126,10 @@ export default function App() {
               <Route path="/ops/leads" element={<LeadCRM base="/ops" />} />
               <Route path="/ops/trials" element={<Trials />} />
               <Route path="/ops/followups" element={<FollowUps />} />
+              <Route path="/ops/schools" element={<Schools />} />
+              <Route path="/ops/events" element={<Events />} />
+              <Route path="/ops/referrals" element={<Referrals />} />
+              <Route path="/ops/campaigns" element={<Campaigns />} />
               <Route path="/ops/players" element={<AdminPlayers />} />
               <Route path="/ops/attendance" element={<AdminAttendance />} />
               <Route path="/ops/retention" element={<Retention />} />

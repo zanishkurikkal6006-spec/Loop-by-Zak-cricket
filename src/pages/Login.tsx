@@ -36,18 +36,18 @@ export default function Login({ onSignIn, error, loading }: LoginProps) {
           {name.charAt(0).toUpperCase()}
         </div>
 
-        {logo && (
-          <span className="relative mb-6 inline-flex w-fit items-center rounded-2xl bg-white px-4 py-3 shadow-sm">
-            <img src={logo} alt={name} className="h-14 w-auto object-contain" style={{ maxWidth: 220 }} />
+        {logo ? (
+          <span className="relative inline-flex w-fit items-center rounded-2xl bg-white px-6 py-5 shadow-md">
+            <img src={logo} alt={name} className="h-auto w-auto object-contain" style={{ maxHeight: 150, maxWidth: 260 }} />
           </span>
+        ) : (
+          <h1 className="relative font-hero text-[clamp(40px,7vw,76px)] uppercase leading-[0.92] tracking-[0.01em] text-brand-deep">
+            {name}
+          </h1>
         )}
-
-        <h1 className="relative font-hero text-[clamp(40px,7vw,76px)] uppercase leading-[0.92] tracking-[0.01em] text-brand-deep">
-          {name}
-        </h1>
-        <div className="relative mt-4 h-1.5 w-24 rounded-full bg-skorange" />
+        <div className="relative mt-6 h-1.5 w-24 rounded-full bg-skorange" />
         {tagline && (
-          <p className="relative mt-5 max-w-[420px] text-[16px] font-medium leading-snug text-brand-deep/80">
+          <p className="relative mt-5 max-w-[420px] font-hero text-[clamp(20px,2.6vw,30px)] uppercase leading-[1.02] tracking-[0.01em] text-brand-deep">
             {tagline}
           </p>
         )}

@@ -106,7 +106,7 @@ export default function App() {
                 </RequireRole>
               }
             >
-              <Route path="/director" element={<CommandCenter base="/director" />} />
+              <Route path="/director" element={<CommandCenter base="/director" variant="director" />} />
               <Route path="/director/ai" element={<AskAI />} />
               <Route path="/director/actions" element={<TodaysActions base="/director" />} />
               <Route path="/director/leads" element={<LeadCRM base="/director" />} />
@@ -135,7 +135,7 @@ export default function App() {
                 </RequireRole>
               }
             >
-              <Route path="/ops" element={<CommandCenter base="/ops" />} />
+              <Route path="/ops" element={<CommandCenter base="/ops" variant="ops" />} />
               <Route path="/ops/ai" element={<AskAI />} />
               <Route path="/ops/actions" element={<TodaysActions base="/ops" />} />
               <Route path="/ops/leads" element={<LeadCRM base="/ops" />} />

@@ -81,10 +81,10 @@ export default function AdminSettings() {
     queryFn: async () => {
       const { data } = await supabase
         .from('academies')
-        .select('id, name, logo_url, bank_details')
+        .select('id, name, logo_url, bank_details, intake_token')
         .eq('id', profile!.academy_id)
         .single();
-      return data as { id: string; name: string; logo_url: string | null; bank_details: Record<string, string> } | null;
+      return data as { id: string; name: string; logo_url: string | null; bank_details: Record<string, string>; intake_token: string | null } | null;
     },
   });
 
@@ -362,6 +362,9 @@ export default function AdminSettings() {
         <Button size="sm" className="mt-3" onClick={saveBranding}>Save branding</Button>
       </Card>
 
+      {/* Lead intake (Meta / Zapier / website) */}
+      <LeadIntakeCard token={academy?.intake_token ?? null} />
+
       {/* Coaches & staff */}
       <Card>
         <div className="eyebrow mb-3 text-ink/40">Coaches &amp; Staff</div>
@@ -586,5 +589,57 @@ function DeleteX({ onClick }: { onClick: () => void }) {
     >
       ✕
     </button>
+  );
+}
+
+// ── Lead Intake card: the webhook URL + token to connect Meta / Zapier / a form ─
+function LeadIntakeCard({ token }: { token: string | null }) {
+  const toast = useToast();
+  const base = (import.meta.env.VITE_SUPABASE_URL as string | undefined)?.replace(/\/$/, '') ?? '';
+  const url = base ? `${base}/functions/v1/intake-lead` : '/functions/v1/intake-lead';
+  const copy = (label: string, value: string) => {
+    navigator.clipboard?.writeText(value).then(
+      () => toast.show(`${label} copied`),
+      () => toast.show('Copy failed — select and copy manually'),
+    );
+  };
+  const field = 'h-11 w-full rounded-pill border border-cardborder bg-white px-3 text-[13px] outline-none';
+
+  return (
+    <Card>
+      <div className="eyebrow mb-1 text-ink/40">Lead Intake · Meta ads, Zapier &amp; forms</div>
+      <p className="mb-3 text-[12px] text-ink/50">
+        Send leads straight into the CRM — no typing. Every lead that arrives here automatically
+        gets a “Call parent” task in Follow-ups. Connect Meta Lead Ads through Zapier or Make.
+      </p>
+
+      <label className="mb-1 block text-[11px] font-semibold uppercase tracking-eyebrow text-ink/40">Webhook URL (POST)</label>
+      <div className="flex gap-2">
+        <input readOnly value={url} className={field} onFocus={(e) => e.currentTarget.select()} />
+        <Button size="sm" variant="ghost" onClick={() => copy('URL', url)}>Copy</Button>
+      </div>
+
+      <label className="mb-1 mt-3 block text-[11px] font-semibold uppercase tracking-eyebrow text-ink/40">Your intake token</label>
+      <div className="flex gap-2">
+        <input readOnly value={token ?? 'Run the latest migration to generate this'} className={field} onFocus={(e) => e.currentTarget.select()} />
+        {token && <Button size="sm" variant="ghost" onClick={() => copy('Token', token)}>Copy</Button>}
+      </div>
+
+      <details className="mt-3 rounded-card border border-cardborder bg-white p-3">
+        <summary className="cursor-pointer text-[12px] font-semibold text-brand-red">How to connect Meta Lead Ads (Zapier)</summary>
+        <ol className="mt-2 space-y-1 pl-4 text-[12px] text-ink/60" style={{ listStyle: 'decimal' }}>
+          <li>In Zapier, create a Zap with trigger <b>Facebook Lead Ads → New Lead</b>.</li>
+          <li>Add action <b>Webhooks by Zapier → POST</b>.</li>
+          <li>URL = the Webhook URL above. Payload type = <b>JSON</b>.</li>
+          <li>Add data fields, mapping your form to these keys:
+            <span className="mono"> token</span>, <span className="mono">parent_name</span>, <span className="mono">player_name</span>,
+            <span className="mono"> phone</span>, <span className="mono">email</span>, <span className="mono">area</span>,
+            <span className="mono"> source</span> (e.g. meta), <span className="mono">campaign</span>.
+          </li>
+          <li>Set <span className="mono">token</span> to your intake token above. Turn the Zap on — new leads now appear instantly with a call task.</li>
+        </ol>
+        <p className="mt-2 text-[11px] text-ink/45">A website form or WhatsApp tool can POST the same JSON. Keep the token private — treat it like a password.</p>
+      </details>
+    </Card>
   );
 }

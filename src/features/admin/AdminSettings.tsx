@@ -69,7 +69,7 @@ export default function AdminSettings() {
       const { data } = await supabase
         .from('profiles')
         .select('*')
-        .in('role', ['coach', 'head_coach', 'admin'])
+        .in('role', ['coach', 'head_coach', 'admin', 'operations_manager', 'director'])
         .order('role');
       return (data ?? []) as Profile[];
     },
@@ -329,7 +329,7 @@ export default function AdminSettings() {
     setEditStaff(null);
   }
 
-  const roleLabel: Record<string, string> = { coach: 'Coach', head_coach: 'Head Coach', admin: 'Admin' };
+  const roleLabel: Record<string, string> = { coach: 'Coach', head_coach: 'Head Coach', admin: 'Admin', operations_manager: 'Operations Manager', director: 'Director' };
 
   const field = 'h-11 w-full rounded-pill border border-cardborder bg-white px-3 text-[14px] outline-none focus:border-gold';
 
@@ -389,6 +389,8 @@ export default function AdminSettings() {
             <option value="coach">Coach</option>
             <option value="head_coach">Head Coach</option>
             <option value="admin">Admin</option>
+            <option value="operations_manager">Operations Manager</option>
+            <option value="director">Director</option>
           </select>
         </div>
         <Button size="sm" className="mt-2" disabled={addingStaff} onClick={addStaff}>
@@ -552,6 +554,8 @@ export default function AdminSettings() {
             <option value="coach">Coach</option>
             <option value="head_coach">Head Coach</option>
             <option value="admin">Admin</option>
+            <option value="operations_manager">Operations Manager</option>
+            <option value="director">Director</option>
           </select>
           {editStaff?.email && <p className="text-[11px] text-ink/45">Login email: {editStaff.email} (can't be changed here)</p>}
           <div className="flex gap-2">

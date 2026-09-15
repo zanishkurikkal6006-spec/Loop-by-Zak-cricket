@@ -7,9 +7,10 @@ import { navByRole, roleHome, roleLabel } from '@/lib/nav';
 import { Wordmark } from '@/components/brand/LoopMark';
 import { Icon } from '@/components/ui/Icon';
 import { clsx } from '@/lib/utils';
+import { appBrandLogoUrl, appBrandName } from '@/lib/appBrand';
 import type { UserRole } from '@/lib/types';
 
-/** Academy logo (uploaded in Settings) in the header, falling back to the Loop mark. */
+/** Academy logo (uploaded in Settings, or the env brand) in the header, else the Loop mark. */
 function BrandHeader({ light, size }: { light?: boolean; size: number }) {
   const { profile } = useAuth();
   const { data } = useQuery({
@@ -20,8 +21,10 @@ function BrandHeader({ light, size }: { light?: boolean; size: number }) {
       return data as { name: string; logo_url: string | null } | null;
     },
   });
-  if (data?.logo_url) {
-    const img = <img src={data.logo_url} alt={data.name} className="w-auto object-contain" style={{ height: size + 8, maxWidth: 168 }} />;
+  const logo = data?.logo_url ?? appBrandLogoUrl();
+  const name = data?.name ?? appBrandName();
+  if (logo) {
+    const img = <img src={logo} alt={name} className="w-auto object-contain" style={{ height: size + 8, maxWidth: 168 }} />;
     // On the dark (navy) sidebar, sit the logo on a white tile so navy-on-navy
     // logos stay visible — mirroring the academy's own site footer.
     return light
@@ -90,6 +93,9 @@ export function AppShell({ role }: { role: UserRole }) {
             <Icon name="logout" size={14} />
             Sign out
           </button>
+          <div className="mt-3 px-2 text-[9.5px] uppercase tracking-[0.22em] text-paper/30">
+            Powered by Loop by Zak Cricket
+          </div>
         </div>
       </aside>
 

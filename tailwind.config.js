@@ -46,6 +46,8 @@ export default {
         'chip-comp': '#F1EAFE',
       },
       fontFamily: {
+        // Heavy condensed hero — big bold headlines (login, dashboard heroes).
+        hero: ['Anton', '"Bebas Neue"', 'sans-serif'],
         // Display / numbers — wordmark, big stat numbers, screen titles.
         display: ['"Bebas Neue"', 'sans-serif'],
         // UI / body — all labels, buttons, body.

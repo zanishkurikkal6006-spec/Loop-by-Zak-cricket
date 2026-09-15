@@ -13,6 +13,7 @@ export const navByRole: Record<UserRole, NavItem[]> = {
   // ── Director — strategy & business visibility (not routine attendance) ──
   director: [
     { to: '/director', label: 'Command', icon: 'sparkles' },
+    { to: '/director/ai', label: 'Ask AI', icon: 'wand' },
     { to: '/director/actions', label: 'Today', icon: 'check', badgeKey: 'todaysActions' },
     { to: '/director/leads', label: 'Lead CRM', icon: 'trending' },
     { to: '/director/trials', label: 'Trials', icon: 'calendar' },
@@ -33,6 +34,7 @@ export const navByRole: Record<UserRole, NavItem[]> = {
   // ── Operations Manager — full operational control ──
   operations_manager: [
     { to: '/ops', label: 'Command', icon: 'sparkles' },
+    { to: '/ops/ai', label: 'Ask AI', icon: 'wand' },
     { to: '/ops/actions', label: 'Today', icon: 'check', badgeKey: 'todaysActions' },
     { to: '/ops/leads', label: 'Lead CRM', icon: 'trending' },
     { to: '/ops/trials', label: 'Trials', icon: 'calendar' },

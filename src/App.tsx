@@ -50,6 +50,8 @@ const RevenueIntelligence = lazy(() => import('./features/ops/RevenueIntelligenc
 const Capacity = lazy(() => import('./features/ops/Capacity'));
 const Venues = lazy(() => import('./features/ops/Venues'));
 const CoachUtilization = lazy(() => import('./features/ops/CoachUtilization'));
+// ── AI Operations (Phase 5) ──
+const AskAI = lazy(() => import('./features/ai/AskAI'));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false } },
@@ -103,6 +105,7 @@ export default function App() {
               }
             >
               <Route path="/director" element={<CommandCenter base="/director" />} />
+              <Route path="/director/ai" element={<AskAI />} />
               <Route path="/director/actions" element={<TodaysActions base="/director" />} />
               <Route path="/director/leads" element={<LeadCRM base="/director" />} />
               <Route path="/director/trials" element={<Trials />} />
@@ -130,6 +133,7 @@ export default function App() {
               }
             >
               <Route path="/ops" element={<CommandCenter base="/ops" />} />
+              <Route path="/ops/ai" element={<AskAI />} />
               <Route path="/ops/actions" element={<TodaysActions base="/ops" />} />
               <Route path="/ops/leads" element={<LeadCRM base="/ops" />} />
               <Route path="/ops/trials" element={<Trials />} />

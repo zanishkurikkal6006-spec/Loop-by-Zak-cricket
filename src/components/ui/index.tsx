@@ -28,7 +28,7 @@ export function Button({ variant = 'primary', size = 'md', className, ...props }
   const base =
     'inline-flex items-center justify-center gap-2 font-semibold uppercase tracking-[0.12em] rounded-pill cursor-pointer transition disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-[1.07]';
   const variants = {
-    primary: 'text-paper border-none shadow-btn bg-gradient-to-b from-[#b1141a] to-[#7c0f14]',
+    primary: 'text-paper border-none shadow-btn bg-gradient-to-b from-[#1b4aa0] to-[#0f2f6b]',
     gold: 'text-ink border-none bg-gradient-to-b from-gold-light to-gold-dark',
     dark: 'text-paper bg-ink border-none',
     ghost: 'bg-white border border-cardborder text-ink/70',

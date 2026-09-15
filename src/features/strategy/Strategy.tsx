@@ -71,8 +71,8 @@ function PlanTab({ f, loading }: { f?: GrowthForecast; loading: boolean }) {
             <YAxis tick={{ fontSize: 10, fill: '#6B6660' }} axisLine={false} tickLine={false} />
             <Tooltip contentStyle={{ borderRadius: 10, border: '1px solid #ECE7E1', fontSize: 12 }} />
             <Legend wrapperStyle={{ fontSize: 11 }} />
-            <Line type="monotone" dataKey="Actual" stroke="#9C1116" strokeWidth={2.5} dot={false} />
-            <Line type="monotone" dataKey="Projected" stroke="#C9A84C" strokeWidth={2.5} strokeDasharray="5 4" dot={false} />
+            <Line type="monotone" dataKey="Actual" stroke="#14387F" strokeWidth={2.5} dot={false} />
+            <Line type="monotone" dataKey="Projected" stroke="#FFC72C" strokeWidth={2.5} strokeDasharray="5 4" dot={false} />
             <Line type="monotone" dataKey="Target" stroke="#8B8680" strokeWidth={1.5} dot={false} />
           </LineChart>
         </ResponsiveContainer>

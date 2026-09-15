@@ -5,14 +5,16 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Super Kings Academy UAE — navy + yellow (powered by Loop by Zak Cricket).
+        // `brand` keeps its token names so the whole app re-themes from here.
         brand: {
-          red: '#9C1116', // primary actions, active nav, key accents
-          deep: '#6E0C10', // gradients, depth, avatars
+          red: '#14387F', // PRIMARY (navy) — actions, active nav, key accents
+          deep: '#0C2657', // deep navy — gradients, depth, avatars
         },
         gold: {
-          DEFAULT: '#C9A84C', // premium accent — 1-on-1 / achievements / head-coach
-          light: '#EFDC97', // top of gold gradients
-          dark: '#937328', // gold text on light, gradient bottoms
+          DEFAULT: '#FFC72C', // Super Kings yellow — accent / achievements
+          light: '#FFE083', // top of yellow gradients
+          dark: '#C9971E', // yellow-gold text on light, gradient bottoms
         },
         ink: '#141414', // text, sidebars, dark cards
         paper: '#FAF7F4', // app background / surfaces
@@ -37,7 +39,7 @@ export default {
         'chip-amber': '#FBF1DD',
         'chip-red': '#FBE9E8',
         'chip-blue': '#EAF1FB',
-        'chip-gold': '#F5ECD3',
+        'chip-gold': '#FFF3D1',
         'chip-comp': '#F1EAFE',
       },
       fontFamily: {
@@ -54,7 +56,7 @@ export default {
       boxShadow: {
         card: '0 10px 24px -20px rgba(20,20,20,0.5)',
         'card-lg': '0 20px 44px -30px rgba(20,20,20,0.5)',
-        btn: '0 14px 26px -12px rgba(156,17,22,0.7)',
+        btn: '0 14px 26px -12px rgba(20,56,127,0.55)',
       },
       letterSpacing: {
         eyebrow: '0.25em',
@@ -63,9 +65,9 @@ export default {
       backgroundImage: {
         // 48° cricket-ball seam texture for dark hero/login surfaces.
         seam:
-          'repeating-linear-gradient(48deg, transparent 0 13px, rgba(201,168,76,0.9) 14px 16px, transparent 16px 17px)',
+          'repeating-linear-gradient(48deg, transparent 0 13px, rgba(255,199,44,0.9) 14px 16px, transparent 16px 17px)',
         'brand-panel':
-          'radial-gradient(125% 90% at 32% 6%, #34151a 0%, #1a0d0e 52%, #100a0b 100%)',
+          'radial-gradient(125% 90% at 32% 6%, #1c3f82 0%, #112a58 52%, #0a1c3d 100%)',
       },
     },
   },

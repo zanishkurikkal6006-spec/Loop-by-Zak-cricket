@@ -21,7 +21,12 @@ function BrandHeader({ light, size }: { light?: boolean; size: number }) {
     },
   });
   if (data?.logo_url) {
-    return <img src={data.logo_url} alt={data.name} className="w-auto object-contain" style={{ height: size + 8, maxWidth: 184 }} />;
+    const img = <img src={data.logo_url} alt={data.name} className="w-auto object-contain" style={{ height: size + 8, maxWidth: 168 }} />;
+    // On the dark (navy) sidebar, sit the logo on a white tile so navy-on-navy
+    // logos stay visible — mirroring the academy's own site footer.
+    return light
+      ? <span className="inline-flex items-center rounded-xl bg-white px-2.5 py-1.5">{img}</span>
+      : img;
   }
   return <Wordmark size={size} light={light} />;
 }

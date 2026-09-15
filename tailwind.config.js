@@ -5,17 +5,20 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Super Kings Academy UAE — navy + yellow (powered by Loop by Zak Cricket).
-        // `brand` keeps its token names so the whole app re-themes from here.
+        // Super Kings Academy Dubai — navy + golden yellow, with royal-blue and
+        // orange accents (powered by Loop by Zak Cricket). `brand` keeps its
+        // token names so the whole app re-themes from here.
         brand: {
-          red: '#14387F', // PRIMARY (navy) — actions, active nav, key accents
-          deep: '#0C2657', // deep navy — gradients, depth, avatars
+          red: '#123A7B', // PRIMARY (Super Kings navy) — actions, active nav
+          deep: '#0C2A5E', // deep navy — gradients, depth, avatars
         },
         gold: {
-          DEFAULT: '#FFC72C', // Super Kings yellow — accent / achievements
-          light: '#FFE083', // top of yellow gradients
-          dark: '#C9971E', // yellow-gold text on light, gradient bottoms
+          DEFAULT: '#F4C20C', // Super Kings golden yellow — accent / achievements
+          light: '#FAD64A', // top of yellow gradients
+          dark: '#A87C08', // gold text on light, gradient bottoms
         },
+        skblue: '#1877C9', // Super Kings royal blue (wordmark accent)
+        skorange: '#F26A21', // Super Kings orange (lion / highlights)
         ink: '#141414', // text, sidebars, dark cards
         paper: '#FAF7F4', // app background / surfaces
         canvas: '#E7E4DF', // behind device frames / page gray
@@ -27,7 +30,7 @@ export default {
           text: '#A9791B', // late, low, pending-confirm
         },
         danger: '#B3261E', // exhausted, overdue (NOTE: no "absent" state exists)
-        info: '#2563EB', // policy notes, info callouts
+        info: '#1877C9', // Super Kings royal blue — policy notes, info callouts
         whatsapp: {
           DEFAULT: '#25D366',
           bubble: '#075E54',
@@ -39,7 +42,7 @@ export default {
         'chip-amber': '#FBF1DD',
         'chip-red': '#FBE9E8',
         'chip-blue': '#EAF1FB',
-        'chip-gold': '#FFF3D1',
+        'chip-gold': '#FCEFC0',
         'chip-comp': '#F1EAFE',
       },
       fontFamily: {
@@ -56,7 +59,7 @@ export default {
       boxShadow: {
         card: '0 10px 24px -20px rgba(20,20,20,0.5)',
         'card-lg': '0 20px 44px -30px rgba(20,20,20,0.5)',
-        btn: '0 14px 26px -12px rgba(20,56,127,0.55)',
+        btn: '0 14px 26px -12px rgba(18,58,123,0.5)',
       },
       letterSpacing: {
         eyebrow: '0.25em',
@@ -65,9 +68,9 @@ export default {
       backgroundImage: {
         // 48° cricket-ball seam texture for dark hero/login surfaces.
         seam:
-          'repeating-linear-gradient(48deg, transparent 0 13px, rgba(255,199,44,0.9) 14px 16px, transparent 16px 17px)',
+          'repeating-linear-gradient(48deg, transparent 0 13px, rgba(244,194,12,0.9) 14px 16px, transparent 16px 17px)',
         'brand-panel':
-          'radial-gradient(125% 90% at 32% 6%, #1c3f82 0%, #112a58 52%, #0a1c3d 100%)',
+          'radial-gradient(125% 90% at 32% 6%, #16407f 0%, #0f2f60 52%, #0a1f45 100%)',
       },
     },
   },

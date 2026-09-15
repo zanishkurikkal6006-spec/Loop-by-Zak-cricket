@@ -3,8 +3,8 @@ import { useRevenueIntel } from '@/lib/opsQueries';
 import { aed, clsx } from '@/lib/utils';
 import { Card, ScreenTitle } from '@/components/ui';
 
-const BAR = '#14387F';
-const GOLD = '#FFC72C';
+const BAR = '#123A7B';
+const GOLD = '#F4C20C';
 
 // Revenue Intelligence — read-only view of the money, computed live from the
 // payment ledger, match fees and ground fees: what's coming in, what's

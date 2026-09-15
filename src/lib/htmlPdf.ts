@@ -49,9 +49,9 @@ export function brandHeader(opts: {
 }): string {
   const logo = opts.logoUrl
     ? `<img src="${opts.logoUrl}" crossorigin="anonymous" style="width:52px;height:52px;border-radius:50%;background:#fff;object-fit:contain;padding:3px;box-sizing:border-box;" />`
-    : `<div style="width:52px;height:52px;border-radius:50%;background:#14387F;display:flex;align-items:center;justify-content:center;color:#FAF7F4;font-weight:800;font-size:24px;">Z</div>`;
+    : `<div style="width:52px;height:52px;border-radius:50%;background:#123A7B;display:flex;align-items:center;justify-content:center;color:#FAF7F4;font-weight:800;font-size:24px;">Z</div>`;
   return `
-  <div style="background:linear-gradient(120deg,#0C2657,#14387F);padding:26px 34px;display:flex;align-items:center;justify-content:space-between;">
+  <div style="background:linear-gradient(120deg,#0C2A5E,#123A7B);padding:26px 34px;display:flex;align-items:center;justify-content:space-between;">
     <div style="display:flex;align-items:center;gap:14px;">
       ${logo}
       <div>

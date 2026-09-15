@@ -72,7 +72,7 @@ export async function downloadReportPdf(data: ReportPdfData): Promise<void> {
         <div style="margin-bottom:22px;break-inside:avoid;">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
             <div style="width:22px;height:3px;background:#C9A84C;border-radius:2px;"></div>
-            <div style="font-size:12px;font-weight:800;letter-spacing:1.5px;color:#14387F;text-transform:uppercase;">${escapeHtml(titleCase(s.heading))}</div>
+            <div style="font-size:12px;font-weight:800;letter-spacing:1.5px;color:#123A7B;text-transform:uppercase;">${escapeHtml(titleCase(s.heading))}</div>
           </div>
           <div style="font-size:14.5px;line-height:1.7;color:#2b2b2b;">${escapeHtml(s.body)}</div>
         </div>`,
@@ -100,7 +100,7 @@ export async function downloadReportPdf(data: ReportPdfData): Promise<void> {
       <div style="font-size:11.5px;color:#8a8078;letter-spacing:.3px;margin-bottom:26px;">${meta}</div>
       ${bodyHtml}
     </div>
-    <div style="margin-top:8px;border-top:2px solid #14387F;padding:14px 34px 26px;display:flex;align-items:center;justify-content:space-between;">
+    <div style="margin-top:8px;border-top:2px solid #123A7B;padding:14px 34px 26px;display:flex;align-items:center;justify-content:space-between;">
       <div style="font-size:9px;color:#9a938a;">${escapeHtml(brand)} &nbsp;·&nbsp; ${dateLabel} &nbsp;·&nbsp; Powered by ${escapeHtml(platformName())}</div>
       <div style="font-size:9px;color:#C9A84C;font-weight:700;letter-spacing:1px;">KEEP BELIEVING. KEEP TRAINING.</div>
     </div>

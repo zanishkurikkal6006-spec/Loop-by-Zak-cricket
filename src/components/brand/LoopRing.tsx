@@ -91,7 +91,7 @@ export function RingAvatar({
         style={{
           width: size - 8,
           height: size - 8,
-          background: 'linear-gradient(180deg,#14387F,#0C2657)',
+          background: 'linear-gradient(180deg,#123A7B,#0C2A5E)',
           fontSize: size * 0.3,
         }}
       >

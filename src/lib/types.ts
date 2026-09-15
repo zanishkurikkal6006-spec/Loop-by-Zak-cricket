@@ -21,6 +21,7 @@ export interface Academy {
   id: string;
   name: string;
   logo_url: string | null;
+  tagline: string | null;
   bank_details: Record<string, unknown>;
   wa_settings: Record<string, unknown>;
   created_at: string;

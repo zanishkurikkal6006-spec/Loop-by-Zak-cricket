@@ -1,5 +1,5 @@
 import { htmlToPdf, escapeHtml, brandHeader } from './htmlPdf';
-import { academyName, academyLogoUrl, platformName } from './branding';
+import { academyName, academyLogoUrl, academyTagline, platformName } from './branding';
 
 // Parent-facing report — a professionally designed, HTML-rendered document
 // (Development Report or Quick Feedback). Rendered via html2canvas so the
@@ -96,13 +96,13 @@ export async function downloadReportPdf(data: ReportPdfData): Promise<void> {
     })}
     <div style="padding:34px;">
       <div style="font-size:30px;font-weight:800;color:#141414;line-height:1.05;">${escapeHtml(data.childName)}</div>
-      <div style="width:54px;height:3px;background:#C9A84C;border-radius:2px;margin:10px 0 12px;"></div>
+      <div style="width:54px;height:3px;background:#F4C20C;border-radius:2px;margin:10px 0 12px;"></div>
       <div style="font-size:11.5px;color:#8a8078;letter-spacing:.3px;margin-bottom:26px;">${meta}</div>
       ${bodyHtml}
     </div>
     <div style="margin-top:8px;border-top:2px solid #123A7B;padding:14px 34px 26px;display:flex;align-items:center;justify-content:space-between;">
       <div style="font-size:9px;color:#9a938a;">${escapeHtml(brand)} &nbsp;·&nbsp; ${dateLabel} &nbsp;·&nbsp; Powered by ${escapeHtml(platformName())}</div>
-      <div style="font-size:9px;color:#C9A84C;font-weight:700;letter-spacing:1px;">KEEP BELIEVING. KEEP TRAINING.</div>
+      <div style="font-size:9px;color:#123A7B;font-weight:700;letter-spacing:1px;">${escapeHtml((academyTagline() || 'KEEP BELIEVING. KEEP TRAINING.').toUpperCase())}</div>
     </div>
   </div>`;
 

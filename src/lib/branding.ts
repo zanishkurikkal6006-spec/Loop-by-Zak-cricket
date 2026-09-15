@@ -8,12 +8,14 @@ import { drawLoopMark } from './brandPdf';
 const PLATFORM = 'Loop by Zak Cricket';
 
 let _name = PLATFORM;
+let _tagline = '';
 let _logoUrl: string | null = null;
 let _logoData: string | null = null;
 let _logoLoading: Promise<string | null> | null = null;
 
-export function setBranding(name?: string | null, logoUrl?: string | null): void {
+export function setBranding(name?: string | null, logoUrl?: string | null, tagline?: string | null): void {
   _name = (name ?? '').trim() || PLATFORM;
+  _tagline = (tagline ?? '').trim();
   const next = logoUrl?.trim() || null;
   if (next !== _logoUrl) {
     _logoUrl = next;
@@ -24,6 +26,10 @@ export function setBranding(name?: string | null, logoUrl?: string | null): void
 
 export function academyName(): string {
   return _name;
+}
+/** The academy's tagline (empty if not set), shown on reports & messages. */
+export function academyTagline(): string {
+  return _tagline;
 }
 export function platformName(): string {
   return PLATFORM;

@@ -2,6 +2,8 @@ import { supabase } from './supabase';
 import { TOOL_REGISTRY, type ToolKey, type ToolResult } from './aiTools';
 import { GROWTH_TARGETS } from './crm';
 import { academyName } from './branding';
+import { computeGrowthForecast } from './forecast';
+import { computeExpansion } from './expansion';
 import type { UserRole } from './types';
 
 // ============================================================================
@@ -380,6 +382,48 @@ export async function generateWeeklyBrief(): Promise<Brief> {
       atRisk.metrics.red > 0 ? `Retention: work ${atRisk.metrics.red} red-risk families` : 'Retention healthy',
       revenue.metrics.outstanding > 0 ? `Collect ${fmtAed(revenue.metrics.outstanding)} outstanding` : 'Collections clean',
       capacity.metrics.nearFull > 0 ? 'Plan capacity where near-full' : 'Capacity has room',
+    ],
+  };
+}
+
+export async function generateMonthlyReview(): Promise<Brief> {
+  const [kpis, funnel, revenue, atRisk, churn, capacity, coaches, campaigns, forecast, expansion] = await Promise.all([
+    ...(['kpis', 'funnel', 'revenue', 'at_risk', 'churn', 'capacity', 'coach_reports', 'campaigns'] as ToolKey[]).map((k) => TOOL_REGISTRY[k]()),
+    computeGrowthForecast(),
+    computeExpansion(),
+  ]);
+  const t = kpis as ToolResult, f = funnel as ToolResult, r = revenue as ToolResult, a = atRisk as ToolResult,
+    c = churn as ToolResult, cap = capacity as ToolResult, co = coaches as ToolResult, cm = campaigns as ToolResult;
+  const fc = forecast as Awaited<ReturnType<typeof computeGrowthForecast>>;
+  const ex = expansion as Awaited<ReturnType<typeof computeExpansion>>;
+  const topArea = ex.areas[0];
+
+  return {
+    generatedAt: new Date().toISOString(),
+    metrics: [
+      { label: 'Active players', value: String(fc.current) },
+      { label: 'Target (this month)', value: `${fc.targetNow} (${fc.onTrackDelta >= 0 ? '+' : ''}${fc.onTrackDelta})` },
+      { label: 'Enrolments (mo)', value: `${f.metrics.enrol} (${f.metrics.enrolDelta >= 0 ? '+' : ''}${f.metrics.enrolDelta}%)` },
+      { label: 'Revenue (mo)', value: fmtAed(r.metrics.month) },
+      { label: 'Net growth /mo', value: String(fc.net) },
+      { label: 'Projected to 500', value: fc.reachDate ?? '—' },
+    ],
+    sections: [
+      { title: 'Growth vs plan', lines: [t.summary, `${fc.onTrackDelta >= 0 ? 'Ahead of' : 'Behind'} plan by ${Math.abs(fc.onTrackDelta)} (${fc.current} vs target ${fc.targetNow}).`] },
+      { title: 'Acquisition funnel', lines: [f.summary] },
+      { title: 'Revenue', lines: [r.summary] },
+      { title: 'Retention & churn', lines: [a.summary, c.summary] },
+      { title: 'Coaching & capacity', lines: [co.summary, cap.summary] },
+      { title: 'Marketing', lines: [cm.summary] },
+      { title: 'Forecast', lines: [`At the current net rate (${fc.net}/mo), the academy reaches ~500 ${fc.reachDate ? `by ${fc.reachDate}` : '— not at the current rate'}.`, ...fc.assumptions] },
+      { title: 'Expansion signal', lines: [topArea ? `Strongest area to investigate: ${topArea.area} (${topArea.activePlayers} players, ${topArea.leads} leads, ${topArea.distanceObjections} distance objections).` : 'Not enough area data recorded yet.', ...ex.missingData.slice(0, 1)] },
+    ],
+    priorities: [
+      fc.onTrackDelta < 0 ? `Close the ${Math.abs(fc.onTrackDelta)}-player gap to plan` : 'Maintain the growth lead',
+      f.metrics.showRateDelta < -5 ? 'Fix trial show-rate' : 'Keep the funnel full',
+      a.metrics.red > 0 ? `Work ${a.metrics.red} red-risk families` : 'Retention healthy',
+      r.metrics.outstanding > 0 ? `Collect ${fmtAed(r.metrics.outstanding)} outstanding` : 'Collections clean',
+      cap.metrics.nearFull > 0 ? 'Plan capacity where near-full' : 'Capacity has room',
     ],
   };
 }

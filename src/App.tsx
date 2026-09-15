@@ -52,6 +52,8 @@ const Venues = lazy(() => import('./features/ops/Venues'));
 const CoachUtilization = lazy(() => import('./features/ops/CoachUtilization'));
 // ── AI Operations (Phase 5) ──
 const AskAI = lazy(() => import('./features/ai/AskAI'));
+// ── Strategy (Phase 7) ──
+const Strategy = lazy(() => import('./features/strategy/Strategy'));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false } },
@@ -122,6 +124,7 @@ export default function App() {
               <Route path="/director/venues" element={<Venues />} />
               <Route path="/director/coaches" element={<CoachUtilization />} />
               <Route path="/director/revenue" element={<RevenueIntelligence />} />
+              <Route path="/director/strategy" element={<Strategy />} />
             </Route>
 
             {/* ── Operations Manager (full operational control) ── */}

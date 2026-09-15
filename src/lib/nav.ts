@@ -30,6 +30,7 @@ export const navByRole: Record<UserRole, NavItem[]> = {
     { to: '/director/venues', label: 'Venues', icon: 'building' },
     { to: '/director/coaches', label: 'Coaches', icon: 'clipboard' },
     { to: '/director/revenue', label: 'Revenue', icon: 'wallet' },
+    { to: '/director/strategy', label: 'Strategy', icon: 'compass' },
   ],
   // ── Operations Manager — full operational control ──
   operations_manager: [

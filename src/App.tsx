@@ -185,6 +185,7 @@ export default function App() {
               <Route path="/head-coach/matches" element={<MatchesList eyebrow="Head Coach" mine={false} />} />
               <Route path="/head-coach/rankings" element={<Rankings eyebrow="Head Coach" />} />
               <Route path="/head-coach/badges" element={<Badges eyebrow="Head Coach" canApprove={false} />} />
+              <Route path="/head-coach/ai" element={<AskAI />} />
             </Route>
 
             {/* ── Admin ── */}

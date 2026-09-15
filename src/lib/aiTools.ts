@@ -129,11 +129,14 @@ export async function toolRevenue(): Promise<ToolResult> {
     bySource.set(k, (bySource.get(k) ?? 0) + Number(p.amount || 0));
   }
   const top = [...bySource.entries()].sort((a, b) => b[1] - a[1]);
+  const prev = monthKey(1);
+  const lastMonth = pay.filter((p) => p.status === 'confirmed' && (p.paid_at ?? '').startsWith(prev)).reduce((s, p) => s + Number(p.amount || 0), 0);
+  const delta = lastMonth > 0 ? Math.round(((month - lastMonth) / lastMonth) * 100) : (month > 0 ? 100 : 0);
   return {
     key: 'revenue', label: 'Revenue',
-    summary: `${aed(month)} collected this month, ${aed(outstanding)} outstanding, ARPU ${aed(active ? Math.round(month / active) : 0)}.`,
-    filters: { period: m },
-    metrics: { month, outstanding, arpu: active ? Math.round(month / active) : 0 },
+    summary: `${aed(month)} this month (${delta >= 0 ? '+' : ''}${delta}% vs ${aed(lastMonth)} last month), ${aed(outstanding)} outstanding, ARPU ${aed(active ? Math.round(month / active) : 0)}.`,
+    filters: { period: m, compared_to: prev },
+    metrics: { month, lastMonth, delta, outstanding, arpu: active ? Math.round(month / active) : 0 },
     rows: top.map(([label, value]) => ({ label: `Revenue · ${label}`, value: aed(value) })),
   };
 }
@@ -303,10 +306,93 @@ export async function toolCampaigns(): Promise<ToolResult> {
   };
 }
 
+// ── Coaching analyst tools (Phase 6) ───────────────────────────────────────────
+export async function toolAssessmentsDue(): Promise<ToolResult> {
+  const since = daysAgo(90).slice(0, 10);
+  const [players, assessments] = await Promise.all([
+    supabase.from('players').select('id, full_name, status').eq('status', 'active'),
+    supabase.from('assessments').select('player_id, assessment_date'),
+  ]);
+  const recent = new Set(
+    ((assessments.data ?? []) as { player_id: string; assessment_date: string }[])
+      .filter((a) => (a.assessment_date ?? '') >= since).map((a) => a.player_id),
+  );
+  const due = ((players.data ?? []) as { id: string; full_name: string }[]).filter((p) => !recent.has(p.id));
+  return {
+    key: 'assessments_due', label: 'Assessments due',
+    summary: `${due.length} of ${(players.data ?? []).length} active players have no assessment in the last 90 days.`,
+    filters: { window: '90 days' },
+    metrics: { due: due.length, active: (players.data ?? []).length },
+    rows: due.slice(0, 10).map((p) => ({ label: p.full_name, value: 'assessment due' })),
+  };
+}
+
+export async function toolReportsCoverage(): Promise<ToolResult> {
+  const since = daysAgo(45).slice(0, 10);
+  const [players, reports] = await Promise.all([
+    supabase.from('players').select('id, full_name, status').eq('status', 'active'),
+    supabase.from('reports').select('player_id, created_at'),
+  ]);
+  const recent = new Set(
+    ((reports.data ?? []) as { player_id: string; created_at: string }[])
+      .filter((r) => r.created_at.slice(0, 10) >= since).map((r) => r.player_id),
+  );
+  const uncovered = ((players.data ?? []) as { id: string; full_name: string }[]).filter((p) => !recent.has(p.id));
+  return {
+    key: 'reports_coverage', label: 'Report coverage',
+    summary: `${uncovered.length} active players haven't had a report in the last 45 days.`,
+    filters: { window: '45 days' },
+    metrics: { uncovered: uncovered.length, active: (players.data ?? []).length },
+    rows: uncovered.slice(0, 10).map((p) => ({ label: p.full_name, value: 'no recent report' })),
+  };
+}
+
+export async function toolAttendanceDeclining(): Promise<ToolResult> {
+  const last14 = daysAgo(14).slice(0, 10);
+  const prevStart = daysAgo(45).slice(0, 10);
+  const [players, attendance] = await Promise.all([
+    supabase.from('players').select('id, full_name, status').eq('status', 'active'),
+    supabase.from('attendance_records').select('player_id, session:attendance_sessions(session_date)'),
+  ]);
+  const recentN = new Map<string, number>(); const priorN = new Map<string, number>();
+  for (const r of (attendance.data ?? []) as unknown as { player_id: string; session: { session_date: string } | null }[]) {
+    const d = r.session?.session_date; if (!d) continue;
+    if (d >= last14) recentN.set(r.player_id, (recentN.get(r.player_id) ?? 0) + 1);
+    else if (d >= prevStart) priorN.set(r.player_id, (priorN.get(r.player_id) ?? 0) + 1);
+  }
+  const declining = ((players.data ?? []) as { id: string; full_name: string }[])
+    .filter((p) => (priorN.get(p.id) ?? 0) >= 2 && (recentN.get(p.id) ?? 0) === 0);
+  return {
+    key: 'attendance_declining', label: 'Declining attendance',
+    summary: `${declining.length} players attended regularly last month but not in the last 14 days.`,
+    filters: { recent: 'last 14 days', prior: 'the 4 weeks before' },
+    metrics: { declining: declining.length },
+    rows: declining.slice(0, 10).map((p) => ({ label: p.full_name, value: 'was regular, now absent' })),
+  };
+}
+
+export async function toolMatchExposure(): Promise<ToolResult> {
+  const [players, matchPlayers] = await Promise.all([
+    supabase.from('players').select('id, full_name, status').eq('status', 'active'),
+    supabase.from('match_players').select('player_id'),
+  ]);
+  const played = new Set((matchPlayers.data ?? []).map((m) => (m as { player_id: string }).player_id));
+  const none = ((players.data ?? []) as { id: string; full_name: string }[]).filter((p) => !played.has(p.id));
+  return {
+    key: 'match_exposure', label: 'Match exposure',
+    summary: `${none.length} active players have no recorded match appearances yet.`,
+    filters: { scope: 'all recorded matches' },
+    metrics: { noMatches: none.length, active: (players.data ?? []).length },
+    rows: none.slice(0, 10).map((p) => ({ label: p.full_name, value: 'no matches' })),
+  };
+}
+
 export const TOOL_REGISTRY = {
   kpis: toolKpis, funnel: toolFunnel, revenue: toolRevenue, at_risk: toolAtRisk,
   leads_to_contact: toolLeadsToContact, capacity: toolCapacity, coach_reports: toolCoachReports,
   churn: toolChurn, campaigns: toolCampaigns,
+  assessments_due: toolAssessmentsDue, reports_coverage: toolReportsCoverage,
+  attendance_declining: toolAttendanceDeclining, match_exposure: toolMatchExposure,
 } as const;
 
 export type ToolKey = keyof typeof TOOL_REGISTRY;

@@ -2,6 +2,7 @@ import { supabase } from './supabase';
 import { TOOL_REGISTRY, type ToolKey, type ToolResult } from './aiTools';
 import { GROWTH_TARGETS } from './crm';
 import { academyName } from './branding';
+import type { UserRole } from './types';
 
 // ============================================================================
 // AI Operations pipeline — the single swap point for academy AI.
@@ -49,6 +50,57 @@ function plan(question: string): { intent: Intent; tools: ToolKey[] } {
   if (has(q, 'today', 'priorit', 'right now', 'first')) return { intent: 'today', tools: ['leads_to_contact', 'at_risk', 'capacity', 'coach_reports'] };
   return { intent: 'overview', tools: ['kpis'] };
 }
+
+// ── Coaching scope (Head Coach): coaching data only, no finance/marketing ──────
+type CoachingIntent = 'assessments' | 'reports' | 'attendance' | 'match' | 'coach' | 'at_risk' | 'capacity' | 'coaching_overview';
+
+/** Returns null when the question is outside a coach's scope (finance/sales). */
+function planCoaching(question: string): { intent: CoachingIntent; tools: ToolKey[] } | null {
+  const q = question.toLowerCase();
+  if (has(q, 'revenue', 'money', 'income', 'marketing', 'campaign', 'spend', 'budget', 'lead', 'sales', 'profit', 'outstanding', 'owe', 'churn', 'enrol')) return null;
+  if (has(q, 'assessment')) return { intent: 'assessments', tools: ['assessments_due'] };
+  if (has(q, 'report')) return has(q, 'overdue', 'which coach', 'coaches')
+    ? { intent: 'coach', tools: ['coach_reports'] }
+    : { intent: 'reports', tools: ['reports_coverage'] };
+  if (has(q, 'attendance', 'declining', 'not coming', 'missing', 'absent', 'dropping off')) return { intent: 'attendance', tools: ['attendance_declining'] };
+  if (has(q, 'match', 'game time', 'exposure', 'played', 'selection')) return { intent: 'match', tools: ['match_exposure'] };
+  if (has(q, 'risk', 'at-risk', 'leaving', 'retention')) return { intent: 'at_risk', tools: ['at_risk'] };
+  if (has(q, 'capacity', 'batch', 'full', 'group size')) return { intent: 'capacity', tools: ['capacity'] };
+  if (has(q, 'coach')) return { intent: 'coach', tools: ['coach_reports'] };
+  return { intent: 'coaching_overview', tools: ['coach_reports', 'assessments_due', 'reports_coverage', 'attendance_declining'] };
+}
+
+function composeCoaching(intent: CoachingIntent, tools: ToolResult[]): Omit<AiAnswer, 'tools'> {
+  const evidence = tools.map((t) => t.summary);
+  const sign = `Based on ${academyName()}'s coaching records.`;
+  const t = (k: string) => byKey(tools, k)!;
+  switch (intent) {
+    case 'assessments':
+      return { answer: t('assessments_due').summary, evidence, why: 'Assessments every ~3 months keep development tracked and parents informed.', actions: ['Book assessments for the players listed', 'Start with those who have none on record'], confidence: `High — ${sign}` };
+    case 'reports':
+      return { answer: t('reports_coverage').summary, evidence, why: 'A regular report cadence (every 4–6 weeks) keeps parents engaged and is a retention signal.', actions: ['Write reports for the uncovered players', 'Use the AI draft to speed it up'], confidence: `High — ${sign}` };
+    case 'attendance':
+      return { answer: t('attendance_declining').summary, evidence, why: 'Players who were regular and then stop are the earliest, most actionable churn signal.', actions: ['Check in with these players and parents', 'Flag any pattern to Operations for a retention call'], confidence: `High — ${sign}` };
+    case 'match':
+      return { answer: t('match_exposure').summary, evidence, why: 'Match minutes drive development and parent satisfaction; players with none need a pathway.', actions: ['Give the listed players match minutes', 'Balance selection across the squad'], confidence: `High — ${sign}` };
+    case 'coach':
+      return { answer: t('coach_reports').summary, evidence, why: 'Freshness threshold is 14 days since a coach last wrote a report.', actions: t('coach_reports').metrics.overdue > 0 ? ['Nudge overdue coaches', 'Check their groups for assessments due'] : ['Reporting is current'], confidence: `High — ${sign}` };
+    case 'at_risk':
+      return { answer: t('at_risk').summary, evidence, why: 'A transparent weighted signal (attendance, recency, complaints) — it flags who needs attention, not a prediction.', actions: ['Give at-risk players extra attention in sessions', 'Flag red-risk families to Operations'], confidence: `High — ${sign}` };
+    case 'capacity':
+      return { answer: t('capacity').summary, evidence, why: 'Utilization is registered players ÷ safe capacity.', actions: ['Balance group sizes where near-full', 'Use spare slots for new players'], confidence: `High — ${sign}` };
+    default:
+      return { answer: 'Coaching status across reports, assessments and attendance is summarised below.', evidence, why: 'A rollup of the coaching signals that need attention.', actions: ['Clear overdue reports and assessments', 'Check in with players whose attendance is slipping'], confidence: `High — ${sign}` };
+  }
+}
+
+const COACHING_REFUSAL: Omit<AiAnswer, 'tools'> = {
+  answer: "That's outside your coaching view.",
+  evidence: [],
+  why: 'As Head Coach, the assistant covers coaching operations only — assessments, reports, attendance, match exposure, at-risk players and capacity. Finance, marketing and sales sit with the Director / Operations Manager.',
+  actions: ['Ask about assessments due, players without reports, declining attendance, or match exposure'],
+  confidence: '—',
+};
 
 async function runTools(keys: ToolKey[]): Promise<ToolResult[]> {
   const results = await Promise.all(keys.map((k) => TOOL_REGISTRY[k]()));
@@ -101,7 +153,7 @@ function compose(intent: Intent, tools: ToolResult[]): Omit<AiAnswer, 'tools'> {
     case 'revenue': {
       const r = byKey(tools, 'revenue')!.metrics;
       return {
-        answer: `${fmtAed(r.month)} collected this month; ${fmtAed(r.outstanding)} outstanding. ARPU ${fmtAed(r.arpu)}.`,
+        answer: `${fmtAed(r.month)} collected this month (${r.delta >= 0 ? '+' : ''}${r.delta}% vs ${fmtAed(r.lastMonth)} last month); ${fmtAed(r.outstanding)} outstanding. ARPU ${fmtAed(r.arpu)}.`,
         evidence,
         why: r.outstanding > 0 ? 'Outstanding balance is the fastest lever — collecting it needs no new sales.' : 'Collection is clean this month.',
         actions: r.outstanding > 0 ? ['Send payment reminders on overdue balances', 'Prioritise the oldest unpaid first'] : ['Focus on renewals to grow ARPU'],
@@ -201,28 +253,49 @@ export interface AskOptions {
   academyId: string;
   userId?: string | null;
   conversationId?: string | null;
+  /** The asker's role — scopes which tools the AI may use. */
+  role?: UserRole | null;
   /** Prior Q for follow-up context (e.g. "what about only Jumeirah?"). */
   previousQuestion?: string | null;
 }
 
-/** Ask the academy AI. Runs the full plan → tools → compose pipeline. */
+/** Ask the academy AI. Runs the full plan → tools → compose pipeline, scoped to role. */
 export async function askAcademyAI(question: string, opts: AskOptions): Promise<AiAnswer> {
   // Follow-up carries the previous question's intent if the new one is a refinement.
   const effective = question.trim().length < 24 && opts.previousQuestion
     ? `${opts.previousQuestion} — ${question}`
     : question;
 
-  const { intent, tools: toolKeys } = plan(effective);
-  const tools = await runTools(toolKeys);
+  const coaching = opts.role === 'head_coach';
+  let toolKeys: ToolKey[];
+  let tools: ToolResult[];
+  let composed: Omit<AiAnswer, 'tools'>;
 
-  let composed = compose(intent, tools);
+  if (coaching) {
+    const c = planCoaching(effective);
+    if (!c) {
+      const refusal: AiAnswer = { ...COACHING_REFUSAL, tools: [] };
+      try {
+        await supabase.from('ai_queries').insert({ academy_id: opts.academyId, user_id: opts.userId ?? null, question, tools: [], filters: {}, answer: refusal.answer, confidence: refusal.confidence });
+      } catch { /* best-effort */ }
+      return refusal;
+    }
+    toolKeys = c.tools;
+    tools = await runTools(toolKeys);
+    composed = composeCoaching(c.intent, tools);
+  } else {
+    const planned = plan(effective);
+    toolKeys = planned.tools;
+    tools = await runTools(toolKeys);
+    composed = compose(planned.intent, tools);
+  }
 
   // Real-provider path: hand the deterministic tool output to the model to
   // phrase, never to compute. Falls back to the templated answer on any error.
   if (PROVIDER !== 'placeholder') {
     try {
       const { data } = await supabase.functions.invoke<{ answer: string; why: string; actions: string[] }>('ask-academy-ai', {
-        body: { question, intent, tools },
+        body: { question, role: opts.role ?? null, tools },
       });
       if (data?.answer) composed = { ...composed, answer: data.answer, why: data.why ?? composed.why, actions: data.actions ?? composed.actions };
     } catch {

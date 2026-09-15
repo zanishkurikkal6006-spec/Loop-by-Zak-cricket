@@ -11,7 +11,7 @@ import { clsx } from '@/lib/utils';
 
 type Tab = 'ask' | 'daily' | 'weekly';
 
-const SUGGESTED = [
+const SUGGESTED_MGMT = [
   'Are we on track for 500 players?',
   'Why did enrolments change this month?',
   'Which players are at risk?',
@@ -24,11 +24,23 @@ const SUGGESTED = [
   'Give me this week’s summary.',
 ];
 
+const SUGGESTED_COACH = [
+  'Which assessments are overdue?',
+  "Which players haven't had a report recently?",
+  'Whose attendance is declining?',
+  'Which players have no match exposure?',
+  'Which coaches have overdue reports?',
+  'Which players are at risk?',
+  'Which batches are near capacity?',
+];
+
 // Ask SKA AI — the AI Operations console. A question is planned into approved
 // deterministic tools, run under the caller's own access (tenant-safe), then
 // explained in a fixed Answer / Evidence / Why / Actions / Confidence format
 // with the supporting data one tap away. Numbers are never invented.
 export default function AskAI() {
+  const { profile } = useAuth();
+  const isCoach = profile?.role === 'head_coach';
   const [tab, setTab] = useState<Tab>('ask');
   return (
     <div className="space-y-5">
@@ -36,26 +48,30 @@ export default function AskAI() {
         <ScreenTitle eyebrow={`${academyName()} · AI Operations`} title="Ask SKA AI" />
         {AI_PROVIDER === 'placeholder' && <Chip tone="gold">Placeholder mode</Chip>}
       </div>
-      <div className="flex gap-2">
-        <TabBtn active={tab === 'ask'} onClick={() => setTab('ask')}>Ask</TabBtn>
-        <TabBtn active={tab === 'daily'} onClick={() => setTab('daily')}>Daily Brief</TabBtn>
-        <TabBtn active={tab === 'weekly'} onClick={() => setTab('weekly')}>Director Brief</TabBtn>
-      </div>
-      {tab === 'ask' && <AskTab />}
-      {tab === 'daily' && <BriefTab kind="daily" />}
-      {tab === 'weekly' && <BriefTab kind="weekly" />}
+      {/* Head Coach gets the coaching-scoped assistant only (no business briefs). */}
+      {!isCoach && (
+        <div className="flex gap-2">
+          <TabBtn active={tab === 'ask'} onClick={() => setTab('ask')}>Ask</TabBtn>
+          <TabBtn active={tab === 'daily'} onClick={() => setTab('daily')}>Daily Brief</TabBtn>
+          <TabBtn active={tab === 'weekly'} onClick={() => setTab('weekly')}>Director Brief</TabBtn>
+        </div>
+      )}
+      {(tab === 'ask' || isCoach) && <AskTab isCoach={isCoach} />}
+      {!isCoach && tab === 'daily' && <BriefTab kind="daily" />}
+      {!isCoach && tab === 'weekly' && <BriefTab kind="weekly" />}
     </div>
   );
 }
 
 interface Turn { question: string; answer: AiAnswer; }
 
-function AskTab() {
+function AskTab({ isCoach }: { isCoach: boolean }) {
   const { profile } = useAuth();
   const [input, setInput] = useState('');
   const [turns, setTurns] = useState<Turn[]>([]);
   const [loading, setLoading] = useState(false);
   const convId = useRef<string | null>(null);
+  const suggested = isCoach ? SUGGESTED_COACH : SUGGESTED_MGMT;
 
   async function ask(q: string) {
     const question = q.trim();
@@ -70,7 +86,7 @@ function AskTab() {
         convId.current = (data as { id: string } | null)?.id ?? null;
       }
       const answer = await askAcademyAI(question, {
-        academyId: profile.academy_id, userId: profile.id, conversationId: convId.current,
+        academyId: profile.academy_id, userId: profile.id, conversationId: convId.current, role: profile.role,
         previousQuestion: turns.length ? turns[turns.length - 1].question : null,
       });
       setTurns((t) => [...t, { question, answer }]);
@@ -99,7 +115,7 @@ function AskTab() {
         <Card>
           <div className="eyebrow mb-2 text-ink/40">Try asking</div>
           <div className="flex flex-wrap gap-2">
-            {SUGGESTED.map((s) => (
+            {suggested.map((s) => (
               <button key={s} onClick={() => ask(s)} className="rounded-pill border border-cardborder bg-white px-3 py-1.5 text-[12px] font-medium text-ink/70 hover:border-gold">
                 {s}
               </button>

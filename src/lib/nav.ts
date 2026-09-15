@@ -65,6 +65,7 @@ export const navByRole: Record<UserRole, NavItem[]> = {
   ],
   head_coach: [
     { to: '/head-coach', label: 'Coaches', icon: 'users' },
+    { to: '/head-coach/ai', label: 'Ask AI', icon: 'wand' },
     { to: '/head-coach/reports', label: 'All Reports', icon: 'message' },
     { to: '/head-coach/flags', label: 'Flags', icon: 'flag' },
     { to: '/head-coach/matches', label: 'Matches', icon: 'trophy' },

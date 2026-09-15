@@ -359,7 +359,12 @@ function ActionCard({ action, confirming, running, onArm, onCancel, onRun }: {
       </button>
       {open && (
         <div className="max-h-40 space-y-0.5 overflow-auto rounded-card bg-hairline p-2.5">
-          {action.items.map((it) => <div key={it.id} className="text-[12px] text-ink/70">{it.label}</div>)}
+          {action.items.map((it) => (
+            <div key={it.id} className="flex items-baseline justify-between gap-2 text-[12px]">
+              <span className="text-ink/70">{it.label}</span>
+              {it.note && <span className="text-ink/45">{it.note}</span>}
+            </div>
+          ))}
         </div>
       )}
 

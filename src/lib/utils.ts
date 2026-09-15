@@ -40,6 +40,23 @@ export function counterState(
   return 'healthy';
 }
 
+/**
+ * Human wording for WHY a renewal/retention follow-up exists, from the player's
+ * package position. Shown on the follow-up task so it's clear what to discuss.
+ *   remaining: min sessions left across active packages (null = no active package)
+ *   extra:     ad-hoc sessions taken without a package (players.extra_sessions)
+ */
+export function renewalContext(remaining: number | null, extra: number): string {
+  if (remaining != null && remaining > 2) return `${remaining} sessions left`;
+  if (remaining != null && remaining > 0)
+    return `${remaining} session${remaining === 1 ? '' : 's'} left — renewal due`;
+  const parts: string[] = [];
+  if (remaining != null && remaining <= 0) parts.push('Package complete — 0 sessions left');
+  else if (remaining == null) parts.push('No active package');
+  if (extra > 0) parts.push(`${extra} extra session${extra === 1 ? '' : 's'} taken`);
+  return parts.join(' · ');
+}
+
 /** Ring color for a counter / tracker state. */
 export function stateColor(state: CounterState | 'present' | 'late'): string {
   switch (state) {

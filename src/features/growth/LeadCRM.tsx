@@ -152,13 +152,8 @@ function AddLeadModal({ open, onClose }: { open: boolean; onClose: () => void })
       if (error) throw error;
       const leadId = (data as { id: string }).id;
       await addLeadActivity({ academyId: profile.academy_id, leadId, type: 'system', body: 'Lead created', createdBy: profile.id });
-      // A brand-new lead always gets a "contact" task so it never slips.
-      await createFollowUp({
-        academyId: profile.academy_id, kind: 'new_lead',
-        title: `Contact ${f.player_name.trim()}`,
-        leadId, ownerId: f.assigned_to || profile.id,
-        dueDate: f.next_follow_up || today(), priority: 'high', createdBy: profile.id,
-      });
+      // The "Call parent" follow-up task is created automatically by a database
+      // trigger (autotask_on_lead), so every lead — manual or webhook — gets one.
     },
     onSuccess: () => {
       toast.show('Lead added');

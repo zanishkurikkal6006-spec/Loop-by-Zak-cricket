@@ -35,7 +35,7 @@ export function AppShell({ role }: { role: UserRole }) {
           </div>
         )}
 
-        <nav className="mt-7 flex flex-1 flex-col gap-1">
+        <nav className="mt-7 flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto pr-1">
           {items.map((item) => (
             <NavLink
               key={item.to}
@@ -92,7 +92,7 @@ export function AppShell({ role }: { role: UserRole }) {
       {moreOpen && hasOverflow && (
         <>
           <div className="fixed inset-0 z-20 bg-ink/30 md:hidden" onClick={() => setMoreOpen(false)} />
-          <div className="fixed inset-x-0 bottom-[58px] z-30 rounded-t-card border-t border-cardborder bg-paper p-3 md:hidden">
+          <div className="fixed inset-x-0 bottom-[58px] z-30 max-h-[60vh] overflow-y-auto rounded-t-card border-t border-cardborder bg-paper p-3 md:hidden">
             <div className="grid grid-cols-4 gap-2">
               {overflow.map((item) => (
                 <NavLink

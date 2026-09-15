@@ -10,7 +10,7 @@ import { RISK_LABEL } from '@/lib/health';
 import { useToast } from '@/lib/toast';
 import { Button, Card, Chip, ScreenTitle } from '@/components/ui';
 import { Icon } from '@/components/ui/Icon';
-import { clsx, firstName } from '@/lib/utils';
+import { clsx, firstName, renewalContext } from '@/lib/utils';
 import type { RiskLevel } from '@/lib/types';
 
 type Filter = 'attention' | 'red' | 'amber' | 'all';
@@ -99,6 +99,7 @@ export default function Retention() {
                 title: `Retention check-in · ${r.player.full_name}`,
                 playerId: r.player.id, ownerId: profile.id,
                 dueDate: new Date().toISOString().slice(0, 10), priority: r.health.risk === 'red' ? 'critical' : 'high',
+                notes: renewalContext(r.signals.sessionsRemaining, r.player.extra_sessions),
                 createdBy: profile.id,
               }).then(() => {
                 toast.show('Check-in task created');

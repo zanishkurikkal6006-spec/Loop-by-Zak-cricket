@@ -38,16 +38,16 @@ function DirectorDashboard({ base }: { base: string }) {
         </Link>
       </div>
 
-      {/* Growth to 500 */}
-      <Card className="bg-brand-panel text-paper">
+      {/* Growth to 500 — bold yellow hero */}
+      <Card className="border-none bg-gold text-brand-deep">
         <div className="flex items-center justify-between">
-          <div className="eyebrow text-gold-light">The path to 500</div>
-          <Chip tone="gold">Next milestone · {nextMilestone}</Chip>
+          <div className="font-hero text-lg uppercase tracking-[0.06em] text-brand-deep">The path to 500</div>
+          <span className="rounded-pill bg-brand-deep px-3 py-1 text-[11px] font-semibold text-gold">Next · {nextMilestone}</span>
         </div>
         <div className="mt-3 flex flex-wrap items-end gap-x-8 gap-y-3">
           <Milestone value={active} label="Active now" big />
           <Milestone value={target6} label="Month 6 target" />
-          <Milestone value={target24} label="Month 24 target" gold />
+          <Milestone value={target24} label="Month 24 target" pop />
         </div>
         <GrowthLadder active={active} />
       </Card>
@@ -170,11 +170,11 @@ function actionLink(base: string, a: ActionItem): string {
   return `${base}/actions`;
 }
 
-function Milestone({ value, label, big, gold }: { value: number; label: string; big?: boolean; gold?: boolean }) {
+function Milestone({ value, label, big, pop }: { value: number; label: string; big?: boolean; pop?: boolean }) {
   return (
     <div>
-      <div className={clsx('font-display leading-none', big ? 'text-5xl' : 'text-3xl', gold && 'text-gold-light')}>{value}</div>
-      <div className="mt-1 text-[11px] text-paper/55">{label}</div>
+      <div className={clsx('font-hero leading-none', big ? 'text-6xl' : 'text-4xl', pop ? 'text-skorange' : 'text-brand-deep')}>{value}</div>
+      <div className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-brand-deep/65">{label}</div>
     </div>
   );
 }
@@ -189,12 +189,12 @@ function GrowthLadder({ active }: { active: number }) {
           const milestone = i === 2 || i === 5 || i === 11 || i === 23;
           return (
             <div key={i} title={`Month ${i + 1}: ${t}`}
-              className={clsx('flex-1 rounded-[2px]', reached ? 'bg-gold' : milestone ? 'bg-white/35' : 'bg-white/15')}
+              className={clsx('flex-1 rounded-[2px]', reached ? 'bg-brand-deep' : milestone ? 'bg-brand-deep/40' : 'bg-brand-deep/15')}
               style={{ height: `${(t / max) * 100}%` }} />
           );
         })}
       </div>
-      <div className="mt-1.5 flex justify-between text-[10px] uppercase tracking-[0.15em] text-paper/40">
+      <div className="mt-1.5 flex justify-between text-[10px] font-semibold uppercase tracking-[0.15em] text-brand-deep/50">
         <span>M1 · 10</span><span>M6 · 75</span><span>M12 · 200</span><span>M24 · 500</span>
       </div>
     </div>

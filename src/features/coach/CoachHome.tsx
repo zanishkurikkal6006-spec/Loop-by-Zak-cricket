@@ -3,8 +3,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useMyGroups, useMyOneToOneBlocks, useMyReports } from '@/lib/queries';
 import { greeting, firstName } from '@/lib/utils';
 import { downloadPortfolio } from '@/lib/portfolio';
+import { academyName } from '@/lib/branding';
 import { useToast } from '@/lib/toast';
-import { Card } from '@/components/ui';
+import { Card, DashHero } from '@/components/ui';
 import { Icon } from '@/components/ui/Icon';
 
 // Coach home: time-aware greeting, dark Coaching Portfolio card, my groups,
@@ -23,7 +24,7 @@ export default function CoachHome() {
     if (!profile) return;
     downloadPortfolio({
       coachName: profile.full_name,
-      academyName: 'Loop by Zak Cricket',
+      academyName: academyName(),
       stats: [
         { label: 'Sessions', value: sessionsDelivered },
         { label: '1-on-1s', value: blocks.length },
@@ -40,15 +41,14 @@ export default function CoachHome() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <div className="eyebrow">{greeting()}</div>
-        <h1 className="display-title mt-1 text-4xl leading-none">
-          {profile ? firstName(profile.full_name) : 'Coach'}
-        </h1>
-      </div>
+      <DashHero
+        eyebrow={`${greeting()} · Coach`}
+        title={profile ? firstName(profile.full_name) : 'Coach'}
+        subtitle="Your sessions, matches, reports and players."
+      />
 
-      {/* Coaching Portfolio — dark card */}
-      <div className="rounded-card bg-ink p-5 text-paper shadow-card-lg">
+      {/* Coaching Portfolio — navy card */}
+      <div className="rounded-card bg-brand-panel p-5 text-paper shadow-card-lg">
         <div className="eyebrow text-gold">Coaching Portfolio</div>
         <div className="mt-4 grid grid-cols-3 gap-3">
           <Metric label="Sessions" value={sessionsDelivered} />

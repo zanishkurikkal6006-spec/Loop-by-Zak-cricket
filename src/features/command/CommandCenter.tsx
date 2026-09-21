@@ -4,7 +4,7 @@ import { useCommandMetrics, useTodaysActions, type ActionItem } from '@/lib/crmQ
 import { computeGrowthForecast } from '@/lib/forecast';
 import { GROWTH_TARGETS } from '@/lib/crm';
 import { academyName } from '@/lib/branding';
-import { Card, Chip, ScreenTitle } from '@/components/ui';
+import { Card, Chip, DashHero } from '@/components/ui';
 import { Icon } from '@/components/ui/Icon';
 import { aed, clsx } from '@/lib/utils';
 
@@ -31,12 +31,16 @@ function DirectorDashboard({ base }: { base: string }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-end justify-between">
-        <ScreenTitle eyebrow={`${academyName()} · Director`} title="Executive Dashboard" />
-        <Link to={`${base}/strategy`} className="hidden items-center gap-2 rounded-pill bg-ink px-4 py-2.5 text-[12px] font-semibold uppercase tracking-[0.12em] text-paper md:inline-flex">
-          <Icon name="compass" size={14} /> Strategy
-        </Link>
-      </div>
+      <DashHero
+        eyebrow={`${academyName()} · Director`}
+        title="Executive Dashboard"
+        subtitle="The whole academy at a glance — growth, revenue, retention."
+        right={
+          <Link to={`${base}/strategy`} className="hidden items-center gap-2 rounded-pill bg-gold px-4 py-2.5 text-[12px] font-semibold uppercase tracking-[0.12em] text-brand-deep md:inline-flex">
+            <Icon name="compass" size={14} /> Strategy
+          </Link>
+        }
+      />
 
       {/* Growth to 500 — bold yellow hero */}
       <Card className="border-none bg-gold text-brand-deep">
@@ -109,10 +113,12 @@ function OpsDashboard({ base }: { base: string }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-end justify-between">
-        <ScreenTitle eyebrow={`${academyName()} · Operations`} title="Operations Dashboard" />
-        <Chip tone={openActions ? 'red' : 'green'}>{openActions} to action</Chip>
-      </div>
+      <DashHero
+        eyebrow={`${academyName()} · Operations`}
+        title="Operations Dashboard"
+        subtitle="Everything that needs your attention today, in one place."
+        right={<Chip tone={openActions ? 'red' : 'green'}>{openActions} to action</Chip>}
+      />
 
       {/* Today's Actions — front and centre for Ops */}
       <Card>
@@ -210,7 +216,7 @@ function Metric({ label, value, icon, tone, to }: {
         <div className="eyebrow text-ink/40">{label}</div>
         <Icon name={icon} size={15} stroke="#B9B2A8" />
       </div>
-      <div className={clsx('font-display text-3xl leading-none', tone === 'green' && 'text-success', tone === 'amber' && 'text-amber-text', tone === 'red' && 'text-danger')}>
+      <div className={clsx('font-display text-3xl leading-none', tone === 'green' ? 'text-success' : tone === 'amber' ? 'text-amber-text' : tone === 'red' ? 'text-danger' : 'text-brand-red')}>
         {value}
       </div>
     </Card>

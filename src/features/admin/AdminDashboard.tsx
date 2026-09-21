@@ -3,7 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePendingAttendance, useCoaches, usePlayerBadges, usePrograms } from '@/lib/queries';
-import { StatCard, InfoCallout, Card, Chip, ScreenTitle } from '@/components/ui';
+import { StatCard, InfoCallout, Card, Chip, DashHero } from '@/components/ui';
+import { academyName } from '@/lib/branding';
 import { Icon } from '@/components/ui/Icon';
 import { aed, firstName } from '@/lib/utils';
 
@@ -96,7 +97,11 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-5">
-      <ScreenTitle eyebrow="Admin" title={profile ? `Welcome back, ${firstName(profile.full_name)}` : 'Dashboard'} />
+      <DashHero
+        eyebrow={`${academyName()} · Admin`}
+        title={profile ? `Welcome, ${firstName(profile.full_name)}` : 'Dashboard'}
+        subtitle="Players, payments, attendance and everything that keeps the academy running."
+      />
 
       {/* Headline stats */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">

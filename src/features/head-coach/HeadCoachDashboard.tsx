@@ -6,7 +6,8 @@ import { useCoaches } from '@/lib/queries';
 import { useToast } from '@/lib/toast';
 import { sendWhatsApp, templates } from '@/lib/whatsapp';
 import { firstName } from '@/lib/utils';
-import { ScreenTitle, Card, StatCard, Chip, Button } from '@/components/ui';
+import { DashHero, Card, StatCard, Chip, Button } from '@/components/ui';
+import { academyName } from '@/lib/branding';
 import { Modal } from '@/components/ui/Modal';
 import { RingAvatar } from '@/components/brand/LoopRing';
 import type { Profile, Report, Player } from '@/lib/types';
@@ -90,10 +91,12 @@ export default function HeadCoachDashboard() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <ScreenTitle eyebrow="Head Coach" title="Coaches" />
-        <Chip tone="green">Development view · no finance</Chip>
-      </div>
+      <DashHero
+        eyebrow={`${academyName()} · Head Coach`}
+        title="Coaching Overview"
+        subtitle="Player development and coaching quality across the whole academy."
+        right={<Chip tone="green">Development view · no finance</Chip>}
+      />
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatCard label="Coaches" value={coaches.length} />

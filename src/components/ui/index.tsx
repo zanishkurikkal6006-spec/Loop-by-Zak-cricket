@@ -100,6 +100,38 @@ export function ScreenTitle({ eyebrow, title }: { eyebrow?: string; title: strin
   );
 }
 
+// ── Branded dashboard hero (Super Kings navy band, used on every dashboard) ────
+export function DashHero({
+  eyebrow,
+  title,
+  subtitle,
+  right,
+}: {
+  eyebrow?: string;
+  title: string;
+  subtitle?: string;
+  right?: React.ReactNode;
+}) {
+  return (
+    <div className="relative overflow-hidden rounded-card bg-brand-panel px-5 py-5 text-paper">
+      <div className="pointer-events-none absolute inset-0 bg-seam opacity-[0.06]" />
+      <div className="relative flex items-end justify-between gap-3">
+        <div>
+          {eyebrow && (
+            <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold">{eyebrow}</div>
+          )}
+          <h1 className="mt-1 font-hero text-3xl uppercase leading-[0.95] tracking-[0.01em] md:text-4xl">
+            {title}
+          </h1>
+          <div className="mt-2 h-1 w-16 rounded-full bg-skorange" />
+          {subtitle && <div className="mt-2.5 text-[13px] text-paper/60">{subtitle}</div>}
+        </div>
+        {right && <div className="flex-none">{right}</div>}
+      </div>
+    </div>
+  );
+}
+
 // ── Info callout (blue policy note) ──────────────────────────────────────────
 export function InfoCallout({ children }: { children: React.ReactNode }) {
   return (
@@ -125,7 +157,8 @@ export function StatCard({
   return (
     <Card className="flex flex-col gap-1">
       <div className="eyebrow text-ink/40">{label}</div>
-      <div className={clsx('font-display text-4xl leading-none', tone === 'amber' && 'text-amber-text', tone === 'red' && 'text-danger', tone === 'green' && 'text-success')}>
+      <div className={clsx('font-display text-4xl leading-none',
+        tone === 'amber' ? 'text-amber-text' : tone === 'red' ? 'text-danger' : tone === 'green' ? 'text-success' : 'text-brand-red')}>
         {value}
       </div>
       {hint && <div className="text-[11px] text-ink/45">{hint}</div>}
